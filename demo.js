@@ -421,29 +421,32 @@
       `<div class="demo-player">
         <svg class="demo-svg" viewBox="0 0 400 400" role="img" aria-label="Exercise demonstration"></svg>
         <div class="demo-side">
-          <div class="demo-caption"></div>
-          <div class="demo-dots"></div>
+          <ol class="demo-steps"></ol>
           <button class="demo-play">Pause</button>
         </div>
       </div>`;
     const svg = container.querySelector('.demo-svg');
-    const caption = container.querySelector('.demo-caption');
-    const dotsBox = container.querySelector('.demo-dots');
+    const stepsBox = container.querySelector('.demo-steps');
     const playBtn = container.querySelector('.demo-play');
     const frames = anim.frames;
     const total = frames.reduce((a, f) => a + f.dur, 0);
-    frames.forEach((f, i) => {
-      const d = document.createElement('button');
-      d.className = 'demo-dot' + (i === 0 ? ' on' : '');
-      d.setAttribute('aria-label', 'Go to step ' + (f.step + 1));
-      d.addEventListener('click', () => { t = starts[i] + 0.001; });
-      dotsBox.appendChild(d);
-    });
+    // one list item per written step; clicking jumps the figure to that step
+    const stepToFrame = {};
+    frames.forEach((f, i) => { if (stepToFrame[f.step] == null) stepToFrame[f.step] = i; });
     const starts = [];
     let acc = 0;
     frames.forEach(f => { starts.push(acc); acc += f.dur; });
+    steps.forEach((s, si) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span>' + s.replace(/</g, '&lt;') + '</span>';
+      li.addEventListener('click', () => {
+        const fi = stepToFrame[si];
+        if (fi != null) t = starts[fi] + 0.001;
+      });
+      stepsBox.appendChild(li);
+    });
+    const items = [...stepsBox.children];
     let t = 0, last = performance.now(), playing = true, raf = 0, dead = false, curStep = -1;
-    const dots = [...dotsBox.children];
     function frameAt(time) {
       for (let i = frames.length - 1; i >= 0; i--) if (time >= starts[i]) return i;
       return 0;
@@ -460,8 +463,9 @@
       const st = frames[i].step;
       if (st !== curStep) {
         curStep = st;
-        caption.textContent = (st + 1) + '. ' + (steps[st] || '');
-        dots.forEach((d, di) => d.classList.toggle('on', di === i));
+        items.forEach((li, si) => li.classList.toggle('on', si === st));
+        const active = items[st];
+        if (active) active.scrollIntoView({ block: 'nearest' });
       }
     }
     playBtn.addEventListener('click', () => {

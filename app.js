@@ -106,6 +106,20 @@
     ball(0.185, null, 0, 3.42, 0.015);
     const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
     part(new THREE.CylinderGeometry(0.070, 0.098, 0.28, 18), null, 0, 3.15, 0);
+    // face — subtle features
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.65, metalness: 0 });
+    const feat = (geo, x, y, z, mat) => {
+      const m = new THREE.Mesh(geo, mat || darkMat); m.position.set(x, y, z); body.add(m); return m;
+    };
+    feat(new THREE.SphereGeometry(0.024, 14, 12), -0.064, 3.455, 0.158);
+    feat(new THREE.SphereGeometry(0.024, 14, 12), 0.064, 3.455, 0.158);
+    const nose = feat(new THREE.SphereGeometry(0.022, 12, 10), 0, 3.395, 0.185, neutralMat);
+    nose.scale.set(0.8, 1.15, 0.9);
+    feat(new THREE.BoxGeometry(0.075, 0.010, 0.012), 0, 3.335, 0.168);
+    for (const s of [-1, 1]) {
+      const ear = feat(new THREE.SphereGeometry(0.038, 12, 10), s * 0.178, 3.42, 0.01, neutralMat);
+      ear.scale.set(0.45, 1.0, 0.7);
+    }
 
     /* ---- torso: organic lathe core + muscle overlays ---- */
     const profile = [
@@ -118,28 +132,28 @@
     // traps — sloped capsules from neck to shoulders
     for (const s of [-1, 1])
       capMesh(0.085, V3(s * 0.05, 3.03, -0.01), V3(s * 0.30, 2.90, -0.02), "traps");
-    // pecs
+    // pecs — flatter, blended
     for (const s of [-1, 1]) {
-      const p = ball(0.150, "chest", s * 0.135, 2.70, 0.155);
-      p.scale.set(1.15, 0.82, 0.60);
+      const p = ball(0.145, "chest", s * 0.14, 2.70, 0.145);
+      p.scale.set(1.30, 0.72, 0.48);
     }
-    // abs — six rounded blocks
+    // abs — six low blocks reading as definition, not attachments
     for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
-      const ab = ball(0.072, "abs", s * 0.068, 2.48 - r * 0.12, 0.150);
-      ab.scale.set(1.2, 0.95, 0.62);
+      const ab = ball(0.068, "abs", s * 0.066, 2.48 - r * 0.12, 0.148);
+      ab.scale.set(1.25, 0.95, 0.50);
     }
     // obliques
     for (const s of [-1, 1])
       capMesh(0.058, V3(s * 0.185, 2.52, 0.055), V3(s * 0.205, 2.26, 0.045), "obliques");
-    // lats — smooth flared wings
+    // lats — smooth flared wings hugging the back
     for (const s of [-1, 1]) {
-      const l = ball(0.155, "lats", s * 0.195, 2.56, -0.135);
-      l.scale.set(0.55, 1.2, 0.5); l.rotation.z = s * 0.12;
+      const l = ball(0.150, "lats", s * 0.19, 2.56, -0.125);
+      l.scale.set(0.50, 1.25, 0.42); l.rotation.z = s * 0.12;
     }
     // upper back
-    const ub = ball(0.150, "back", 0, 2.70, -0.145); ub.scale.set(1.2, 0.8, 0.5);
+    const ub = ball(0.150, "back", 0, 2.70, -0.140); ub.scale.set(1.25, 0.70, 0.42);
     for (const s of [-1, 1])                                   // erector spinae
-      capMesh(0.068, V3(s * 0.075, 2.22, -0.150), V3(s * 0.075, 1.98, -0.150), "lower-back");
+      capMesh(0.060, V3(s * 0.070, 2.22, -0.150), V3(s * 0.070, 1.98, -0.150), "lower-back");
     const pelvis = ball(0.215, null, 0, 1.845, 0); pelvis.scale.set(1.02, 0.72, 0.82);
     for (const s of [-1, 1]) {                                 // glutes
       const gl = ball(0.16, "glutes", s * 0.15, 1.74, -0.115);
@@ -162,11 +176,28 @@
       peak.scale.set(1, 1.3, 1);
       capMesh(0.10, V3(s * 0.03, -0.08, -0.055), V3(s * 0.045, -0.44, -0.06), "triceps", g);
       ball(0.075, null, s * 0.05, -0.50, 0, g);                // elbow
+      // forearm in its own group for a natural slight bend + articulated hand
+      const foreG = new THREE.Group();
+      foreG.position.set(s * 0.05, -0.50, 0);
       const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.062, 0.44, 20), matFor("forearms"));
-      fore.position.set(s * 0.055, -0.74, 0.005);
-      fore.userData.muscle = "forearms"; muscleMeshes.push(fore); g.add(fore);
-      box(0.09, 0.17, 0.05, null, s * 0.06, -1.06, 0.01, g);   // hand
-      g.rotation.z = s * 0.10;
+      fore.position.set(s * 0.005, -0.24, 0.005);
+      fore.userData.muscle = "forearms"; muscleMeshes.push(fore); foreG.add(fore);
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.095, 0.038), neutralMat);
+      palm.position.set(s * 0.01, -0.51, 0.008); foreG.add(palm);
+      for (let f = 0; f < 4; f++) {
+        const fg = new THREE.Mesh(new THREE.CapsuleGeometry(0.014, 0.055, 4, 10), neutralMat);
+        fg.position.set(s * (0.01 - 0.027 + f * 0.018), -0.585, 0.012);
+        fg.rotation.x = 0.35;
+        foreG.add(fg);
+      }
+      const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.014, 0.045, 4, 10), neutralMat);
+      thumb.position.set(s * 0.048, -0.52, 0.02);
+      thumb.rotation.z = s * -0.5; thumb.rotation.x = 0.3;
+      foreG.add(thumb);
+      foreG.rotation.x = -0.14;
+      foreG.rotation.z = s * 0.05;
+      g.add(foreG);
+      g.rotation.z = s * 0.13;
       body.add(g);
     }
 
@@ -186,7 +217,7 @@
       calf.userData.muscle = "calves"; muscleMeshes.push(calf); body.add(calf);
       box(0.105, 0.085, 0.13, null, s * 0.172, 0.355, -0.035);    // heel
       const toe = box(0.10, 0.07, 0.19, null, s * 0.172, 0.345, 0.095); // forefoot
-      toe.rotation.x = -0.06;
+      toe.rotation.x = -0.06; toe.rotation.y = s * 0.12;                // toes out, natural stance
     }
 
     /* ---- highlight ---- */
