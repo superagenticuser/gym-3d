@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGE — 3D Gym Training</title>
+<meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/">
+    <span class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20 L9 12 L13 15 L20 4" stroke="#d4ff3f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    FORGE
+  </a>
+  <nav class="nav">
+    <a href="#/exercises" data-nav="exercises">Exercises</a>
+    <a href="#/body" data-nav="body">3D Body Map</a>
+    <a href="#/favorites" data-nav="favorites">Favorites <span class="fav-count" id="favCount">0</span></a>
+  </nav>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="view-home" class="view">
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="kicker">3D GYM TRAINING</p>
+        <h1>Every muscle.<br /><span class="volt">Every exercise.</span><br />In 3D.</h1>
+        <p class="lede">190+ exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#/body">Explore the 3D body</a>
+          <a class="btn btn-ghost" href="#/exercises">Browse exercises</a>
+        </div>
+        <div class="hero-stats">
+          <div><b id="statEx">190</b><span>exercises</span></div>
+          <div><b id="statMus">17</b><span>muscle groups</span></div>
+          <div><b>3D</b><span>interactive body</span></div>
+        </div>
+      </div>
+      <div class="hero-3d" id="hero3d"></div>
+    </div>
+    <h2 class="section-title">Train by muscle</h2>
+    <div class="muscle-grid" id="muscleGrid"></div>
+  </section>
+
+  <!-- EXERCISES -->
+  <section id="view-exercises" class="view hidden">
+    <h2 class="section-title">All exercises <span class="count" id="exCount"></span></h2>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search exercises… (e.g. squat, cable, beginner)" autocomplete="off" />
+      <div class="chip-row" id="muscleChips"></div>
+      <div class="selects">
+        <select id="eqFilter"><option value="">All equipment</option></select>
+        <select id="lvlFilter">
+          <option value="">All levels</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+    </div>
+    <div class="cards" id="exerciseGrid"></div>
+  </section>
+
+  <!-- DETAIL -->
+  <section id="view-detail" class="view hidden">
+    <a class="back" href="#/exercises">← All exercises</a>
+    <div class="detail-layout">
+      <div class="detail-3d">
+        <div id="detail3d" class="stage"></div>
+        <div class="view-toggle">
+          <button id="dFront" class="on">Front</button>
+          <button id="dBack">Back</button>
+        </div>
+        <p class="hint">Drag to rotate · scroll to zoom · red = primary, orange = secondary</p>
+      </div>
+      <div class="detail-info">
+        <div class="badges" id="dBadges"></div>
+        <h2 id="dName"></h2>
+        <button class="fav-btn" id="dFav">♡ Save to favorites</button>
+        <h3>How to do it</h3>
+        <ol class="steps" id="dSteps"></ol>
+        <h3>Muscles worked</h3>
+        <div class="muscle-tags" id="dMuscles"></div>
+        <h3>Try also</h3>
+        <div class="mini-cards" id="dSimilar"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY MAP -->
+  <section id="view-body" class="view hidden">
+    <h2 class="section-title">3D Body Map</h2>
+    <p class="lede">Click any muscle on the body to see every exercise that trains it.</p>
+    <div class="body-layout">
+      <div class="body-3d">
+        <div id="body3d" class="stage tall"></div>
+        <div class="view-toggle">
+          <button id="bFront" class="on">Front</button>
+          <button id="bBack">Back</button>
+        </div>
+        <p class="hint">Drag to rotate · scroll to zoom · click a muscle</p>
+      </div>
+      <aside class="body-panel">
+        <div id="muscleInfo"><p class="muted">Select a muscle…</p></div>
+        <div class="mini-cards" id="bodyExercises"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- FAVORITES -->
+  <section id="view-favorites" class="view hidden">
+    <h2 class="section-title">Your favorites</h2>
+    <div class="cards" id="favGrid"></div>
+    <p class="muted hidden" id="favEmpty">Nothing saved yet — tap ♡ on any exercise.</p>
+  </section>
+</main>
+
+<footer>
+  <p>FORGE · 190 exercises · built with Three.js · <span class="muted">sample training content — not medical advice</span></p>
+</footer>
+
+<script src="three.min.js"></script>
+<script src="exercises.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
