@@ -418,8 +418,12 @@
   }
 
   /* ---------- player ---------- */
+  function demoSettings() {
+    try { return JSON.parse(localStorage.getItem("forge-settings") || "{}"); } catch (e) { return {}; }
+  }
   function createDemo(container, templateId, steps) {
     const anim = ANIMS[T2A[templateId] || 'march'];
+    const ds = demoSettings();
         container.innerHTML =
       `<div class="demo-player">
         <svg class="demo-svg" viewBox="0 0 400 400" role="img" aria-label="Exercise demonstration"></svg>
@@ -449,7 +453,9 @@
       stepsBox.appendChild(li);
     });
     const items = [...stepsBox.children];
-    let t = 0, last = performance.now(), playing = true, raf = 0, dead = false, curStep = -1;
+    let t = 0, last = performance.now(), raf = 0, dead = false, curStep = -1;
+    let playing = ds.demoAutoplay !== false && !ds.reduceMotion;
+    const speed = ds.demoSpeed || 1;
     function frameAt(time) {
       for (let i = frames.length - 1; i >= 0; i--) if (time >= starts[i]) return i;
       return 0;
@@ -458,7 +464,7 @@
       if (dead) return;
       raf = requestAnimationFrame(tick);
       const dt = Math.min(0.1, (now - last) / 1000); last = now;
-      if (playing) t = (t + dt) % total;
+      if (playing) t = (t + dt * speed) % total;
       const i = frameAt(t);
       const prev = frames[(i - 1 + frames.length) % frames.length].p;
       const q = Math.min(1, (t - starts[i]) / (frames[i].dur * 0.55));

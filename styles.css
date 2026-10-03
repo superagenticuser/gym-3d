@@ -156,9 +156,6 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .wo-ex-head b { font-size: 17px; }
 .wo-link { cursor: pointer; }
 .wo-link:hover { color: var(--volt); }
-.set-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-.set-dot { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface2); cursor: pointer; transition: all .15s; }
-.set-dot.hit { background: var(--volt); border-color: var(--volt); box-shadow: 0 0 14px rgba(212,255,63,.5); }
 .wo-muscle { font-size: 12px; }
 .done-banner { text-align: center; background: var(--surface); border: 1px solid var(--volt); border-radius: var(--radius); padding: 36px 24px; margin-top: 22px; }
 .done-banner h3 { font-size: 26px; margin-bottom: 8px; }
@@ -192,7 +189,6 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
   .stage.tall { height: 420px; }
   .cards { grid-template-columns: 1fr; }
   .muscle-grid { grid-template-columns: repeat(2, 1fr); }
-  .set-dot { width: 52px; height: 52px; }
 }
 
 /* ================= v3: nav pills ================= */
@@ -404,3 +400,90 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   display: flex; align-items: center; justify-content: center; color: var(--volt);
 }
 .prog-icon .ic { width: 20px; height: 20px; }
+
+/* ================= v6: training intelligence ================= */
+/* settings extras */
+.modal-body { max-height: 70vh; overflow-y: auto; }
+.seg-row { display: flex; gap: 8px; }
+.seg {
+  flex: 1; padding: 10px; border-radius: 12px; cursor: pointer;
+  background: var(--surface2); border: 2px solid var(--line);
+  color: var(--muted); font-weight: 700; font-size: 14px;
+}
+.seg.on { border-color: var(--volt); color: var(--ink); }
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.toggle {
+  width: 52px; height: 30px; border-radius: 999px; cursor: pointer;
+  background: var(--surface2); border: 1px solid var(--line);
+  position: relative; transition: background .18s;
+}
+.toggle .knob {
+  position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--muted); transition: all .18s;
+}
+.toggle[aria-checked="true"] { background: var(--volt); border-color: var(--volt); }
+.toggle[aria-checked="true"] .knob { left: 25px; background: var(--volt-ink); }
+.setting-btns { display: flex; gap: 10px; margin-top: 4px; }
+.btn.danger { color: #ff7a7a; border-color: #5c2a2a; }
+
+/* workout set rows */
+.set-row2 { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.set-row2:last-child { border-bottom: none; }
+.set-done {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: var(--surface2); border: 2px solid var(--line);
+  color: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.set-done .ic { width: 18px; height: 18px; }
+.set-done.hit { background: var(--volt); border-color: var(--volt); color: var(--volt-ink); }
+.set-num { font-weight: 700; font-size: 14px; min-width: 44px; }
+.set-reps { color: var(--muted); font-size: 14px; flex: 1; }
+.set-reps input {
+  width: 56px; background: var(--surface2); border: 1px solid var(--line);
+  color: var(--ink); border-radius: 8px; padding: 7px 6px; font-size: 14px; text-align: center;
+}
+.set-weight {
+  width: 76px; background: var(--surface2); border: 1px solid var(--line);
+  color: var(--ink); border-radius: 8px; padding: 8px 6px; font-size: 15px; text-align: center;
+}
+.set-weight:focus, .set-reps input:focus { outline: none; border-color: var(--volt); }
+.set-unit { color: var(--muted); font-size: 13px; min-width: 24px; }
+.set-bw { color: var(--muted); font-size: 13px; font-weight: 700; min-width: 100px; text-align: right; }
+
+/* progress view */
+.tab-row { display: flex; gap: 8px; margin: 16px 0 20px; flex-wrap: wrap; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.stat-card b { font-size: 26px; display: block; color: var(--volt); }
+.stat-card span { color: var(--muted); font-size: 13px; }
+.hist-day { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+.hist-day .hd { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.hist-day .hd b { font-size: 15px; }
+.hist-day ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+.rec-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 8px;
+}
+.rec-row .ic { width: 18px; height: 18px; color: #ffd23f; }
+.rec-row b { flex: 1; }
+.rec-row span { color: var(--muted); font-size: 14px; }
+.vol-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.vol-row .vn { min-width: 110px; font-size: 14px; font-weight: 600; }
+.vol-row .bar { flex: 1; height: 14px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+.vol-row .bar i { display: block; height: 100%; background: var(--volt); border-radius: 999px; }
+.vol-row .vc { min-width: 64px; text-align: right; color: var(--muted); font-size: 13px; }
+.empty-note { color: var(--muted); text-align: center; padding: 40px 20px; }
+
+/* recovery heatmap */
+.heat-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.heat-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+/* nav scroll on small screens */
+@media (max-width: 760px) {
+  .nav { max-width: 56vw; overflow-x: auto; }
+  .nav a { font-size: 13px; padding: 8px 12px; }
+}

@@ -256,6 +256,13 @@
     function setAccent(hex) {
       ring.material.color.set(hex);
     }
+    function setHeat(heatByGroup) {
+      reset();
+      for (const id in mats) {
+        const h = heatByGroup[groupOf(id)] || 0;
+        if (h > 0) { mats[id].emissive.setHex(0xff2d1a); mats[id].emissiveIntensity = 0.25 + h * 0.95; }
+      }
+    }
 
     /* ---- interaction: rotate + pinch zoom + tap ---- */
     let rotY = Math.PI * 0.12, targetRotY = rotY, rotX = 0;
@@ -341,6 +348,7 @@
     return {
       highlight,
       setAccent,
+      setHeat,
       setView(v) { targetRotY = (v === "back") ? Math.PI : 0; rotY = targetRotY; },
       dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
     };
@@ -371,9 +379,98 @@
     grid.innerHTML = ACCENTS.map(a =>
       `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
       `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`).join("");
+    syncSettingsUI();
     $("settingsVeil").classList.remove("hidden");
   }
-  function closeSettings() { $("settingsVeil").classList.add("hidden"); }
+  function syncSettingsUI() {
+    const s = getSettings();
+    document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
+    document.querySelectorAll("#speedSeg .seg").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.speed) === s.demoSpeed));
+    const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
+    tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
+  }
+
+  /* ---------- settings state ---------- */
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false };
+  function getSettings() {
+    try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
+    catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
+  }
+  function saveSettings(s) { localStorage.setItem("forge-settings", JSON.stringify(s)); }
+  function unitLabel() { return getSettings().units; }
+  function fromKg(kg) { const v = getSettings().units === "lb" ? kg * 2.20462 : kg; return Math.round(v * 10) / 10; }
+  function toKg(v) { return getSettings().units === "lb" ? v / 2.20462 : v; }
+  function fmtW(kg) { return fromKg(kg) + " " + unitLabel(); }
+  function fmtDate(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+
+  /* ---------- workout log ---------- */
+  function getLog() {
+    try { const l = JSON.parse(localStorage.getItem("forge-log") || "[]"); return Array.isArray(l) ? l : []; }
+    catch (e) { return []; }
+  }
+  function saveLog(l) { localStorage.setItem("forge-log", JSON.stringify(l)); }
+  function lastWeightKg(exId) {
+    const log = getLog();
+    for (let i = log.length - 1; i >= 0; i--) {
+      const x = log[i].exercises.find(e => e.id === exId);
+      if (x) for (let j = x.sets.length - 1; j >= 0; j--) if (x.sets[j].weight) return x.sets[j].weight;
+    }
+    return null;
+  }
+  function exercisePR(exId) {
+    let best = null;
+    getLog().forEach(w => w.exercises.forEach(x => {
+      if (x.id !== exId) return;
+      x.sets.forEach(s => {
+        const wgt = s.weight || 0;
+        if (!best || wgt > best.weight || (wgt === best.weight && s.reps > best.reps)) best = { weight: wgt, reps: s.reps };
+      });
+    }));
+    return best;
+  }
+  function daysAgo(dateStr) {
+    const d = new Date(dateStr + "T12:00:00"), n = new Date();
+    n.setHours(12, 0, 0, 0);
+    return Math.max(0, Math.round((n - d) / 864e5));
+  }
+  function muscleHeat() {
+    const last = {};
+    getLog().forEach(w => {
+      const ago = daysAgo(w.date);
+      w.exercises.forEach(x => {
+        const ex = byId(x.id); if (!ex) return;
+        [ex.primary].concat(ex.secondary || []).forEach(g => {
+          g = groupOf(g);
+          if (last[g] == null || ago < last[g]) last[g] = ago;
+        });
+      });
+    });
+    const heat = {};
+    for (const g in last) heat[g] = last[g] <= 1 ? 1 : last[g] === 2 ? 0.65 : last[g] === 3 ? 0.35 : 0;
+    return heat;
+  }
+  function volumeByMuscle(days) {
+    const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
+    const vol = {};
+    getLog().forEach(w => {
+      if (new Date(w.date + "T12:00:00") < cutoff) return;
+      w.exercises.forEach(x => {
+        const ex = byId(x.id); if (!ex) return;
+        const g = groupOf(ex.primary);
+        vol[g] = (vol[g] || 0) + x.sets.length;
+      });
+    });
+    return vol;
+  }
+  function workoutStreak() {
+    const days = [...new Set(getLog().map(w => w.date))].sort();
+    if (!days.length) return 0;
+    let streak = 0;
+    const d = new Date(); d.setHours(12, 0, 0, 0);
+    if (!days.includes(fmtDate(d))) d.setDate(d.getDate() - 1);
+    while (days.includes(fmtDate(d))) { streak++; d.setDate(d.getDate() - 1); }
+    return streak;
+  }
 
   /* ---------- active program ---------- */
   const getActiveProg = () => localStorage.getItem("forge-active") || null;
@@ -433,7 +530,7 @@
   });
 
   /* ---------- views ---------- */
-  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout"];
+  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress"];
   function show(name) {
     clearViewers();
     clearDemos();
@@ -454,7 +551,7 @@
     $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
       `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
     ).join("");
-    const v = createBodyViewer($("hero3d"), { autoRotate: true, dist: 5.6 });
+    const v = createBodyViewer($("hero3d"), { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
     viewers.push(v);
     const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
     let i = 0;
@@ -517,7 +614,7 @@
     $("dSimilar").innerHTML = sim.map(x =>
       `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
     ).join("");
-    const v = createBodyViewer($("detail3d"), { autoRotate: true });
+    const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
     viewers.push(v);
     if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
     const full = ex.primary === "full-body" || ex.primary === "cardio";
@@ -537,7 +634,7 @@
   // BODY MAP
   function renderBody(selected) {
     const v = createBodyViewer($("body3d"), {
-      autoRotate: true, dist: 6.1,
+      autoRotate: !getSettings().reduceMotion, dist: 6.1,
       onMuscleClick: mid => selectMuscle(groupOf(mid))
     });
     viewers.push(v);
@@ -545,8 +642,18 @@
       v.setView(front ? "front" : "back");
       $("bFront").classList.toggle("on", front); $("bBack").classList.toggle("on", !front);
     };
+    const syncMode = () => {
+      const heat = !!window._bodyHeatMode;
+      $("bMuscles").classList.toggle("on", !heat);
+      $("bRecovery").classList.toggle("on", heat);
+      $("heatLegend").classList.toggle("hidden", !heat);
+    };
+    window._syncBodyMode = syncMode;
+    window._bodyHeatMode = false;
     $("bFront").onclick = () => setV(true);
     $("bBack").onclick = () => setV(false);
+    $("bMuscles").onclick = () => { window._bodyHeatMode = false; syncMode(); selectMuscle(window._lastMuscle || "chest"); };
+    $("bRecovery").onclick = () => { window._bodyHeatMode = true; syncMode(); v.setHeat(muscleHeat()); };
     window._bodyViewer = v;
     selectMuscle(selected || "chest");
   }
@@ -554,6 +661,8 @@
     const v = window._bodyViewer;
     const info = MUSCLE_INFO[groupId];
     if (!info || !v) return;
+    window._lastMuscle = groupId;
+    if (window._bodyHeatMode) { window._bodyHeatMode = false; if (window._syncBodyMode) window._syncBodyMode(); }
     const full = groupId === "full-body" || groupId === "cardio";
     v.highlight(full ? [] : expandMuscles(groupId), [], full);
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>`;
@@ -569,6 +678,57 @@
     const list = EXERCISES.filter(e => favs.has(e.id));
     $("favGrid").innerHTML = list.map(cardHTML).join("");
     $("favEmpty").classList.toggle("hidden", list.length > 0);
+  }
+
+  // PROGRESS
+  function renderProgress(tab) {
+    tab = tab || "overview";
+    document.querySelectorAll("#progTabs .chip").forEach(c => c.classList.toggle("on", c.dataset.ptab === tab));
+    const log = getLog();
+    const body = $("progressBody");
+    if (!log.length) {
+      body.innerHTML = `<div class="empty-note"><p><b>No workouts logged yet.</b></p><p>Finish a workout and it will show up here with your history, records and volume.</p></div>`;
+      return;
+    }
+    if (tab === "overview") {
+      const totalSets = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
+      const totalVol = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * s.reps, 0), 0), 0);
+      body.innerHTML = `<div class="stat-grid">
+        <div class="stat-card"><b>${log.length}</b><span>workouts logged</span></div>
+        <div class="stat-card"><b>${workoutStreak()}</b><span>day streak</span></div>
+        <div class="stat-card"><b>${totalSets}</b><span>total sets</span></div>
+        <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
+      </div>
+      <p class="muted">Volume = weight × reps across every logged set.</p>`;
+    } else if (tab === "history") {
+      const byDate = {};
+      log.forEach(w => { (byDate[w.date] = byDate[w.date] || []).push(w); });
+      body.innerHTML = Object.keys(byDate).sort().reverse().map(dt => {
+        const ws = byDate[dt];
+        const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
+        const dstr = new Date(dt + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+        return `<div class="hist-day"><div class="hd"><b>${dstr}</b><span class="muted">${sets} sets</span></div><ul>` +
+          ws.map(w => `<li>${esc(w.programName)} — ${esc(w.dayName)} (${w.exercises.length} exercises)</li>`).join("") + `</ul></div>`;
+      }).join("");
+    } else if (tab === "records") {
+      const recs = [];
+      EXERCISES.forEach(ex => {
+        const pr = exercisePR(ex.id);
+        if (pr && (pr.weight > 0 || pr.reps > 0)) recs.push({ ex, pr });
+      });
+      recs.sort((a, b) => b.pr.weight - a.pr.weight || b.pr.reps - a.pr.reps);
+      body.innerHTML = recs.length ? recs.map(({ ex, pr }) =>
+        `<div class="rec-row">${window.FORGE_ICON("trophy")}<b>${esc(ex.name)}</b><span>${pr.weight > 0 ? fmtW(pr.weight) + " × " + pr.reps : pr.reps + " reps"}</span></div>`
+      ).join("") : `<div class="empty-note"><p>No records yet. Log a workout to set your first.</p></div>`;
+    } else {
+      const vol = volumeByMuscle(28);
+      const entries = Object.keys(vol).map(g => ({ g, n: vol[g] })).sort((a, b) => b.n - a.n);
+      const max = entries.length ? entries[0].n : 1;
+      body.innerHTML = entries.length
+        ? `<p class="muted" style="margin-bottom:14px">Sets per muscle group, last 28 days.</p>` +
+          entries.map(({ g, n }) => `<div class="vol-row"><span class="vn">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span><span class="bar"><i style="width:${Math.round(n / max * 100)}%"></i></span><span class="vc">${n} sets</span></div>`).join("")
+        : `<div class="empty-note"><p>Nothing in the last 28 days.</p></div>`;
+    }
   }
 
   // PROGRAMS
@@ -653,6 +813,7 @@
   let timerInt = null, timerLeft = 0;
   function fmtT(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
   function beep() {
+    if (!getSettings().sound) return;
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const o = ctx.createOscillator(), g = ctx.createGain();
@@ -673,8 +834,19 @@
     $("woSub").textContent = p.name;
     $("woList").innerHTML = d.exercises.map((x, xi) => {
       const ex = byId(x.id);
-      const dots = Array.from({ length: x.sets }, (_, si) =>
-        `<button class="set-dot" data-x="${xi}" data-s="${si}" aria-label="set ${si + 1}"></button>`).join("");
+      const isBW = ex.equipment === "Bodyweight";
+      const lw = lastWeightKg(x.id);
+      const repsNum = parseInt(x.reps) || 8;
+      const rows = Array.from({ length: x.sets }, (_, si) => {
+        const wVal = lw != null ? fromKg(lw) : "";
+        return `<div class="set-row2">
+          <button class="set-done" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} done">${window.FORGE_ICON("check")}</button>
+          <span class="set-num">Set ${si + 1}</span>
+          <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
+          ${isBW ? `<span class="set-bw">Bodyweight</span>`
+                 : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
+        </div>`;
+      }).join("");
       return `<div class="wo-ex">
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
@@ -684,7 +856,7 @@
         <ol class="steps wo-steps hidden" id="guide-${xi}">
           ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
         </ol>
-        <div class="set-row">${dots}</div>
+        <div>${rows}</div>
         <span class="tag volt-tag wo-muscle">${MUSCLE_INFO[ex.primary].name}</span>
       </div>`;
     }).join("");
@@ -700,7 +872,7 @@
       gt.classList.toggle("open", !open);
       return;
     }
-    const sd = e.target.closest(".set-dot");
+    const sd = e.target.closest(".set-done");
     if (sd) { sd.classList.toggle("hit"); return; }
     const tp = e.target.closest("[data-timer]");
     if (tp) {
@@ -720,7 +892,22 @@
   $("woFinish").addEventListener("click", () => {
     const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
     const key = raw[1] + ":" + raw[2];
-    const today = new Date().toISOString().slice(0, 10);
+    const today = fmtDate(new Date());
+    const p = progById(raw[1]);
+    const d = p && p.days[parseInt(raw[2], 10)];
+    const entry = { date: today, ts: Date.now(), programId: raw[1], programName: p ? p.name : "", dayName: d ? d.name : "", exercises: [] };
+    if (d) d.exercises.forEach((x, xi) => {
+      const sets = [];
+      document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).forEach(btn => {
+        const si = btn.dataset.s;
+        const repsEl = document.querySelector(`input[data-f="reps"][data-x="${xi}"][data-s="${si}"]`);
+        const wEl = document.querySelector(`input[data-f="weight"][data-x="${xi}"][data-s="${si}"]`);
+        sets.push({ reps: Math.max(1, parseInt(repsEl && repsEl.value) || 0), weight: wEl ? toKg(parseFloat(wEl.value) || 0) : 0 });
+      });
+      if (sets.length) entry.exercises.push({ id: x.id, sets });
+    });
+    if (!entry.exercises.length) { alert("Mark at least one set as done to log this workout."); return; }
+    const log = getLog(); log.push(entry); saveLog(log);
     done[key] = done[key] || [];
     done[key].push(today); saveDone();
     $("woDone").classList.remove("hidden");
@@ -749,6 +936,7 @@
     else if (parts[0] === "programs") { show("programs"); renderPrograms(); }
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
     else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); renderWorkout(parts[1], parseInt(parts[2], 10)); }
+    else if (parts[0] === "progress") { show("progress"); renderProgress("overview"); }
     else { show("home"); renderHome(); }
   }
   $("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); });
@@ -781,6 +969,42 @@
   $("accentGrid").addEventListener("click", e => {
     const b = e.target.closest("[data-accent]");
     if (b) applyAccent(b.dataset.accent);
+  });
+  $("unitSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-unit]"); if (!b) return;
+    const s = getSettings(); s.units = b.dataset.unit; saveSettings(s); syncSettingsUI();
+  });
+  $("speedSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-speed]"); if (!b) return;
+    const s = getSettings(); s.demoSpeed = parseFloat(b.dataset.speed); saveSettings(s); syncSettingsUI();
+  });
+  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"]].forEach(([id, key]) => {
+    $(id).addEventListener("click", () => {
+      const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI();
+    });
+  });
+  $("exportData").addEventListener("click", () => {
+    const data = {
+      favs: [...favs], log: getLog(), done,
+      settings: getSettings(), accent: localStorage.getItem("forge-accent") || "volt",
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "forge-backup.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  });
+  $("resetData").addEventListener("click", () => {
+    if (confirm("Delete all favorites, workout history, records and settings? This cannot be undone.")) {
+      localStorage.clear();
+      location.reload();
+    }
+  });
+  $("progTabs").addEventListener("click", e => {
+    const c = e.target.closest("[data-ptab]"); if (!c) return;
+    renderProgress(c.dataset.ptab);
   });
   router();
 })();
