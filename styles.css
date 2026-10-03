@@ -350,7 +350,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .demo-play .ic { width: 16px; height: 16px; }
 
 /* search field icon */
-.search-wrap { position: relative; flex: 1 1 260px; }
+.search-wrap { position: relative; width: 100%; }
 .search-wrap .ic {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   width: 17px; height: 17px; color: var(--muted); pointer-events: none;
