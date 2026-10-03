@@ -2899,6 +2899,55 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
+ },
+ {
+  "id": "single-arm-dumbbell-row",
+  "name": "Single-Arm Dumbbell Row",
+  "equipment": "dumbbell",
+  "level": "beginner",
+  "primary": "back",
+  "secondary": [
+   "biceps"
+  ],
+  "steps": [
+   "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
+   "Pull the weight toward your lower ribs, driving your elbows behind you.",
+   "Squeeze your shoulder blades together hard at the top.",
+   "Lower with control to a full stretch and repeat."
+  ]
+ },
+ {
+  "id": "dumbbell-floor-press",
+  "name": "Dumbbell Floor Press",
+  "equipment": "dumbbell",
+  "level": "beginner",
+  "primary": "chest",
+  "secondary": [
+   "triceps"
+  ],
+  "steps": [
+   "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
+   "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
+   "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
+   "Lock out softly at the top, then repeat — exhale on the press."
+  ]
+ },
+ {
+  "id": "dumbbell-romanian-deadlift",
+  "name": "Dumbbell Romanian Deadlift",
+  "equipment": "dumbbell",
+  "level": "beginner",
+  "primary": "hamstrings",
+  "secondary": [
+   "glutes",
+   "lower-back"
+  ],
+  "steps": [
+   "Stand holding the weight, feet hip-width, soft knees.",
+   "Push your hips straight back, letting the weight slide down your thighs.",
+   "Go until you feel a deep hamstring stretch, back flat.",
+   "Drive your hips forward to stand, squeezing your glutes."
+  ]
  }
 ];
 

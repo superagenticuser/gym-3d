@@ -40,139 +40,220 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(W(), H());
-    container.appendChild(renderer.domElement);
+    const el = renderer.domElement;
+    el.style.touchAction = "none";
+    el.style.display = "block";
+    container.appendChild(el);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, W() / H(), 0.1, 100);
-    let camDist = opts.dist || 5.6;
-    camera.position.set(0, 2.0, camDist);
-    camera.lookAt(0, 1.8, 0);
+    let camDist = opts.dist || 5.9;
+    camera.position.set(0, 2.05, camDist);
+    camera.lookAt(0, 1.85, 0);
 
-    scene.add(new THREE.HemisphereLight(0x9aa6c4, 0x0b0d12, 0.95));
-    const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(3, 5, 4); scene.add(key);
-    const rim = new THREE.DirectionalLight(0x7c8cff, 0.7); rim.position.set(-4, 3, -4); scene.add(rim);
+    scene.add(new THREE.HemisphereLight(0xaab4d4, 0x0b0d12, 1.0));
+    const key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(3, 6, 4); scene.add(key);
+    const rim = new THREE.DirectionalLight(0x7c8cff, 0.85); rim.position.set(-4, 3, -4); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0xdde4ff, 0.35); fill.position.set(0, 2, 6); scene.add(fill);
 
-    const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(1.7, 48),
-      new THREE.MeshBasicMaterial({ color: 0x141824, transparent: true, opacity: 0.9 })
-    );
-    ground.rotation.x = -Math.PI / 2; ground.position.y = 0.28; scene.add(ground);
-    const ringGeo = new THREE.RingGeometry(1.7, 1.78, 64);
-    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xd4ff3f, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.281; scene.add(ring);
+    // soft blob shadow under feet
+    const bc = document.createElement("canvas"); bc.width = bc.height = 128;
+    const bg = bc.getContext("2d");
+    const grd = bg.createRadialGradient(64, 64, 6, 64, 64, 62);
+    grd.addColorStop(0, "rgba(0,0,0,0.6)"); grd.addColorStop(1, "rgba(0,0,0,0)");
+    bg.fillStyle = grd; bg.fillRect(0, 0, 128, 128);
+    const blob = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.5),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bc), transparent: true, depthWrite: false }));
+    blob.rotation.x = -Math.PI / 2; blob.position.y = 0.295; scene.add(blob);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.63, 72),
+      new THREE.MeshBasicMaterial({ color: 0xd4ff3f, transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x39404f, roughness: 0.55, metalness: 0.15 });
-    const neutralMat = new THREE.MeshStandardMaterial({ color: 0x232836, roughness: 0.6, metalness: 0.1 });
-    const mats = {}; // muscle id -> material
-    const muscleMeshes = []; // {mesh, muscle}
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0x3b4356, roughness: 0.42, metalness: 0.28 });
+    const neutralMat = new THREE.MeshStandardMaterial({ color: 0x222836, roughness: 0.6, metalness: 0.15 });
+    const mats = {};
+    const muscleMeshes = [];
+    const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
-    function matFor(mid) {
-      if (!mats[mid]) mats[mid] = baseMat.clone();
-      return mats[mid];
-    }
-    function add(geo, x, y, z, mid, neutral) {
-      const m = new THREE.Mesh(geo, neutral ? neutralMat : matFor(mid));
+    function part(geo, mid, x, y, z, parent) {
+      const m = new THREE.Mesh(geo, mid ? matFor(mid) : neutralMat);
       m.position.set(x, y, z);
-      if (mid && !neutral) { m.userData.muscle = mid; muscleMeshes.push(m); }
-      body.add(m); return m;
-    }
-    const ball = (r, x, y, z, mid, sx, sy, sz) => {
-      const m = add(new THREE.SphereGeometry(r, 24, 18), x, y, z, mid, !mid);
-      if (sx) m.scale.set(sx, sy || sx, sz || sx);
+      if (mid) { m.userData.muscle = mid; muscleMeshes.push(m); }
+      (parent || body).add(m);
       return m;
-    };
-    const box = (w, h, d, x, y, z, mid, rz) => {
-      const m = add(new THREE.BoxGeometry(w, h, d), x, y, z, mid, !mid);
-      if (rz) m.rotation.z = rz; return m;
-    };
-    const cap = (r, x1, y1, z1, x2, y2, z2, mid) => {
-      const a = new THREE.Vector3(x1, y1, z1), b = new THREE.Vector3(x2, y2, z2);
+    }
+    function capMesh(r, a, b, mid, parent) {
       const len = a.distanceTo(b);
-      const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), matFor(mid));
+      const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 18), matFor(mid));
       m.position.copy(a).lerp(b, 0.5);
-      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
-      m.userData.muscle = mid; muscleMeshes.push(m); body.add(m); return m;
-    };
-
-    // ---- build the mannequin (facing +z) ----
-    ball(0.21, 0, 3.34, 0, null);                                  // head
-    add(new THREE.CylinderGeometry(0.07, 0.09, 0.2, 16), 0, 3.1, 0, null, true); // neck
-    box(0.52, 0.17, 0.26, 0, 2.99, -0.02, "traps");                // traps
-    ball(0.19, -0.17, 2.73, 0.10, "chest", 1, 0.88, 0.66);         // pecs
-    ball(0.19,  0.17, 2.73, 0.10, "chest", 1, 0.88, 0.66);
-    for (const s of [-1, 1]) {
-      ball(0.125, s * 0.40, 2.75, 0.09, "front-delt");             // front delt
-      ball(0.125, s * 0.48, 2.70, 0.00, "side-delt", 1, 1.12, 1);  // side delt
-      ball(0.115, s * 0.44, 2.70, -0.10, "rear-delt");             // rear delt
-      cap(0.105, s * 0.48, 2.58, 0.055, s * 0.51, 2.22, 0.055, "biceps");
-      cap(0.10,  s * 0.48, 2.58, -0.065, s * 0.51, 2.22, -0.065, "triceps");
-      ball(0.08, s * 0.515, 2.16, 0, null);                        // elbow
-      cap(0.085, s * 0.52, 2.10, 0.0, s * 0.54, 1.74, 0.01, "forearms");
-      ball(0.07, s * 0.545, 1.63, 0.01, null);                     // hand
+      m.quaternion.setFromUnitVectors(V3(0, 1, 0), b.clone().sub(a).normalize());
+      m.userData.muscle = mid; muscleMeshes.push(m);
+      (parent || body).add(m);
+      return m;
     }
-    box(0.34, 0.44, 0.17, 0, 2.30, 0.06, "abs");                   // abs
-    box(0.10, 0.38, 0.15, -0.245, 2.30, 0.03, "obliques");         // obliques
-    box(0.10, 0.38, 0.15,  0.245, 2.30, 0.03, "obliques");
-    box(0.17, 0.44, 0.11, -0.27, 2.44, -0.13, "lats", 0.12);       // lats
-    box(0.17, 0.44, 0.11,  0.27, 2.44, -0.13, "lats", -0.12);
-    box(0.38, 0.32, 0.13, 0, 2.64, -0.12, "back");                // upper back
-    box(0.33, 0.28, 0.13, 0, 2.02, -0.10, "lower-back");          // lower back
-    box(0.44, 0.22, 0.26, 0, 1.82, 0, null, true);                // pelvis
-    ball(0.165, -0.155, 1.72, -0.12, "glutes", 1, 1.1, 0.9);      // glutes
-    ball(0.165,  0.155, 1.72, -0.12, "glutes", 1, 1.1, 0.9);
+    const ball = (r, mid, x, y, z, parent) => part(new THREE.SphereGeometry(r, 26, 20), mid, x, y, z, parent);
+    const box = (w, h, d, mid, x, y, z, parent) => part(new THREE.BoxGeometry(w, h, d), mid, x, y, z, parent);
+
+    /* ---- head & neck ---- */
+    ball(0.20, null, 0, 3.42, 0.01);
+    part(new THREE.CylinderGeometry(0.075, 0.105, 0.26, 18), null, 0, 3.16, 0);
+
+    /* ---- torso ---- */
+    // sloped traps
     for (const s of [-1, 1]) {
-      cap(0.135, s * 0.165, 1.62, 0.085, s * 0.175, 1.08, 0.085, "quads");
-      cap(0.12,  s * 0.165, 1.62, -0.095, s * 0.175, 1.08, -0.095, "hamstrings");
-      ball(0.09, s * 0.175, 1.0, 0.02, null);                      // knee
-      cap(0.095, s * 0.175, 0.88, -0.045, s * 0.175, 0.48, -0.05, "calves");
-      box(0.11, 0.09, 0.27, s * 0.175, 0.36, 0.07, null, true);    // foot
+      const tp = box(0.32, 0.15, 0.24, "traps", s * 0.185, 3.02, -0.03);
+      tp.rotation.z = -s * 0.38;
+    }
+    // clavicle hint
+    box(0.52, 0.05, 0.09, null, 0, 2.93, 0.085);
+    // pecs
+    for (const s of [-1, 1]) {
+      const p = ball(0.185, "chest", s * 0.165, 2.78, 0.105);
+      p.scale.set(1.05, 0.85, 0.62);
+    }
+    // abs — six blocks
+    for (const r of [0, 1, 2]) for (const s of [-1, 1])
+      box(0.135, 0.115, 0.10, "abs", s * 0.078, 2.52 - r * 0.125, 0.095);
+    // obliques
+    for (const s of [-1, 1]) {
+      const o = box(0.095, 0.36, 0.13, "obliques", s * 0.235, 2.40, 0.035);
+      o.rotation.z = -s * 0.07;
+    }
+    // lats — flared
+    for (const s of [-1, 1]) {
+      const l = box(0.17, 0.42, 0.11, "lats", s * 0.265, 2.52, -0.125);
+      l.rotation.z = s * 0.16;
+    }
+    box(0.38, 0.32, 0.13, "back", 0, 2.72, -0.115);           // upper back
+    for (const s of [-1, 1])                                   // erector spinae
+      capMesh(0.075, V3(s * 0.09, 2.20, -0.10), V3(s * 0.09, 1.94, -0.10), "lower-back");
+    box(0.44, 0.20, 0.26, null, 0, 1.86, 0);                   // pelvis
+    for (const s of [-1, 1]) {                                 // glutes
+      const gl = ball(0.16, "glutes", s * 0.15, 1.74, -0.115);
+      gl.scale.set(1, 1.12, 0.85);
+      ball(0.10, "glutes", s * 0.235, 1.83, -0.05);
     }
 
-    // ---- highlight ----
+    /* ---- arms (grouped at shoulder, slight A-pose) ---- */
+    for (const s of [-1, 1]) {
+      const g = new THREE.Group();
+      g.position.set(s * 0.44, 2.86, 0);
+      ball(0.125, "front-delt", 0, 0.02, 0.095, g);
+      const sd = ball(0.135, "side-delt", s * 0.055, 0.0, 0.0, g);
+      sd.scale.set(0.95, 1.15, 0.95);
+      ball(0.115, "rear-delt", 0, 0.02, -0.10, g);
+      capMesh(0.105, V3(s * 0.03, -0.08, 0.05), V3(s * 0.045, -0.44, 0.055), "biceps", g);
+      const peak = ball(0.10, "biceps", s * 0.038, -0.20, 0.058, g);
+      peak.scale.set(1, 1.3, 1);
+      capMesh(0.10, V3(s * 0.03, -0.08, -0.055), V3(s * 0.045, -0.44, -0.06), "triceps", g);
+      ball(0.075, null, s * 0.05, -0.50, 0, g);                // elbow
+      const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.062, 0.44, 20), matFor("forearms"));
+      fore.position.set(s * 0.055, -0.74, 0.005);
+      fore.userData.muscle = "forearms"; muscleMeshes.push(fore); g.add(fore);
+      box(0.09, 0.17, 0.05, null, s * 0.06, -1.06, 0.01, g);   // hand
+      g.rotation.z = s * 0.10;
+      body.add(g);
+    }
+
+    /* ---- legs ---- */
+    for (const s of [-1, 1]) {
+      capMesh(0.13, V3(s * 0.16, 1.64, 0.08), V3(s * 0.17, 1.10, 0.08), "quads");
+      const tear = ball(0.115, "quads", s * 0.15, 1.20, 0.085);   // vastus medialis teardrop
+      tear.scale.set(1, 1.35, 1);
+      capMesh(0.095, V3(s * 0.205, 1.58, 0.03), V3(s * 0.215, 1.16, 0.03), "quads"); // outer sweep
+      capMesh(0.092, V3(s * 0.125, 1.62, -0.085), V3(s * 0.13, 1.10, -0.085), "hamstrings");
+      capMesh(0.092, V3(s * 0.20, 1.62, -0.085), V3(s * 0.205, 1.10, -0.085), "hamstrings");
+      ball(0.085, null, s * 0.172, 1.02, 0.03);                   // knee
+      ball(0.088, "calves", s * 0.13, 0.88, -0.055);              // calf heads
+      ball(0.088, "calves", s * 0.215, 0.88, -0.055);
+      const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.058, 0.36, 20), matFor("calves"));
+      calf.position.set(s * 0.172, 0.62, -0.05);
+      calf.userData.muscle = "calves"; muscleMeshes.push(calf); body.add(calf);
+      box(0.11, 0.09, 0.28, null, s * 0.172, 0.345, 0.08);        // foot
+    }
+
+    /* ---- highlight ---- */
     function reset() {
-      for (const id in mats) { mats[id].emissive.setHex(0x000000); mats[id].emissiveIntensity = 0; mats[id].color.setHex(0x39404f); }
+      for (const id in mats) {
+        mats[id].emissive.setHex(0x000000); mats[id].emissiveIntensity = 0;
+        mats[id].color.setHex(0x3b4356);
+      }
     }
     function highlight(primaryIds, secondaryIds, allSoft) {
       reset();
       if (allSoft) {
-        for (const id in mats) { mats[id].emissive.setHex(0xff5c1a); mats[id].emissiveIntensity = 0.35; }
+        for (const id in mats) { mats[id].emissive.setHex(0xff5c1a); mats[id].emissiveIntensity = 0.38; }
         return;
       }
       (primaryIds || []).forEach(id => {
-        if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.0; mats[id].color.setHex(0x6b2a20); }
+        if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.1; mats[id].color.setHex(0x5e2a22); }
       });
       (secondaryIds || []).forEach(id => {
-        if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.5; }
+        if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.55; }
       });
     }
 
-    // ---- interaction ----
+    /* ---- interaction: rotate + pinch zoom + tap ---- */
     let rotY = Math.PI * 0.12, targetRotY = rotY, rotX = 0;
-    let dragging = false, px = 0, py = 0, moved = 0, lastAct = Date.now();
-    const el = renderer.domElement;
-    el.addEventListener("pointerdown", e => { dragging = true; px = e.clientX; py = e.clientY; moved = 0; lastAct = Date.now(); el.setPointerCapture(e.pointerId); });
-    el.addEventListener("pointermove", e => {
-      if (!dragging) return;
-      const dx = e.clientX - px, dy = e.clientY - py;
-      moved += Math.abs(dx) + Math.abs(dy);
-      rotY += dx * 0.008; targetRotY = rotY;
-      rotX = Math.max(-0.3, Math.min(0.5, rotX + dy * 0.004));
-      px = e.clientX; py = e.clientY; lastAct = Date.now();
-    });
-    el.addEventListener("pointerup", e => {
-      dragging = false; lastAct = Date.now();
-      if (moved < 8 && opts.onMuscleClick) {
-        const r = el.getBoundingClientRect();
-        const ray = new THREE.Raycaster();
-        ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
-        const hit = ray.intersectObjects(muscleMeshes, false)[0];
-        if (hit) opts.onMuscleClick(hit.object.userData.muscle);
+    let dragging = false, px = 0, py = 0, moved = 0, tapOK = false, pinchDist = 0, lastAct = Date.now();
+    const pointers = new Map();
+    const clampD = d => Math.max(3.6, Math.min(9.5, d));
+
+    el.addEventListener("pointerdown", e => {
+      el.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2) {
+        const p = [...pointers.values()];
+        pinchDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        tapOK = false; dragging = false;
+      } else {
+        dragging = true; px = e.clientX; py = e.clientY; moved = 0; tapOK = true;
       }
+      lastAct = Date.now();
     });
+    el.addEventListener("pointermove", e => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2) {
+        const p = [...pointers.values()];
+        const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        if (pinchDist > 0 && d > 0) { camDist = clampD(camDist * pinchDist / d); camera.position.z = camDist; }
+        pinchDist = d;
+      } else if (dragging) {
+        const dx = e.clientX - px, dy = e.clientY - py;
+        moved += Math.abs(dx) + Math.abs(dy);
+        if (moved > 10) tapOK = false;
+        rotY += dx * 0.008; targetRotY = rotY;
+        rotX = Math.max(-0.3, Math.min(0.5, rotX + dy * 0.004));
+        px = e.clientX; py = e.clientY;
+      }
+      lastAct = Date.now();
+    });
+    function pointerEnd(e) {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinchDist = 0;
+      if (pointers.size === 0) {
+        dragging = false;
+        if (tapOK && moved < 10 && opts.onMuscleClick) {
+          const r = el.getBoundingClientRect();
+          const ray = new THREE.Raycaster();
+          ray.setFromCamera(new THREE.Vector2(
+            ((e.clientX - r.left) / r.width) * 2 - 1,
+            -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+          const hit = ray.intersectObjects(muscleMeshes, false)[0];
+          if (hit) opts.onMuscleClick(hit.object.userData.muscle);
+        }
+        tapOK = false;
+      }
+      lastAct = Date.now();
+    }
+    el.addEventListener("pointerup", pointerEnd);
+    el.addEventListener("pointercancel", pointerEnd);
     el.addEventListener("wheel", e => {
       e.preventDefault();
-      camDist = Math.max(3.4, Math.min(8.5, camDist + e.deltaY * 0.003));
+      camDist = clampD(camDist + e.deltaY * 0.003);
       camera.position.z = camDist; lastAct = Date.now();
     }, { passive: false });
 
@@ -180,7 +261,9 @@
     (function loop() {
       if (dead) return;
       raf = requestAnimationFrame(loop);
-      if (opts.autoRotate && !dragging && Date.now() - lastAct > 3000) { rotY += 0.004; targetRotY = rotY; }
+      if (opts.autoRotate && !dragging && pointers.size === 0 && Date.now() - lastAct > 3000) {
+        rotY += 0.004; targetRotY = rotY;
+      }
       rotY += (targetRotY - rotY) * 0.12;
       body.rotation.y = rotY; body.rotation.x = rotX;
       ring.rotation.z += 0.002;
@@ -200,16 +283,19 @@
     };
   }
 
-  /* ---------- favorites ---------- */
+  /* ---------- favorites & completed ---------- */
   const favs = new Set(JSON.parse(localStorage.getItem("forge-favs") || "[]"));
+  const done = JSON.parse(localStorage.getItem("forge-done") || "{}"); // "progId:dayIdx" -> [dates]
   function saveFavs() {
     localStorage.setItem("forge-favs", JSON.stringify([...favs]));
     document.getElementById("favCount").textContent = favs.size;
   }
+  function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
+  const progById = id => PROGRAMS.find(p => p.id === id);
 
   /* ---------- helpers ---------- */
   const $ = id => document.getElementById(id);
-  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
   const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
   const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
   const lvlDots = l => l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●";
@@ -244,7 +330,7 @@
       });
       const df = $("dFav");
       if (df && df.dataset.id === id) syncDetailFav(byId(id));
-      if (location.hash.includes("favorites")) renderFavorites();
+      if ((location.hash || "").includes("favorites")) renderFavorites();
       return;
     }
     const card = e.target.closest("[data-ex]");
@@ -252,12 +338,14 @@
   });
 
   /* ---------- views ---------- */
-  const views = ["home", "exercises", "detail", "body", "favorites"];
+  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout"];
   function show(name) {
     clearViewers();
-    views.forEach(v => $("view-" + v).classList.toggle("hidden", v !== name));
+    if (timerInt) { clearInterval(timerInt); timerInt = null; }
+    views.forEach(v => { const s = $("view-" + v); if (s) s.classList.toggle("hidden", v !== name); });
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
-      (name === "detail" && a.dataset.nav === "exercises")));
+      (name === "detail" && a.dataset.nav === "exercises") ||
+      ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
     window.scrollTo(0, 0);
   }
 
@@ -269,14 +357,13 @@
     $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
       `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
     ).join("");
-    const v = createBodyViewer($("hero3d"), { autoRotate: true, dist: 5.4 });
+    const v = createBodyViewer($("hero3d"), { autoRotate: true, dist: 5.6 });
     viewers.push(v);
     const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
     let i = 0;
     const cyc = setInterval(() => {
       if (!document.body.contains($("hero3d"))) { clearInterval(cyc); return; }
-      const g = groups[i++ % groups.length];
-      v.highlight(expandMuscles(g), []);
+      v.highlight(expandMuscles(groups[i++ % groups.length]), []);
     }, 2400);
     v.highlight(expandMuscles("chest"), []);
     const origDispose = v.dispose.bind(v);
@@ -352,7 +439,7 @@
   // BODY MAP
   function renderBody(selected) {
     const v = createBodyViewer($("body3d"), {
-      autoRotate: true, dist: 6.0,
+      autoRotate: true, dist: 6.1,
       onMuscleClick: mid => selectMuscle(groupOf(mid))
     });
     viewers.push(v);
@@ -368,7 +455,7 @@
   function selectMuscle(groupId) {
     const v = window._bodyViewer;
     const info = MUSCLE_INFO[groupId];
-    if (!info) return;
+    if (!info || !v) return;
     const full = groupId === "full-body" || groupId === "cardio";
     v.highlight(full ? [] : expandMuscles(groupId), [], full);
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>`;
@@ -385,6 +472,123 @@
     $("favGrid").innerHTML = list.map(cardHTML).join("");
     $("favEmpty").classList.toggle("hidden", list.length > 0);
   }
+
+  // PROGRAMS
+  function renderPrograms() {
+    $("programGrid").innerHTML = PROGRAMS.map(p => {
+      const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
+      return `<div class="prog-card" data-prog="${p.id}">
+        <h3>${esc(p.name)}</h3>
+        <p class="muted">${esc(p.tagline)}</p>
+        <div class="meta">
+          <span class="tag volt-tag">${cap1(p.level)}</span>
+          <span class="tag">${p.daysPerWeek} days/wk</span>
+          <span class="tag">${p.weeks} weeks</span>
+        </div>
+        <p class="muted" style="margin-top:10px;font-size:13px">${p.days.length} workouts · ${n} exercises · ${esc(p.equipment)}</p>
+      </div>`;
+    }).join("");
+  }
+  document.addEventListener("click", e => {
+    const pc = e.target.closest("[data-prog]");
+    if (pc) location.hash = "#/program/" + pc.dataset.prog;
+  });
+
+  // PROGRAM DETAIL
+  function renderProgram(id) {
+    const p = progById(id);
+    if (!p) { location.hash = "#/programs"; return; }
+    $("pgName").textContent = p.name;
+    $("pgTag").textContent = p.tagline;
+    $("pgBadges").innerHTML =
+      `<span class="tag volt-tag">${cap1(p.level)}</span>
+       <span class="tag">${p.daysPerWeek} days/week</span>
+       <span class="tag">${p.weeks} weeks</span>
+       <span class="tag">${esc(p.equipment)}</span>`;
+    $("pgDays").innerHTML = p.days.map((d, di) => {
+      const key = p.id + ":" + di;
+      const times = (done[key] || []).length;
+      return `<div class="day-card">
+        <div class="day-head">
+          <h3>${esc(d.name)} ${times ? `<span class="done-mark">✓ ${times}x</span>` : ""}</h3>
+          <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>
+        </div>
+        ${d.exercises.map(x => {
+          const ex = byId(x.id);
+          return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex.name)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
+        }).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  // WORKOUT MODE
+  let timerInt = null, timerLeft = 0;
+  function fmtT(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880; o.type = "sine";
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      o.start(); o.stop(ctx.currentTime + 0.65);
+    } catch (e) { /* audio unavailable */ }
+  }
+  function renderWorkout(pid, di) {
+    clearInterval(timerInt); timerInt = null; timerLeft = 0;
+    const p = progById(pid);
+    const d = p && p.days[di];
+    if (!d) { location.hash = "#/program/" + pid; return; }
+    $("woTitle").textContent = d.name;
+    $("woSub").textContent = p.name;
+    $("woList").innerHTML = d.exercises.map((x, xi) => {
+      const ex = byId(x.id);
+      const dots = Array.from({ length: x.sets }, (_, si) =>
+        `<button class="set-dot" data-x="${xi}" data-s="${si}" aria-label="set ${si + 1}"></button>`).join("");
+      return `<div class="wo-ex">
+        <div class="wo-ex-head">
+          <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
+          <span class="tag">${x.sets} × ${esc(x.reps)}</span>
+        </div>
+        <div class="set-row">${dots}</div>
+        <span class="tag volt-tag wo-muscle">${MUSCLE_INFO[ex.primary].name}</span>
+      </div>`;
+    }).join("");
+    $("timerDisplay").textContent = "0:00";
+    $("woDone").classList.add("hidden");
+    $("woFinish").classList.remove("hidden");
+  }
+  document.addEventListener("click", e => {
+    const sd = e.target.closest(".set-dot");
+    if (sd) { sd.classList.toggle("hit"); return; }
+    const tp = e.target.closest("[data-timer]");
+    if (tp) {
+      const sec = parseInt(tp.dataset.timer, 10);
+      clearInterval(timerInt);
+      timerLeft = sec;
+      $("timerDisplay").textContent = fmtT(timerLeft);
+      timerInt = setInterval(() => {
+        timerLeft--;
+        $("timerDisplay").textContent = fmtT(Math.max(0, timerLeft));
+        if (timerLeft <= 0) { clearInterval(timerInt); timerInt = null; beep(); }
+      }, 1000);
+      return;
+    }
+    if (e.target.closest("#timerStop")) { clearInterval(timerInt); timerInt = null; return; }
+  });
+  $("woFinish").addEventListener("click", () => {
+    const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
+    const key = raw[1] + ":" + raw[2];
+    const today = new Date().toISOString().slice(0, 10);
+    done[key] = done[key] || [];
+    done[key].push(today); saveDone();
+    $("woDone").classList.remove("hidden");
+    $("woFinish").classList.add("hidden");
+    clearInterval(timerInt); timerInt = null;
+    window.scrollTo(0, 0);
+  });
 
   /* ---------- router ---------- */
   function router() {
@@ -403,6 +607,9 @@
     }
     else if (parts[0] === "body") { show("body"); renderBody(params.get("m")); }
     else if (parts[0] === "favorites") { show("favorites"); renderFavorites(); }
+    else if (parts[0] === "programs") { show("programs"); renderPrograms(); }
+    else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
+    else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); renderWorkout(parts[1], parseInt(parts[2], 10)); }
     else { show("home"); renderHome(); }
   }
   $("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); });

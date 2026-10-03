@@ -15,6 +15,7 @@
   </a>
   <nav class="nav">
     <a href="#/exercises" data-nav="exercises">Exercises</a>
+    <a href="#/programs" data-nav="programs">Programs</a>
     <a href="#/body" data-nav="body">3D Body Map</a>
     <a href="#/favorites" data-nav="favorites">Favorites <span class="fav-count" id="favCount">0</span></a>
   </nav>
@@ -109,6 +110,47 @@
     </div>
   </section>
 
+  <!-- PROGRAMS -->
+  <section id="view-programs" class="view hidden">
+    <h2 class="section-title">Training programs</h2>
+    <p class="lede">Pick a plan and just train — every workout is laid out set by set.</p>
+    <div class="prog-grid" id="programGrid"></div>
+  </section>
+
+  <!-- PROGRAM DETAIL -->
+  <section id="view-program" class="view hidden">
+    <a class="back" href="#/programs">← All programs</a>
+    <h2 class="section-title" id="pgName"></h2>
+    <p class="lede" id="pgTag"></p>
+    <div class="badges" id="pgBadges" style="margin-bottom:24px"></div>
+    <div id="pgDays"></div>
+  </section>
+
+  <!-- WORKOUT MODE -->
+  <section id="view-workout" class="view hidden">
+    <a class="back" id="woBack" href="#/programs">← Back</a>
+    <p class="kicker" id="woSub"></p>
+    <h2 class="section-title" id="woTitle"></h2>
+    <div class="timer">
+      <div class="timer-display" id="timerDisplay">0:00</div>
+      <div class="timer-btns">
+        <button data-timer="30">0:30</button>
+        <button data-timer="60">1:00</button>
+        <button data-timer="90">1:30</button>
+        <button data-timer="120">2:00</button>
+        <button id="timerStop">Stop</button>
+      </div>
+      <p class="hint">Rest timer — tap a duration to start</p>
+    </div>
+    <div id="woList"></div>
+    <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
+    <div class="done-banner hidden" id="woDone">
+      <h3>Workout complete. 💪</h3>
+      <p class="muted">Logged — keep the streak going.</p>
+      <a class="btn btn-ghost" id="woDoneBack" href="#/programs">Back to programs</a>
+    </div>
+  </section>
+
   <!-- FAVORITES -->
   <section id="view-favorites" class="view hidden">
     <h2 class="section-title">Your favorites</h2>
@@ -123,6 +165,7 @@
 
 <script src="three.min.js"></script>
 <script src="exercises.js"></script>
+<script src="programs.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
