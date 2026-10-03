@@ -382,6 +382,7 @@
     syncSettingsUI();
     $("settingsVeil").classList.remove("hidden");
   }
+  function closeSettings() { $("settingsVeil").classList.add("hidden"); }
   function syncSettingsUI() {
     const s = getSettings();
     document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
