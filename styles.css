@@ -264,6 +264,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   counter-increment: step; position: relative;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 14px; padding: 16px 18px 16px 58px; font-size: 15.5px;
+  color: var(--ink);
 }
 .steps li::before {
   content: counter(step); position: absolute; left: 16px; top: 15px;
@@ -302,4 +303,36 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   .detail-head h2 { font-size: 26px; }
   .nav a { padding: 8px 12px; font-size: 13px; }
   .nav a svg { width: 14px; height: 14px; }
+}
+
+/* ================= v4: flat 3D viewport backgrounds, readable steps ================= */
+.stage, .hero-3d { background: var(--surface); }
+[data-theme="light"] .hero-3d { background: var(--surface); }
+.wo-steps li { color: var(--ink); }
+
+/* ================= v4: exercise demo player ================= */
+.demo-box { margin-bottom: 8px; }
+.demo-player {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 18px;
+}
+.demo-svg { width: 100%; height: auto; display: block; }
+.demo-side { display: flex; flex-direction: column; gap: 14px; }
+.demo-caption { font-size: 15.5px; color: var(--ink); min-height: 72px; }
+.demo-dots { display: flex; gap: 10px; }
+.demo-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface2); cursor: pointer; padding: 0;
+}
+.demo-dot.on { background: var(--volt); border-color: var(--volt); }
+.demo-play {
+  align-self: flex-start; background: var(--surface2); border: 1px solid var(--line);
+  color: var(--ink); border-radius: 10px; padding: 10px 22px;
+  font-weight: 700; font-size: 14px; cursor: pointer; min-height: 44px;
+}
+.demo-play:active { background: var(--volt); color: var(--volt-ink); }
+@media (max-width: 700px) {
+  .demo-player { grid-template-columns: 1fr; }
+  .demo-caption { min-height: 0; }
 }

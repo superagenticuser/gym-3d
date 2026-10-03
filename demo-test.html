@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Demo pose check</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  body { padding: 20px; }
+  .pose-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .pose-cell { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; text-align: center; }
+  .pose-cell svg { width: 100%; height: auto; display: block; }
+  .pose-cell b { font-size: 12px; display: block; margin-top: 4px; }
+  .pose-cell span { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<h2>Pose check — frame 0 / mid of every animation</h2>
+<div class="pose-grid" id="grid"></div>
+<script src="demo.js"></script>
+<script>
+  const grid = document.getElementById('grid');
+  Object.keys(FORGE_DEMO.ANIMS).sort().forEach(name => {
+    const anim = FORGE_DEMO.ANIMS[name];
+    anim.frames.forEach((f, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'pose-cell';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 400 400');
+      cell.appendChild(svg);
+      const b = document.createElement('b');
+      b.textContent = name + ' · f' + i;
+      cell.appendChild(b);
+      const s = document.createElement('span');
+      s.textContent = 'step ' + (f.step + 1) + ', ' + f.dur + 's' + (anim.prop ? ', ' + anim.prop : '');
+      cell.appendChild(s);
+      grid.appendChild(cell);
+      FORGE_DEMO.drawStatic(svg, name, i);
+    });
+  });
+</script>
+</body>
+</html>

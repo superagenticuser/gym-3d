@@ -76,8 +76,8 @@
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
-    const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.42, metalness: 0.28 });
-    const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.6, metalness: 0.15 });
+    const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.52, metalness: 0.10 });
+    const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.62, metalness: 0.06 });
     const mats = {};
     const muscleMeshes = [];
     const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
@@ -102,50 +102,57 @@
     const ball = (r, mid, x, y, z, parent) => part(new THREE.SphereGeometry(r, 26, 20), mid, x, y, z, parent);
     const box = (w, h, d, mid, x, y, z, parent) => part(new THREE.BoxGeometry(w, h, d), mid, x, y, z, parent);
 
-    /* ---- head & neck ---- */
-    ball(0.20, null, 0, 3.42, 0.01);
-    part(new THREE.CylinderGeometry(0.075, 0.105, 0.26, 18), null, 0, 3.16, 0);
+    /* ---- head & neck (refined) ---- */
+    ball(0.185, null, 0, 3.42, 0.015);
+    const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
+    part(new THREE.CylinderGeometry(0.070, 0.098, 0.28, 18), null, 0, 3.15, 0);
 
-    /* ---- torso ---- */
-    // sloped traps
-    for (const s of [-1, 1]) {
-      const tp = box(0.32, 0.15, 0.24, "traps", s * 0.185, 3.02, -0.03);
-      tp.rotation.z = -s * 0.38;
-    }
-    // clavicle hint
-    box(0.52, 0.05, 0.09, null, 0, 2.93, 0.085);
+    /* ---- torso: organic lathe core + muscle overlays ---- */
+    const profile = [
+      [0.012, 1.90], [0.155, 1.92], [0.198, 2.00], [0.186, 2.14], [0.172, 2.28],
+      [0.180, 2.42], [0.205, 2.56], [0.228, 2.68], [0.232, 2.76], [0.210, 2.86],
+      [0.150, 2.94], [0.096, 3.00], [0.072, 3.07]
+    ].map(p => new THREE.Vector2(p[0], p[1]));
+    const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 30), neutralMat);
+    body.add(torsoCore);
+    // traps — sloped capsules from neck to shoulders
+    for (const s of [-1, 1])
+      capMesh(0.085, V3(s * 0.05, 3.03, -0.01), V3(s * 0.30, 2.90, -0.02), "traps");
     // pecs
     for (const s of [-1, 1]) {
-      const p = ball(0.185, "chest", s * 0.165, 2.78, 0.105);
-      p.scale.set(1.05, 0.85, 0.62);
+      const p = ball(0.150, "chest", s * 0.135, 2.70, 0.155);
+      p.scale.set(1.15, 0.82, 0.60);
     }
-    // abs — six blocks
-    for (const r of [0, 1, 2]) for (const s of [-1, 1])
-      box(0.135, 0.115, 0.10, "abs", s * 0.078, 2.52 - r * 0.125, 0.095);
+    // abs — six rounded blocks
+    for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
+      const ab = ball(0.072, "abs", s * 0.068, 2.48 - r * 0.12, 0.150);
+      ab.scale.set(1.2, 0.95, 0.62);
+    }
     // obliques
+    for (const s of [-1, 1])
+      capMesh(0.058, V3(s * 0.185, 2.52, 0.055), V3(s * 0.205, 2.26, 0.045), "obliques");
+    // lats — smooth flared wings
     for (const s of [-1, 1]) {
-      const o = box(0.095, 0.36, 0.13, "obliques", s * 0.235, 2.40, 0.035);
-      o.rotation.z = -s * 0.07;
+      const l = ball(0.155, "lats", s * 0.195, 2.56, -0.135);
+      l.scale.set(0.55, 1.2, 0.5); l.rotation.z = s * 0.12;
     }
-    // lats — flared
-    for (const s of [-1, 1]) {
-      const l = box(0.17, 0.42, 0.11, "lats", s * 0.265, 2.52, -0.125);
-      l.rotation.z = s * 0.16;
-    }
-    box(0.38, 0.32, 0.13, "back", 0, 2.72, -0.115);           // upper back
+    // upper back
+    const ub = ball(0.150, "back", 0, 2.70, -0.145); ub.scale.set(1.2, 0.8, 0.5);
     for (const s of [-1, 1])                                   // erector spinae
-      capMesh(0.075, V3(s * 0.09, 2.20, -0.10), V3(s * 0.09, 1.94, -0.10), "lower-back");
-    box(0.44, 0.20, 0.26, null, 0, 1.86, 0);                   // pelvis
+      capMesh(0.068, V3(s * 0.075, 2.22, -0.150), V3(s * 0.075, 1.98, -0.150), "lower-back");
+    const pelvis = ball(0.215, null, 0, 1.845, 0); pelvis.scale.set(1.02, 0.72, 0.82);
     for (const s of [-1, 1]) {                                 // glutes
       const gl = ball(0.16, "glutes", s * 0.15, 1.74, -0.115);
       gl.scale.set(1, 1.12, 0.85);
       ball(0.10, "glutes", s * 0.235, 1.83, -0.05);
     }
+    // shoulder blend — smooths arm into torso
+    for (const s of [-1, 1]) ball(0.115, null, s * 0.27, 2.82, 0);
 
     /* ---- arms (grouped at shoulder, slight A-pose) ---- */
     for (const s of [-1, 1]) {
       const g = new THREE.Group();
-      g.position.set(s * 0.44, 2.86, 0);
+      g.position.set(s * 0.38, 2.84, 0);
       ball(0.125, "front-delt", 0, 0.02, 0.095, g);
       const sd = ball(0.135, "side-delt", s * 0.055, 0.0, 0.0, g);
       sd.scale.set(0.95, 1.15, 0.95);
@@ -177,7 +184,9 @@
       const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.058, 0.36, 20), matFor("calves"));
       calf.position.set(s * 0.172, 0.62, -0.05);
       calf.userData.muscle = "calves"; muscleMeshes.push(calf); body.add(calf);
-      box(0.11, 0.09, 0.28, null, s * 0.172, 0.345, 0.08);        // foot
+      box(0.105, 0.085, 0.13, null, s * 0.172, 0.355, -0.035);    // heel
+      const toe = box(0.10, 0.07, 0.19, null, s * 0.172, 0.345, 0.095); // forefoot
+      toe.rotation.x = -0.06;
     }
 
     /* ---- highlight ---- */
@@ -335,6 +344,8 @@
   const byId = id => EXERCISES.find(e => e.id === id);
   let viewers = [];
   function clearViewers() { viewers.forEach(v => v.dispose()); viewers = []; }
+  let demos = [];
+  function clearDemos() { demos.forEach(d => d.destroy()); demos = []; }
 
   function heartBtn(ex) {
     return `<button class="heart ${favs.has(ex.id) ? "faved" : ""}" data-fav="${ex.id}" title="Save">${favs.has(ex.id) ? "♥" : "♡"}</button>`;
@@ -374,6 +385,7 @@
   const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout"];
   function show(name) {
     clearViewers();
+    clearDemos();
     if (timerInt) { clearInterval(timerInt); timerInt = null; }
     views.forEach(v => { const s = $("view-" + v); if (s) s.classList.toggle("hidden", v !== name); });
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
@@ -456,6 +468,7 @@
     ).join("");
     const v = createBodyViewer($("detail3d"), { autoRotate: true });
     viewers.push(v);
+    if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
     const full = ex.primary === "full-body" || ex.primary === "cardio";
     v.highlight(full ? [] : expandMuscles(ex.primary), full ? [] : ex.secondary.flatMap(expandMuscles), full);
     const setV = front => {

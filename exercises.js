@@ -9,6 +9,7 @@ const EXERCISES = [
    "triceps",
    "front-delt"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -26,6 +27,7 @@ const EXERCISES = [
    "triceps",
    "front-delt"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -43,6 +45,7 @@ const EXERCISES = [
    "triceps",
    "front-delt"
   ],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -59,6 +62,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -73,6 +77,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "chest",
   "secondary": [],
+  "pattern": "fly",
   "steps": [
    "Lie back with a dumbbell in each hand, arms extended above your chest with a soft bend in the elbows.",
    "Open your arms wide in an arc until you feel a deep stretch across your chest.",
@@ -87,6 +92,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "chest",
   "secondary": [],
+  "pattern": "cable-fly",
   "steps": [
    "Stand centered between the pulleys with handles at shoulder height, one foot forward.",
    "Step forward and bring your hands together in front of your chest in a hugging motion.",
@@ -103,6 +109,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -119,6 +126,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "dip",
   "steps": [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
@@ -135,6 +143,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "machine-press",
   "steps": [
    "Adjust the seat so the handles line up with mid-chest, back flat against the pad.",
    "Press the handles forward until your arms are nearly straight.",
@@ -151,6 +160,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -168,6 +178,7 @@ const EXERCISES = [
    "front-delt",
    "triceps"
   ],
+  "pattern": "landmine-press",
   "steps": [
    "Wedge one end of the barbell into a corner or landmine base, holding the other end at shoulder height.",
    "Brace your core and press the bar up and slightly forward.",
@@ -184,6 +195,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -200,6 +212,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -214,6 +227,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "chest",
   "secondary": [],
+  "pattern": "cable-fly",
   "steps": [
    "Stand centered between the pulleys with handles at shoulder height, one foot forward.",
    "Step forward and bring your hands together in front of your chest in a hugging motion.",
@@ -230,6 +244,7 @@ const EXERCISES = [
   "secondary": [
    "front-delt"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -246,6 +261,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -260,6 +276,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "chest",
   "secondary": [],
+  "pattern": "fly",
   "steps": [
    "Lie back with a dumbbell in each hand, arms extended above your chest with a soft bend in the elbows.",
    "Open your arms wide in an arc until you feel a deep stretch across your chest.",
@@ -278,6 +295,7 @@ const EXERCISES = [
    "hamstrings",
    "traps"
   ],
+  "pattern": "deadlift",
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
@@ -295,6 +313,7 @@ const EXERCISES = [
    "biceps",
    "lats"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -311,6 +330,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -327,6 +347,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "cable-row",
   "steps": [
    "Sit tall with feet braced, chest up, and grab the handle with arms extended.",
    "Pull the handle to your torso, elbows tracking back close to your sides.",
@@ -343,6 +364,7 @@ const EXERCISES = [
   "secondary": [
    "lats"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -359,6 +381,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "inverted-row",
   "steps": [
    "Set a bar at waist height and hang underneath it, body straight, heels on the floor.",
    "Pull your chest to the bar, keeping your body rigid like a plank.",
@@ -375,6 +398,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -391,6 +415,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -407,6 +432,7 @@ const EXERCISES = [
   "secondary": [
    "traps"
   ],
+  "pattern": "deadlift",
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
@@ -423,6 +449,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "cable-row",
   "steps": [
    "Sit tall with feet braced, chest up, and grab the handle with arms extended.",
    "Pull the handle to your torso, elbows tracking back close to your sides.",
@@ -439,6 +466,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -455,6 +483,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -471,6 +500,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pullup",
   "steps": [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
@@ -487,6 +517,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pulldown",
   "steps": [
    "Sit with thighs locked under the pads, gripping the bar wider than shoulders.",
    "Pull the bar down to your upper chest, leaning back just slightly.",
@@ -503,6 +534,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pulldown",
   "steps": [
    "Sit with thighs locked under the pads, gripping the bar wider than shoulders.",
    "Pull the bar down to your upper chest, leaning back just slightly.",
@@ -517,6 +549,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "lats",
   "secondary": [],
+  "pattern": "straight-pulldown",
   "steps": [
    "Stand facing the cable with a straight bar at shoulder height, arms straight.",
    "Keeping your arms straight, pull the bar down to your thighs.",
@@ -533,6 +566,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pulldown",
   "steps": [
    "Sit with thighs locked under the pads, gripping the bar wider than shoulders.",
    "Pull the bar down to your upper chest, leaning back just slightly.",
@@ -549,6 +583,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pullup",
   "steps": [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
@@ -565,6 +600,7 @@ const EXERCISES = [
   "secondary": [
    "chest"
   ],
+  "pattern": "pullover",
   "steps": [
    "Lie across a bench with only your upper back supported, hips low, holding one dumbbell overhead.",
    "Lower the weight behind your head in an arc until you feel a deep lat stretch.",
@@ -581,6 +617,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "pullup",
   "steps": [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
@@ -597,6 +634,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -613,6 +651,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -627,6 +666,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "raise",
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
@@ -641,6 +681,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "raise",
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
@@ -655,6 +696,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "rear-fly",
   "steps": [
    "Hinge forward with a flat back, dumbbells hanging below your chest.",
    "Raise the weights out to the sides with a slight elbow bend, like opening wings.",
@@ -671,6 +713,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -687,6 +730,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -701,6 +745,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "raise",
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
@@ -717,6 +762,7 @@ const EXERCISES = [
   "secondary": [
    "traps"
   ],
+  "pattern": "face-pull",
   "steps": [
    "Set the cable at eye level with a rope attachment and step back.",
    "Pull the rope toward your forehead, splitting it so your knuckles face you.",
@@ -733,6 +779,7 @@ const EXERCISES = [
   "secondary": [
    "traps"
   ],
+  "pattern": "upright-row",
   "steps": [
    "Stand holding the bar with an overhand grip, hands shoulder-width.",
    "Pull the bar straight up along your body to chest height, elbows leading.",
@@ -749,6 +796,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "machine-press",
   "steps": [
    "Adjust the seat so the handles line up with mid-chest, back flat against the pad.",
    "Press the handles forward until your arms are nearly straight.",
@@ -765,6 +813,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -781,6 +830,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -795,6 +845,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "cuban",
   "steps": [
    "Hold light dumbbells at your sides and do an upright row to chest height.",
    "Rotate your forearms up so the weights are overhead-ready.",
@@ -811,6 +862,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "landmine-press",
   "steps": [
    "Wedge one end of the barbell into a corner or landmine base, holding the other end at shoulder height.",
    "Brace your core and press the bar up and slightly forward.",
@@ -825,6 +877,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "shoulders",
   "secondary": [],
+  "pattern": "raise",
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
@@ -841,6 +894,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "ohp",
   "steps": [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
@@ -857,6 +911,7 @@ const EXERCISES = [
   "secondary": [
    "forearms"
   ],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -871,6 +926,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -887,6 +943,7 @@ const EXERCISES = [
   "secondary": [
    "forearms"
   ],
+  "pattern": "hammer-curl",
   "steps": [
    "Hold dumbbells with a neutral grip (palms facing each other), arms at your sides.",
    "Curl both weights up, keeping your palms facing in the whole time.",
@@ -901,6 +958,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -915,6 +973,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -929,6 +988,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -943,6 +1003,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -957,6 +1018,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -973,6 +1035,7 @@ const EXERCISES = [
   "secondary": [
    "forearms"
   ],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -987,6 +1050,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -1003,6 +1067,7 @@ const EXERCISES = [
   "secondary": [
    "forearms"
   ],
+  "pattern": "zotten",
   "steps": [
    "Curl the dumbbells up with palms facing forward.",
    "At the top, rotate to palms-down (pronated) grip.",
@@ -1017,6 +1082,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -1031,6 +1097,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "biceps",
   "secondary": [],
+  "pattern": "curl",
   "steps": [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
@@ -1045,6 +1112,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "pushdown",
   "steps": [
    "Stand facing the cable, elbows pinned tight to your ribs.",
    "Push the handle down until your arms are fully straight.",
@@ -1059,6 +1127,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "overhead-ext",
   "steps": [
    "Hold the weight overhead with both hands, elbows pointing forward.",
    "Lower the weight behind your head by bending only at the elbows.",
@@ -1073,6 +1142,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "skullcrusher",
   "steps": [
    "Lie on a bench holding the bar above your chest, arms straight.",
    "Bend at the elbows to lower the bar toward your forehead.",
@@ -1089,6 +1159,7 @@ const EXERCISES = [
   "secondary": [
    "chest"
   ],
+  "pattern": "dip",
   "steps": [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
@@ -1105,6 +1176,7 @@ const EXERCISES = [
   "secondary": [
    "chest"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -1119,6 +1191,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "pushup",
   "steps": [
    "Start in a high plank: hands under shoulders, body in one straight line, glutes squeezed.",
    "Lower your chest toward the floor with elbows at ~45°, keeping your core braced.",
@@ -1133,6 +1206,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "kickback",
   "steps": [
    "Hinge forward, upper arm parallel to the floor, dumbbell in hand.",
    "Extend your forearm back until your arm is straight.",
@@ -1147,6 +1221,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -1161,6 +1236,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "dip",
   "steps": [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
@@ -1175,6 +1251,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "pushdown",
   "steps": [
    "Stand facing the cable, elbows pinned tight to your ribs.",
    "Push the handle down until your arms are fully straight.",
@@ -1189,6 +1266,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "triceps",
   "secondary": [],
+  "pattern": "overhead-ext",
   "steps": [
    "Hold the weight overhead with both hands, elbows pointing forward.",
    "Lower the weight behind your head by bending only at the elbows.",
@@ -1205,6 +1283,7 @@ const EXERCISES = [
   "secondary": [
    "chest"
   ],
+  "pattern": "dip",
   "steps": [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
@@ -1219,6 +1298,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "forearms",
   "secondary": [],
+  "pattern": "wrist-curl",
   "steps": [
    "Rest your forearms on a bench, wrists hanging off the edge, holding the bar.",
    "Curl the weight up using only your wrists.",
@@ -1233,6 +1313,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "forearms",
   "secondary": [],
+  "pattern": "wrist-curl",
   "steps": [
    "Rest your forearms on a bench, wrists hanging off the edge, holding the bar.",
    "Curl the weight up using only your wrists.",
@@ -1249,6 +1330,7 @@ const EXERCISES = [
   "secondary": [
    "traps"
   ],
+  "pattern": "carry",
   "steps": [
    "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
@@ -1263,6 +1345,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "forearms",
   "secondary": [],
+  "pattern": "hang",
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
    "Engage your shoulders slightly. Don't just dangle passively.",
@@ -1279,6 +1362,7 @@ const EXERCISES = [
   "secondary": [
    "lats"
   ],
+  "pattern": "hang",
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
    "Engage your shoulders slightly. Don't just dangle passively.",
@@ -1293,6 +1377,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "forearms",
   "secondary": [],
+  "pattern": "hang",
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
    "Engage your shoulders slightly. Don't just dangle passively.",
@@ -1307,6 +1392,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "forearms",
   "secondary": [],
+  "pattern": "wrist-curl",
   "steps": [
    "Rest your forearms on a bench, wrists hanging off the edge, holding the bar.",
    "Curl the weight up using only your wrists.",
@@ -1321,6 +1407,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1335,6 +1422,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "plank",
   "steps": [
    "Get into a forearm plank: elbows under shoulders, body in one line.",
    "Squeeze your glutes and brace your abs like you're about to be punched.",
@@ -1349,6 +1437,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "abs",
   "secondary": [],
+  "pattern": "leg-raise",
   "steps": [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
@@ -1363,6 +1452,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "abs",
   "secondary": [],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1379,6 +1469,7 @@ const EXERCISES = [
   "secondary": [
    "lats"
   ],
+  "pattern": "rollout",
   "steps": [
    "Kneel with the ab wheel under your shoulders.",
    "Roll forward slowly, keeping your core braced and back flat.",
@@ -1395,6 +1486,7 @@ const EXERCISES = [
   "secondary": [
    "obliques"
   ],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1409,6 +1501,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "deadbug",
   "steps": [
    "Lie on your back, arms reaching up, knees bent at 90°.",
    "Press your lower back into the floor and extend opposite arm and leg.",
@@ -1423,6 +1516,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "abs",
   "secondary": [],
+  "pattern": "plank",
   "steps": [
    "Get into a forearm plank: elbows under shoulders, body in one line.",
    "Squeeze your glutes and brace your abs like you're about to be punched.",
@@ -1437,6 +1531,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "leg-raise",
   "steps": [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
@@ -1453,6 +1548,7 @@ const EXERCISES = [
   "secondary": [
    "lats"
   ],
+  "pattern": "leg-raise",
   "steps": [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
@@ -1467,6 +1563,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1483,6 +1580,7 @@ const EXERCISES = [
   "secondary": [
    "obliques"
   ],
+  "pattern": "pallof",
   "steps": [
    "Stand sideways to a cable set at chest height, holding the handle at your sternum.",
    "Press the handle straight out. Resist the cable trying to rotate you.",
@@ -1497,6 +1595,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "abs",
   "secondary": [],
+  "pattern": "leg-raise",
   "steps": [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
@@ -1511,6 +1610,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "abs",
   "secondary": [],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1527,6 +1627,7 @@ const EXERCISES = [
   "secondary": [
    "abs"
   ],
+  "pattern": "twist",
   "steps": [
    "Sit leaning back slightly, feet off the floor, holding a weight.",
    "Rotate your torso to one side, bringing the weight beside your hip.",
@@ -1541,6 +1642,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "obliques",
   "secondary": [],
+  "pattern": "side-plank",
   "steps": [
    "Lie on your side, propped on one forearm, feet stacked.",
    "Lift your hips so your body forms a straight line.",
@@ -1557,6 +1659,7 @@ const EXERCISES = [
   "secondary": [
    "abs"
   ],
+  "pattern": "woodchopper",
   "steps": [
    "Stand sideways to the cable set high, holding the handle with both hands.",
    "Pull the handle down across your body to the opposite hip, rotating your torso.",
@@ -1571,6 +1674,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "obliques",
   "secondary": [],
+  "pattern": "crunch",
   "steps": [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
@@ -1587,6 +1691,7 @@ const EXERCISES = [
   "secondary": [
    "abs"
   ],
+  "pattern": "leg-raise",
   "steps": [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
@@ -1603,6 +1708,7 @@ const EXERCISES = [
   "secondary": [
    "forearms"
   ],
+  "pattern": "carry",
   "steps": [
    "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
@@ -1617,6 +1723,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "obliques",
   "secondary": [],
+  "pattern": "woodchopper",
   "steps": [
    "Stand sideways to the cable set high, holding the handle with both hands.",
    "Pull the handle down across your body to the opposite hip, rotating your torso.",
@@ -1633,6 +1740,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "side-plank",
   "steps": [
    "Lie on your side, propped on one forearm, feet stacked.",
    "Lift your hips so your body forms a straight line.",
@@ -1649,6 +1757,7 @@ const EXERCISES = [
   "secondary": [
    "hamstrings"
   ],
+  "pattern": "hip-thrust",
   "steps": [
    "Sit with your upper back against a bench, feet flat, weight across your hips.",
    "Drive through your heels to lift your hips until your body forms a straight line.",
@@ -1663,6 +1772,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "hip-thrust",
   "steps": [
    "Sit with your upper back against a bench, feet flat, weight across your hips.",
    "Drive through your heels to lift your hips until your body forms a straight line.",
@@ -1680,6 +1790,7 @@ const EXERCISES = [
    "hamstrings",
    "lower-back"
   ],
+  "pattern": "swing",
   "steps": [
    "Stand with feet wide, kettlebell on the floor in front of you.",
    "Hike the bell back between your legs, then snap your hips forward.",
@@ -1694,6 +1805,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "kickback",
   "steps": [
    "Hinge forward, upper arm parallel to the floor, dumbbell in hand.",
    "Extend your forearm back until your arm is straight.",
@@ -1710,6 +1822,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "carry",
   "steps": [
    "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
@@ -1726,6 +1839,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "lunge",
   "steps": [
    "Stand tall, then step forward (or back) into a long stride.",
    "Lower until both knees are near 90°, torso upright.",
@@ -1740,6 +1854,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "hang",
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
    "Engage your shoulders slightly. Don't just dangle passively.",
@@ -1754,6 +1869,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "hang",
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
    "Engage your shoulders slightly. Don't just dangle passively.",
@@ -1768,6 +1884,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "hip-thrust",
   "steps": [
    "Sit with your upper back against a bench, feet flat, weight across your hips.",
    "Drive through your heels to lift your hips until your body forms a straight line.",
@@ -1785,6 +1902,7 @@ const EXERCISES = [
    "quads",
    "traps"
   ],
+  "pattern": "deadlift",
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
@@ -1799,6 +1917,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "carry",
   "steps": [
    "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
@@ -1813,6 +1932,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "glutes",
   "secondary": [],
+  "pattern": "hip-thrust",
   "steps": [
    "Sit with your upper back against a bench, feet flat, weight across your hips.",
    "Drive through your heels to lift your hips until your body forms a straight line.",
@@ -1829,6 +1949,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1845,6 +1966,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1861,6 +1983,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "leg-press",
   "steps": [
    "Sit with your back flat and feet shoulder-width on the platform.",
    "Release the safeties and lower the platform until your knees reach ~90°.",
@@ -1877,6 +2000,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "lunge",
   "steps": [
    "Stand tall, then step forward (or back) into a long stride.",
    "Lower until both knees are near 90°, torso upright.",
@@ -1893,6 +2017,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "lunge",
   "steps": [
    "Stand tall, then step forward (or back) into a long stride.",
    "Lower until both knees are near 90°, torso upright.",
@@ -1909,6 +2034,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1923,6 +2049,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "quads",
   "secondary": [],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1937,6 +2064,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "quads",
   "secondary": [],
+  "pattern": "leg-extension",
   "steps": [
    "Sit with the pad resting on your lower shins, back against the seat.",
    "Extend your knees to lift the weight until your legs are straight.",
@@ -1951,6 +2079,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "quads",
   "secondary": [],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1967,6 +2096,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -1983,6 +2113,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "lunge",
   "steps": [
    "Stand tall, then step forward (or back) into a long stride.",
    "Lower until both knees are near 90°, torso upright.",
@@ -1997,6 +2128,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "quads",
   "secondary": [],
+  "pattern": "wall-sit",
   "steps": [
    "Lean your back against a wall and slide down until your thighs are parallel to the floor.",
    "Keep your knees over your ankles and your core braced.",
@@ -2011,6 +2143,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "quads",
   "secondary": [],
+  "pattern": "wall-sit",
   "steps": [
    "Lean your back against a wall and slide down until your thighs are parallel to the floor.",
    "Keep your knees over your ankles and your core braced.",
@@ -2027,6 +2160,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "lunge",
   "steps": [
    "Stand tall, then step forward (or back) into a long stride.",
    "Lower until both knees are near 90°, torso upright.",
@@ -2041,6 +2175,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "quads",
   "secondary": [],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -2057,6 +2192,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "squat",
   "steps": [
    "Set the bar across your upper back (or hold the weight at your chest), feet shoulder-width.",
    "Break at the hips and knees together, sitting down between your heels.",
@@ -2074,6 +2210,7 @@ const EXERCISES = [
    "glutes",
    "lower-back"
   ],
+  "pattern": "rdl",
   "steps": [
    "Stand holding the weight, feet hip-width, soft knees.",
    "Push your hips straight back, letting the weight slide down your thighs.",
@@ -2088,6 +2225,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "hamstrings",
   "secondary": [],
+  "pattern": "nordic",
   "steps": [
    "Kneel with your feet anchored, body tall, arms crossed or at your sides.",
    "Lower yourself forward as slowly as possible, resisting with your hamstrings.",
@@ -2102,6 +2240,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "hamstrings",
   "secondary": [],
+  "pattern": "leg-curl",
   "steps": [
    "Lie face down with the pad above your heels (or sit per the machine).",
    "Curl your heels toward your glutes, squeezing your hamstrings.",
@@ -2116,6 +2255,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "hamstrings",
   "secondary": [],
+  "pattern": "leg-curl",
   "steps": [
    "Lie face down with the pad above your heels (or sit per the machine).",
    "Curl your heels toward your glutes, squeezing your hamstrings.",
@@ -2132,6 +2272,7 @@ const EXERCISES = [
   "secondary": [
    "lower-back"
   ],
+  "pattern": "good-morning",
   "steps": [
    "Stand with the bar across your upper back, feet hip-width.",
    "Push your hips back, hinging forward with a flat back.",
@@ -2148,6 +2289,7 @@ const EXERCISES = [
   "secondary": [
    "lower-back"
   ],
+  "pattern": "rdl",
   "steps": [
    "Stand holding the weight, feet hip-width, soft knees.",
    "Push your hips straight back, letting the weight slide down your thighs.",
@@ -2164,6 +2306,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "nordic",
   "steps": [
    "Kneel with your feet anchored, body tall, arms crossed or at your sides.",
    "Lower yourself forward as slowly as possible, resisting with your hamstrings.",
@@ -2180,6 +2323,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "rdl",
   "steps": [
    "Stand holding the weight, feet hip-width, soft knees.",
    "Push your hips straight back, letting the weight slide down your thighs.",
@@ -2196,6 +2340,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "pull-through",
   "steps": [
    "Face away from a low cable, rope between your legs.",
    "Hinge back, letting the rope pull your hips behind you.",
@@ -2212,6 +2357,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "leg-curl",
   "steps": [
    "Lie face down with the pad above your heels (or sit per the machine).",
    "Curl your heels toward your glutes, squeezing your hamstrings.",
@@ -2226,6 +2372,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "hamstrings",
   "secondary": [],
+  "pattern": "leg-curl",
   "steps": [
    "Lie face down with the pad above your heels (or sit per the machine).",
    "Curl your heels toward your glutes, squeezing your hamstrings.",
@@ -2240,6 +2387,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2254,6 +2402,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2268,6 +2417,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2282,6 +2432,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2296,6 +2447,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2310,6 +2462,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2326,6 +2479,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "box-jump",
   "steps": [
    "Stand facing a sturdy box, feet shoulder-width.",
    "Swing your arms and jump, landing soft with knees bent on top of the box.",
@@ -2340,6 +2494,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "calves",
   "secondary": [],
+  "pattern": "calf-raise",
   "steps": [
    "Stand with the balls of your feet on the edge of a step or platform.",
    "Rise as high as possible onto your toes, squeezing your calves.",
@@ -2354,6 +2509,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2368,6 +2524,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2382,6 +2539,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2396,6 +2554,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2412,6 +2571,7 @@ const EXERCISES = [
   "secondary": [
    "shoulders"
   ],
+  "pattern": "high-pull",
   "steps": [
    "Start like a clean pull. Bar at mid-thigh after the first pull.",
    "Explode upward, shrugging hard and pulling the bar to chest height.",
@@ -2426,6 +2586,7 @@ const EXERCISES = [
   "level": "advanced",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2440,6 +2601,7 @@ const EXERCISES = [
   "level": "intermediate",
   "primary": "traps",
   "secondary": [],
+  "pattern": "shrug",
   "steps": [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
@@ -2456,6 +2618,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "hyper",
   "steps": [
    "Set up on the hyperextension bench with hips on the pad, feet anchored.",
    "Lower your torso with control until you feel a hamstring stretch.",
@@ -2472,6 +2635,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "hyper",
   "steps": [
    "Set up on the hyperextension bench with hips on the pad, feet anchored.",
    "Lower your torso with control until you feel a hamstring stretch.",
@@ -2488,6 +2652,7 @@ const EXERCISES = [
   "secondary": [
    "glutes"
   ],
+  "pattern": "superman",
   "steps": [
    "Lie face down with arms extended overhead.",
    "Lift your arms, chest, and legs off the floor simultaneously.",
@@ -2504,6 +2669,7 @@ const EXERCISES = [
   "secondary": [
    "abs"
   ],
+  "pattern": "birddog",
   "steps": [
    "Start on all fours, hands under shoulders, knees under hips.",
    "Extend opposite arm and leg until they're in line with your torso.",
@@ -2520,6 +2686,7 @@ const EXERCISES = [
   "secondary": [
    "hamstrings"
   ],
+  "pattern": "jefferson",
   "steps": [
    "Stand on a box or platform holding a light barbell.",
    "Slowly round down vertebra by vertebra, reaching toward your toes.",
@@ -2537,6 +2704,7 @@ const EXERCISES = [
    "glutes",
    "hamstrings"
   ],
+  "pattern": "deadlift",
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
@@ -2554,6 +2722,7 @@ const EXERCISES = [
    "chest",
    "quads"
   ],
+  "pattern": "burpee",
   "steps": [
    "From standing, drop into a squat and kick your feet back to a plank.",
    "Do a push-up, then jump your feet back under you.",
@@ -2571,6 +2740,7 @@ const EXERCISES = [
    "quads",
    "shoulders"
   ],
+  "pattern": "thruster",
   "steps": [
    "Hold the weight in a front rack and squat all the way down.",
    "Drive up explosively out of the squat.",
@@ -2588,6 +2758,7 @@ const EXERCISES = [
    "traps",
    "quads"
   ],
+  "pattern": "clean-family",
   "steps": [
    "Start with the weight on the floor, back flat, hips loaded.",
    "Explode upward, shrugging and pulling yourself under the weight.",
@@ -2605,6 +2776,7 @@ const EXERCISES = [
    "traps",
    "quads"
   ],
+  "pattern": "clean-family",
   "steps": [
    "Start with the weight on the floor, back flat, hips loaded.",
    "Explode upward, shrugging and pulling yourself under the weight.",
@@ -2621,6 +2793,7 @@ const EXERCISES = [
   "secondary": [
    "shoulders"
   ],
+  "pattern": "getup",
   "steps": [
    "Lie on your back holding a kettlebell straight above your shoulder.",
    "Roll to your elbow, then your hand, keeping the bell locked overhead.",
@@ -2638,6 +2811,7 @@ const EXERCISES = [
    "chest",
    "back"
   ],
+  "pattern": "manmaker",
   "steps": [
    "Start in a plank holding dumbbells, do a push-up.",
    "Row one dumbbell, then the other, keeping hips square.",
@@ -2654,6 +2828,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "devil-press",
   "steps": [
    "With dumbbells on the floor, do a burpee over them.",
    "At the bottom, grab the weights and swing them overhead.",
@@ -2670,6 +2845,7 @@ const EXERCISES = [
   "secondary": [
    "shoulders"
   ],
+  "pattern": "ropes",
   "steps": [
    "Stand athletic with a rope in each hand, knees soft.",
    "Drive alternating waves (or slams) with your whole body, not just arms.",
@@ -2687,6 +2863,7 @@ const EXERCISES = [
    "quads",
    "glutes"
   ],
+  "pattern": "sled",
   "steps": [
    "Load the sled, get low behind it with arms extended.",
    "Drive with powerful leg steps, keeping your back flat.",
@@ -2704,6 +2881,7 @@ const EXERCISES = [
    "shoulders",
    "abs"
   ],
+  "pattern": "crawl",
   "steps": [
    "Get on all fours with knees hovering just off the floor.",
    "Move opposite hand and foot together, keeping your back flat.",
@@ -2720,6 +2898,7 @@ const EXERCISES = [
   "secondary": [
    "traps"
   ],
+  "pattern": "carry",
   "steps": [
    "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
@@ -2737,6 +2916,7 @@ const EXERCISES = [
    "quads",
    "shoulders"
   ],
+  "pattern": "wall-ball",
   "steps": [
    "Hold a medicine ball at your chest facing a wall.",
    "Squat deep, then explode up, throwing the ball to the target.",
@@ -2751,6 +2931,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "cardio",
   "secondary": [],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2768,6 +2949,7 @@ const EXERCISES = [
    "lats",
    "quads"
   ],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2784,6 +2966,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2801,6 +2984,7 @@ const EXERCISES = [
    "glutes",
    "calves"
   ],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2817,6 +3001,7 @@ const EXERCISES = [
   "secondary": [
    "abs"
   ],
+  "pattern": "climbers",
   "steps": [
    "Start in a high plank with your core braced.",
    "Drive one knee toward your chest, then switch legs quickly.",
@@ -2833,6 +3018,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2849,6 +3035,7 @@ const EXERCISES = [
   "secondary": [
    "lats"
   ],
+  "pattern": "swim",
   "steps": [
    "Warm up with easy laps before any hard efforts.",
    "Focus on long strokes and steady breathing rhythm.",
@@ -2863,6 +3050,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "cardio",
   "secondary": [],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2879,6 +3067,7 @@ const EXERCISES = [
   "secondary": [
    "quads"
   ],
+  "pattern": "sprint",
   "steps": [
    "Warm up thoroughly with easy jogging and drills.",
    "Sprint at near-max effort for the programmed distance or time.",
@@ -2893,6 +3082,7 @@ const EXERCISES = [
   "level": "beginner",
   "primary": "cardio",
   "secondary": [],
+  "pattern": "cardio",
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
    "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
@@ -2909,6 +3099,7 @@ const EXERCISES = [
   "secondary": [
    "biceps"
   ],
+  "pattern": "row",
   "steps": [
    "Hinge at the hips with a flat back, chest up, holding the weight with arms hanging.",
    "Pull the weight toward your lower ribs, driving your elbows behind you.",
@@ -2925,6 +3116,7 @@ const EXERCISES = [
   "secondary": [
    "triceps"
   ],
+  "pattern": "press-h",
   "steps": [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
@@ -2942,6 +3134,7 @@ const EXERCISES = [
    "glutes",
    "lower-back"
   ],
+  "pattern": "rdl",
   "steps": [
    "Stand holding the weight, feet hip-width, soft knees.",
    "Push your hips straight back, letting the weight slide down your thighs.",
