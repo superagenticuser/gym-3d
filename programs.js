@@ -4,7 +4,7 @@ const PROGRAMS = [
   {
     id: "full-body-starter",
     name: "Full-Body Starter",
-    tagline: "Learn the fundamentals — three full-body days per week.",
+    tagline: "Learn the fundamentals with three full-body days per week.",
     level: "beginner",
     daysPerWeek: 3,
     weeks: 4,
@@ -39,7 +39,7 @@ const PROGRAMS = [
   {
     id: "push-pull-legs",
     name: "Push / Pull / Legs",
-    tagline: "The classic hypertrophy split. Run 3–6 days per week.",
+    tagline: "The classic hypertrophy split. Run it 3 to 6 days per week.",
     level: "intermediate",
     daysPerWeek: 6,
     weeks: 8,
@@ -71,7 +71,7 @@ const PROGRAMS = [
   {
     id: "upper-lower",
     name: "Upper / Lower",
-    tagline: "Train everything twice a week. Four focused days.",
+    tagline: "Train everything twice per week across four focused days.",
     level: "intermediate",
     daysPerWeek: 4,
     weeks: 8,
@@ -108,7 +108,7 @@ const PROGRAMS = [
   {
     id: "strength-5x5",
     name: "5×5 Strength",
-    tagline: "Simple, heavy, effective. Add weight every session.",
+    tagline: "Simple, heavy and effective. Add weight every session.",
     level: "intermediate",
     daysPerWeek: 3,
     weeks: 12,
@@ -150,13 +150,13 @@ const PROGRAMS = [
   {
     id: "hiit-conditioning",
     name: "HIIT Conditioning",
-    tagline: "Build your engine. 3–4 rounds, minimal rest.",
+    tagline: "Build your engine. Three to four rounds with minimal rest.",
     level: "intermediate",
     daysPerWeek: 3,
     weeks: 4,
     equipment: "Bodyweight + kettlebell",
     days: [
-      { name: "Circuit · 3–4 rounds", exercises: [
+      { name: "Circuit · 3 to 4 rounds", exercises: [
         { id: "burpee", sets: 1, reps: "40s" },
         { id: "kettlebell-swing", sets: 1, reps: "40s" },
         { id: "mountain-climbers", sets: 1, reps: "40s" },

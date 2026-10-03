@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FORGE — 3D Gym Training</title>
+<title>FORGE · 3D Gym Training</title>
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <link rel="stylesheet" href="styles.css" />
 </head>
@@ -14,11 +14,15 @@
     FORGE
   </a>
   <nav class="nav">
-    <a href="#/exercises" data-nav="exercises">Exercises</a>
-    <a href="#/programs" data-nav="programs">Programs</a>
-    <a href="#/body" data-nav="body">3D Body Map</a>
-    <a href="#/favorites" data-nav="favorites">Favorites <span class="fav-count" id="favCount">0</span></a>
+    <a href="#/exercises" data-nav="exercises"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="1.5" y="9" width="3.6" height="6" rx="1.2"/><rect x="18.9" y="9" width="3.6" height="6" rx="1.2"/><rect x="6.4" y="7" width="2.8" height="10" rx="1"/><rect x="14.8" y="7" width="2.8" height="10" rx="1"/><rect x="9.6" y="10.6" width="4.8" height="2.8" rx="1"/></svg>Exercises</a>
+    <a href="#/programs" data-nav="programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><line x1="3.5" y1="10" x2="20.5" y2="10"/><line x1="8" y1="2.8" x2="8" y2="6.5"/><line x1="16" y1="2.8" x2="16" y2="6.5"/></svg>Programs</a>
+    <a href="#/body" data-nav="body"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.4" r="2.6"/><path d="M12 8.6c-3.4 0-5.4 1.2-5.4 3.4 0 1.5.9 2.4 2.1 2.9l-.5 5.1h7.6l-.5-5.1c1.2-.5 2.1-1.4 2.1-2.9 0-2.2-2-3.4-5.4-3.4z"/></svg>3D Body Map</a>
+    <a href="#/favorites" data-nav="favorites"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5C7 16.5 3.5 13.3 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.8 4 2.1C12.9 5.8 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.7-3.5 6.9-8.5 10.9z"/></svg>Favorites <span class="fav-count" id="favCount">0</span></a>
   </nav>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light / dark mode" aria-label="Toggle theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="4.9" y1="4.9" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.1" y2="4.9"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6z"/></svg>
+  </button>
 </header>
 
 <main>
@@ -67,26 +71,32 @@
   <!-- DETAIL -->
   <section id="view-detail" class="view hidden">
     <a class="back" href="#/exercises">← All exercises</a>
-    <div class="detail-layout">
-      <div class="detail-3d">
-        <div id="detail3d" class="stage"></div>
-        <div class="view-toggle">
-          <button id="dFront" class="on">Front</button>
-          <button id="dBack">Back</button>
-        </div>
-        <p class="hint">Drag to rotate · scroll to zoom · red = primary, orange = secondary</p>
-      </div>
-      <div class="detail-info">
+    <div class="detail-head">
+      <div>
         <div class="badges" id="dBadges"></div>
         <h2 id="dName"></h2>
-        <button class="fav-btn" id="dFav">♡ Save to favorites</button>
+      </div>
+      <button class="fav-btn" id="dFav">♡ Save to favorites</button>
+    </div>
+    <div class="detail-3d">
+      <div id="detail3d" class="stage"></div>
+      <div class="view-toggle">
+        <button id="dFront" class="on">Front</button>
+        <button id="dBack">Back</button>
+      </div>
+      <p class="hint">Drag to rotate · scroll to zoom · red = primary, orange = secondary</p>
+    </div>
+    <div class="detail-cols">
+      <div class="detail-main">
         <h3>How to do it</h3>
         <ol class="steps" id="dSteps"></ol>
+      </div>
+      <aside class="detail-side">
         <h3>Muscles worked</h3>
         <div class="muscle-tags" id="dMuscles"></div>
         <h3>Try also</h3>
         <div class="mini-cards" id="dSimilar"></div>
-      </div>
+      </aside>
     </div>
   </section>
 
@@ -113,7 +123,8 @@
   <!-- PROGRAMS -->
   <section id="view-programs" class="view hidden">
     <h2 class="section-title">Training programs</h2>
-    <p class="lede">Pick a plan and just train — every workout is laid out set by set.</p>
+    <p class="lede">Pick a plan and just train. Every workout is laid out set by set.</p>
+    <div class="active-banner hidden" id="activeBanner"></div>
     <div class="prog-grid" id="programGrid"></div>
   </section>
 
@@ -122,7 +133,8 @@
     <a class="back" href="#/programs">← All programs</a>
     <h2 class="section-title" id="pgName"></h2>
     <p class="lede" id="pgTag"></p>
-    <div class="badges" id="pgBadges" style="margin-bottom:24px"></div>
+    <div class="badges" id="pgBadges" style="margin-bottom:20px"></div>
+    <div class="prog-actions" id="pgActions" style="margin-bottom:24px"></div>
     <div id="pgDays"></div>
   </section>
 
@@ -140,13 +152,13 @@
         <button data-timer="120">2:00</button>
         <button id="timerStop">Stop</button>
       </div>
-      <p class="hint">Rest timer — tap a duration to start</p>
+      <p class="hint">Rest timer. Tap a duration to start</p>
     </div>
     <div id="woList"></div>
     <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
     <div class="done-banner hidden" id="woDone">
       <h3>Workout complete. 💪</h3>
-      <p class="muted">Logged — keep the streak going.</p>
+      <p class="muted">Logged. Keep the streak going.</p>
       <a class="btn btn-ghost" id="woDoneBack" href="#/programs">Back to programs</a>
     </div>
   </section>
@@ -155,12 +167,26 @@
   <section id="view-favorites" class="view hidden">
     <h2 class="section-title">Your favorites</h2>
     <div class="cards" id="favGrid"></div>
-    <p class="muted hidden" id="favEmpty">Nothing saved yet — tap ♡ on any exercise.</p>
+    <p class="muted hidden" id="favEmpty">Nothing saved yet. Tap ♡ on any exercise.</p>
   </section>
 </main>
 
 <footer>
-  <p>FORGE · 190 exercises · built with Three.js · <span class="muted">sample training content — not medical advice</span></p>
+  <div class="foot-inner">
+    <a class="brand" href="#/">
+      <span class="brand-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20 L9 12 L13 15 L20 4" stroke="var(--volt)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      FORGE
+    </a>
+    <nav class="foot-nav">
+      <a href="#/exercises">Exercises</a>
+      <a href="#/programs">Programs</a>
+      <a href="#/body">3D Body Map</a>
+      <a href="#/favorites">Favorites</a>
+    </nav>
+    <p class="foot-stats"><span id="footEx">193</span> exercises · 6 programs · interactive 3D body</p>
+    <p class="muted">Sample training content. Not medical advice. Train smart.</p>
+    <p class="muted foot-copy">© 2026 FORGE · v3</p>
+  </div>
 </footer>
 
 <script src="three.min.js"></script>

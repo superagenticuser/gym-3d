@@ -4,23 +4,23 @@
 
   /* ---------- muscle metadata ---------- */
   const MUSCLE_INFO = {
-    chest:      { name: "Chest",        desc: "Pectorals — pushing power for presses, push-ups and dips." },
-    back:       { name: "Back",         desc: "Rhomboids & mid-traps — thick upper back from rows and deadlifts." },
-    lats:       { name: "Lats",         desc: "Latissimus dorsi — the wings. Pull-ups and pulldowns build width." },
-    traps:      { name: "Traps",        desc: "Trapezius — shrugs and carries build the upper-back shelf." },
-    "lower-back": { name: "Lower Back", desc: "Erector spinae — keeps your spine strong under load." },
-    shoulders:  { name: "Shoulders",    desc: "Deltoids — pressing and raising builds capped shoulders." },
-    biceps:     { name: "Biceps",       desc: "Front of the upper arm — curls of every kind." },
-    triceps:    { name: "Triceps",      desc: "Back of the upper arm — two-thirds of your arm size." },
-    forearms:   { name: "Forearms",     desc: "Grip strength — carries, hangs and wrist work." },
-    abs:        { name: "Abs",          desc: "Rectus abdominis — the six-pack wall. Train with resistance." },
-    obliques:   { name: "Obliques",     desc: "Side core — rotation and anti-rotation strength." },
-    glutes:     { name: "Glutes",       desc: "The powerhouse — hip thrusts, swings and lunges." },
-    quads:      { name: "Quads",        desc: "Front of the thigh — squats, presses and lunges." },
-    hamstrings: { name: "Hamstrings",   desc: "Back of the thigh — hinges, curls and Nordics." },
-    calves:     { name: "Calves",       desc: "Lower leg — raises with full stretch and squeeze." },
-    "full-body":{ name: "Full Body",    desc: "Compound conditioning — multiple muscles, maximum output." },
-    cardio:     { name: "Cardio",       desc: "Engine building — heart, lungs and work capacity." }
+    chest:      { name: "Chest",        desc: "Pectorals. The pushing muscles behind every press, push-up and dip." },
+    back:       { name: "Back",         desc: "Rhomboids and mid-traps. A thick upper back built with rows and deadlifts." },
+    lats:       { name: "Lats",         desc: "Latissimus dorsi, the wings. Pull-ups and pulldowns build width." },
+    traps:      { name: "Traps",        desc: "Trapezius. Shrugs and carries build the upper-back shelf." },
+    "lower-back": { name: "Lower Back", desc: "Erector spinae. Keeps your spine strong under load." },
+    shoulders:  { name: "Shoulders",    desc: "Deltoids. Pressing and raising builds capped shoulders." },
+    biceps:     { name: "Biceps",       desc: "Front of the upper arm. Curls of every kind." },
+    triceps:    { name: "Triceps",      desc: "Back of the upper arm. About two thirds of your arm size." },
+    forearms:   { name: "Forearms",     desc: "Grip strength. Carries, hangs and wrist work." },
+    abs:        { name: "Abs",          desc: "Rectus abdominis, the six-pack wall. Train it with resistance." },
+    obliques:   { name: "Obliques",     desc: "Side core. Rotation and anti-rotation strength." },
+    glutes:     { name: "Glutes",       desc: "The powerhouse. Hip thrusts, swings and lunges." },
+    quads:      { name: "Quads",        desc: "Front of the thigh. Squats, presses and lunges." },
+    hamstrings: { name: "Hamstrings",   desc: "Back of the thigh. Hinges, curls and Nordics." },
+    calves:     { name: "Calves",       desc: "Lower leg. Raises with a full stretch and squeeze." },
+    "full-body":{ name: "Full Body",    desc: "Compound conditioning. Multiple muscles, maximum output." },
+    cardio:     { name: "Cardio",       desc: "Engine building. Heart, lungs and work capacity." }
   };
   const MANNEQUIN_IDS = ["chest","back","lats","traps","lower-back","front-delt","side-delt","rear-delt",
     "biceps","triceps","forearms","abs","obliques","glutes","quads","hamstrings","calves"];
@@ -66,12 +66,17 @@
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bc), transparent: true, depthWrite: false }));
     blob.rotation.x = -Math.PI / 2; blob.position.y = 0.295; scene.add(blob);
     const ring = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.63, 72),
-      new THREE.MeshBasicMaterial({ color: 0xd4ff3f, transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
+      new THREE.MeshBasicMaterial({ color: vTheme.ring, transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x3b4356, roughness: 0.42, metalness: 0.28 });
-    const neutralMat = new THREE.MeshStandardMaterial({ color: 0x222836, roughness: 0.6, metalness: 0.15 });
+    const VIEW_THEMES = {
+      dark:  { base: 0x3b4356, neutral: 0x222836, ring: 0xd4ff3f, primary: 0x5e2a22 },
+      light: { base: 0x94a1bb, neutral: 0x6b7690, ring: 0x65a30d, primary: 0x7a3a2a }
+    };
+    let vTheme = VIEW_THEMES[(document.documentElement.dataset.theme === "light") ? "light" : "dark"];
+    const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.42, metalness: 0.28 });
+    const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.6, metalness: 0.15 });
     const mats = {};
     const muscleMeshes = [];
     const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
@@ -175,24 +180,32 @@
     }
 
     /* ---- highlight ---- */
+    let hlState = { p: [], s: [], soft: false };
     function reset() {
       for (const id in mats) {
         mats[id].emissive.setHex(0x000000); mats[id].emissiveIntensity = 0;
-        mats[id].color.setHex(0x3b4356);
+        mats[id].color.setHex(vTheme.base);
       }
     }
     function highlight(primaryIds, secondaryIds, allSoft) {
+      hlState = { p: primaryIds || [], s: secondaryIds || [], soft: !!allSoft };
       reset();
       if (allSoft) {
         for (const id in mats) { mats[id].emissive.setHex(0xff5c1a); mats[id].emissiveIntensity = 0.38; }
         return;
       }
       (primaryIds || []).forEach(id => {
-        if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.1; mats[id].color.setHex(0x5e2a22); }
+        if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.1; mats[id].color.setHex(vTheme.primary); }
       });
       (secondaryIds || []).forEach(id => {
         if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.55; }
       });
+    }
+    function setTheme(name) {
+      vTheme = VIEW_THEMES[name] || VIEW_THEMES.dark;
+      neutralMat.color.setHex(vTheme.neutral);
+      ring.material.color.setHex(vTheme.ring);
+      highlight(hlState.p, hlState.s, hlState.soft);
     }
 
     /* ---- interaction: rotate + pinch zoom + tap ---- */
@@ -278,6 +291,7 @@
 
     return {
       highlight,
+      setTheme,
       setView(v) { targetRotY = (v === "back") ? Math.PI : 0; rotY = targetRotY; },
       dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
     };
@@ -292,6 +306,24 @@
   }
   function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
   const progById = id => PROGRAMS.find(p => p.id === id);
+
+  /* ---------- theme ---------- */
+  function applyTheme(name, save) {
+    document.documentElement.dataset.theme = name;
+    if (save !== false) localStorage.setItem("forge-theme", name);
+    viewers.forEach(v => { if (v.setTheme) v.setTheme(name); });
+  }
+
+  /* ---------- active program ---------- */
+  const getActiveProg = () => localStorage.getItem("forge-active") || null;
+  function setActiveProg(id) {
+    if (id) localStorage.setItem("forge-active", id);
+    else localStorage.removeItem("forge-active");
+  }
+  function nextDayIdx(p) {
+    const i = p.days.findIndex((d, di) => !(done[p.id + ":" + di] || []).length);
+    return i === -1 ? 0 : i;
+  }
 
   /* ---------- helpers ---------- */
   const $ = id => document.getElementById(id);
@@ -352,6 +384,7 @@
   // HOME
   function renderHome() {
     $("statEx").textContent = EXERCISES.length;
+    $("footEx").textContent = EXERCISES.length;
     const counts = {};
     EXERCISES.forEach(e => counts[e.primary] = (counts[e.primary] || 0) + 1);
     $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
@@ -475,10 +508,26 @@
 
   // PROGRAMS
   function renderPrograms() {
+    const activeId = getActiveProg();
+    const active = activeId && progById(activeId);
+    if (active) {
+      const ni = nextDayIdx(active);
+      $("activeBanner").classList.remove("hidden");
+      $("activeBanner").innerHTML =
+        `<div><b>Active program: ${esc(active.name)}</b><br><span class="muted">Up next: ${esc(active.days[ni].name)}</span></div>
+         <div style="display:flex;gap:8px">
+           <a class="btn btn-primary btn-sm" href="#/workout/${active.id}/${ni}">Continue</a>
+           <a class="btn btn-ghost btn-sm" href="#/program/${active.id}">View</a>
+         </div>`;
+    } else {
+      $("activeBanner").classList.add("hidden");
+      $("activeBanner").innerHTML = "";
+    }
     $("programGrid").innerHTML = PROGRAMS.map(p => {
       const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
+      const isActive = activeId === p.id;
       return `<div class="prog-card" data-prog="${p.id}">
-        <h3>${esc(p.name)}</h3>
+        <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""}</h3>
         <p class="muted">${esc(p.tagline)}</p>
         <div class="meta">
           <span class="tag volt-tag">${cap1(p.level)}</span>
@@ -505,6 +554,16 @@
        <span class="tag">${p.daysPerWeek} days/week</span>
        <span class="tag">${p.weeks} weeks</span>
        <span class="tag">${esc(p.equipment)}</span>`;
+    const isActive = getActiveProg() === p.id;
+    const ni = nextDayIdx(p);
+    $("pgActions").innerHTML = isActive
+      ? `<a class="btn btn-primary" href="#/workout/${p.id}/${ni}">Continue: ${esc(p.days[ni].name)}</a>
+         <button class="btn btn-ghost" id="pgStop">Stop program</button>`
+      : `<button class="btn btn-primary" id="pgStart">Start this program</button>`;
+    const st = $("pgStart");
+    if (st) st.onclick = () => { setActiveProg(p.id); renderProgram(p.id); };
+    const sp = $("pgStop");
+    if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
     $("pgDays").innerHTML = p.days.map((d, di) => {
       const key = p.id + ":" + di;
       const times = (done[key] || []).length;
@@ -513,10 +572,12 @@
           <h3>${esc(d.name)} ${times ? `<span class="done-mark">✓ ${times}x</span>` : ""}</h3>
           <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>
         </div>
+        <div class="day-exercises">
         ${d.exercises.map(x => {
           const ex = byId(x.id);
           return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex.name)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
         }).join("")}
+        </div>
       </div>`;
     }).join("");
   }
@@ -552,6 +613,10 @@
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
+        <button class="guide-toggle" data-guide="${xi}">Form guide ▾</button>
+        <ol class="steps wo-steps hidden" id="guide-${xi}">
+          ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
+        </ol>
         <div class="set-row">${dots}</div>
         <span class="tag volt-tag wo-muscle">${MUSCLE_INFO[ex.primary].name}</span>
       </div>`;
@@ -561,6 +626,13 @@
     $("woFinish").classList.remove("hidden");
   }
   document.addEventListener("click", e => {
+    const gt = e.target.closest(".guide-toggle");
+    if (gt) {
+      const panel = $("guide-" + gt.dataset.guide);
+      const open = panel.classList.toggle("hidden");
+      gt.textContent = open ? "Form guide ▾" : "Form guide ▴";
+      return;
+    }
     const sd = e.target.closest(".set-dot");
     if (sd) { sd.classList.toggle("hit"); return; }
     const tp = e.target.closest("[data-timer]");
@@ -630,5 +702,9 @@
   window.addEventListener("hashchange", router);
   initExercises();
   saveFavs();
+  applyTheme(localStorage.getItem("forge-theme") || "dark", false);
+  $("themeToggle").addEventListener("click", () => {
+    applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+  });
   router();
 })();

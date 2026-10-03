@@ -13,7 +13,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -30,7 +30,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -63,7 +63,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -77,7 +77,7 @@ const EXERCISES = [
    "Lie back with a dumbbell in each hand, arms extended above your chest with a soft bend in the elbows.",
    "Open your arms wide in an arc until you feel a deep stretch across your chest.",
    "Squeeze your pecs to bring the weights back together over your chest.",
-   "Keep the elbow angle fixed — this is a chest isolation move, not a press."
+   "Keep the elbow angle fixed. This is a chest isolation move, not a press."
   ]
  },
  {
@@ -107,7 +107,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -123,7 +123,7 @@ const EXERCISES = [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
    "Drive back up without shrugging or swinging your legs.",
-   "Keep the movement strict — add weight only once bodyweight feels easy."
+   "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
  },
  {
@@ -155,7 +155,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -172,7 +172,7 @@ const EXERCISES = [
    "Wedge one end of the barbell into a corner or landmine base, holding the other end at shoulder height.",
    "Brace your core and press the bar up and slightly forward.",
    "Lower it back to your shoulder with control.",
-   "Keep your ribs down — don't overarch your lower back."
+   "Keep your ribs down. Don't overarch your lower back."
   ]
  },
  {
@@ -234,7 +234,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -264,7 +264,7 @@ const EXERCISES = [
    "Lie back with a dumbbell in each hand, arms extended above your chest with a soft bend in the elbows.",
    "Open your arms wide in an arc until you feel a deep stretch across your chest.",
    "Squeeze your pecs to bring the weights back together over your chest.",
-   "Keep the elbow angle fixed — this is a chest isolation move, not a press."
+   "Keep the elbow angle fixed. This is a chest isolation move, not a press."
   ]
  },
  {
@@ -281,7 +281,7 @@ const EXERCISES = [
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
-   "Stand tall, squeezing your glutes — don't lean back.",
+   "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
  },
@@ -410,7 +410,7 @@ const EXERCISES = [
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
-   "Stand tall, squeezing your glutes — don't lean back.",
+   "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
  },
@@ -475,7 +475,7 @@ const EXERCISES = [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
    "Pause at the top with your chin over the bar.",
-   "Lower all the way down with control — no kipping unless programmed."
+   "Lower all the way down with control. No kipping unless programmed."
   ]
  },
  {
@@ -553,7 +553,7 @@ const EXERCISES = [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
    "Pause at the top with your chin over the bar.",
-   "Lower all the way down with control — no kipping unless programmed."
+   "Lower all the way down with control. No kipping unless programmed."
   ]
  },
  {
@@ -585,7 +585,7 @@ const EXERCISES = [
    "Hang from the bar with a full grip, arms straight, shoulders engaged.",
    "Pull your chest toward the bar by driving your elbows down.",
    "Pause at the top with your chin over the bar.",
-   "Lower all the way down with control — no kipping unless programmed."
+   "Lower all the way down with control. No kipping unless programmed."
   ]
  },
  {
@@ -601,7 +601,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -617,7 +617,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -630,7 +630,7 @@ const EXERCISES = [
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
-   "Pause briefly, feeling the delts do the work — don't shrug.",
+   "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
  },
@@ -644,7 +644,7 @@ const EXERCISES = [
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
-   "Pause briefly, feeling the delts do the work — don't shrug.",
+   "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
  },
@@ -675,7 +675,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -691,7 +691,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -704,7 +704,7 @@ const EXERCISES = [
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
-   "Pause briefly, feeling the delts do the work — don't shrug.",
+   "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
  },
@@ -720,7 +720,7 @@ const EXERCISES = [
   "steps": [
    "Set the cable at eye level with a rope attachment and step back.",
    "Pull the rope toward your forehead, splitting it so your knuckles face you.",
-   "Rotate your shoulders outward at the end — think 'double biceps' pose.",
+   "Rotate your shoulders outward at the end. Think 'double biceps' pose.",
    "Extend your arms slowly back to the start."
   ]
  },
@@ -737,7 +737,7 @@ const EXERCISES = [
    "Stand holding the bar with an overhand grip, hands shoulder-width.",
    "Pull the bar straight up along your body to chest height, elbows leading.",
    "Pause briefly, then lower with control.",
-   "Stop if you feel shoulder impingement — dumbbells are friendlier."
+   "Stop if you feel shoulder impingement. Dumbbells are friendlier."
   ]
  },
  {
@@ -785,7 +785,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -799,7 +799,7 @@ const EXERCISES = [
    "Hold light dumbbells at your sides and do an upright row to chest height.",
    "Rotate your forearms up so the weights are overhead-ready.",
    "Press the dumbbells overhead, then reverse the whole sequence.",
-   "Use very light weight — this is a shoulder-health move."
+   "Use very light weight. This is a shoulder-health move."
   ]
  },
  {
@@ -815,7 +815,7 @@ const EXERCISES = [
    "Wedge one end of the barbell into a corner or landmine base, holding the other end at shoulder height.",
    "Brace your core and press the bar up and slightly forward.",
    "Lower it back to your shoulder with control.",
-   "Keep your ribs down — don't overarch your lower back."
+   "Keep your ribs down. Don't overarch your lower back."
   ]
  },
  {
@@ -828,7 +828,7 @@ const EXERCISES = [
   "steps": [
    "Stand tall with a dumbbell in each hand at your sides, slight bend in the elbows.",
    "Raise the weights out to the side (or front) to shoulder height.",
-   "Pause briefly, feeling the delts do the work — don't shrug.",
+   "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
  },
@@ -845,7 +845,7 @@ const EXERCISES = [
    "Stand with the weight at shoulder height, glutes and core braced.",
    "Press overhead until your arms are straight, head moving slightly forward at the top.",
    "Pause briefly, then lower with control back to your shoulders.",
-   "Don't lean back excessively — keep your ribs down."
+   "Don't lean back excessively. Keep your ribs down."
   ]
  },
  {
@@ -861,7 +861,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -875,7 +875,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -891,7 +891,7 @@ const EXERCISES = [
    "Hold dumbbells with a neutral grip (palms facing each other), arms at your sides.",
    "Curl both weights up, keeping your palms facing in the whole time.",
    "Squeeze at the top, then lower with control.",
-   "Keep your elbows fixed — don't let them drift forward."
+   "Keep your elbows fixed. Don't let them drift forward."
   ]
  },
  {
@@ -905,7 +905,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -919,7 +919,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -933,7 +933,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -947,7 +947,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -961,7 +961,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -977,7 +977,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -991,7 +991,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -1021,7 +1021,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -1035,7 +1035,7 @@ const EXERCISES = [
    "Stand tall holding the weight with arms extended, elbows pinned at your sides.",
    "Curl the weight up toward your shoulders without swinging.",
    "Squeeze your biceps hard at the top.",
-   "Lower slowly to full extension — the negative matters."
+   "Lower slowly to full extension. The negative matters."
   ]
  },
  {
@@ -1049,7 +1049,7 @@ const EXERCISES = [
    "Stand facing the cable, elbows pinned tight to your ribs.",
    "Push the handle down until your arms are fully straight.",
    "Squeeze your triceps hard at the bottom.",
-   "Let the handle rise slowly — don't let your elbows move."
+   "Let the handle rise slowly. Don't let your elbows move."
   ]
  },
  {
@@ -1063,7 +1063,7 @@ const EXERCISES = [
    "Hold the weight overhead with both hands, elbows pointing forward.",
    "Lower the weight behind your head by bending only at the elbows.",
    "Feel the deep stretch, then extend back up to full lockout.",
-   "Keep your upper arms still — only the forearms move."
+   "Keep your upper arms still. Only the forearms move."
   ]
  },
  {
@@ -1093,7 +1093,7 @@ const EXERCISES = [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
    "Drive back up without shrugging or swinging your legs.",
-   "Keep the movement strict — add weight only once bodyweight feels easy."
+   "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
  },
  {
@@ -1109,7 +1109,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -1137,7 +1137,7 @@ const EXERCISES = [
    "Hinge forward, upper arm parallel to the floor, dumbbell in hand.",
    "Extend your forearm back until your arm is straight.",
    "Squeeze the triceps hard at full extension.",
-   "Lower slowly — your upper arm never moves."
+   "Lower slowly. Your upper arm never moves."
   ]
  },
  {
@@ -1151,7 +1151,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
@@ -1165,7 +1165,7 @@ const EXERCISES = [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
    "Drive back up without shrugging or swinging your legs.",
-   "Keep the movement strict — add weight only once bodyweight feels easy."
+   "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
  },
  {
@@ -1179,7 +1179,7 @@ const EXERCISES = [
    "Stand facing the cable, elbows pinned tight to your ribs.",
    "Push the handle down until your arms are fully straight.",
    "Squeeze your triceps hard at the bottom.",
-   "Let the handle rise slowly — don't let your elbows move."
+   "Let the handle rise slowly. Don't let your elbows move."
   ]
  },
  {
@@ -1193,7 +1193,7 @@ const EXERCISES = [
    "Hold the weight overhead with both hands, elbows pointing forward.",
    "Lower the weight behind your head by bending only at the elbows.",
    "Feel the deep stretch, then extend back up to full lockout.",
-   "Keep your upper arms still — only the forearms move."
+   "Keep your upper arms still. Only the forearms move."
   ]
  },
  {
@@ -1209,7 +1209,7 @@ const EXERCISES = [
    "Grip the bars and lift yourself up, leaning slightly forward for chest or staying upright for triceps.",
    "Lower yourself with control until your shoulders are just below your elbows.",
    "Drive back up without shrugging or swinging your legs.",
-   "Keep the movement strict — add weight only once bodyweight feels easy."
+   "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
  },
  {
@@ -1250,7 +1250,7 @@ const EXERCISES = [
    "traps"
   ],
   "steps": [
-   "Pick up heavy weights and stand tall — shoulders back, core braced.",
+   "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
@@ -1265,7 +1265,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
-   "Engage your shoulders slightly — don't just dangle passively.",
+   "Engage your shoulders slightly. Don't just dangle passively.",
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
@@ -1281,7 +1281,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
-   "Engage your shoulders slightly — don't just dangle passively.",
+   "Engage your shoulders slightly. Don't just dangle passively.",
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
@@ -1295,7 +1295,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
-   "Engage your shoulders slightly — don't just dangle passively.",
+   "Engage your shoulders slightly. Don't just dangle passively.",
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
@@ -1325,7 +1325,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1338,7 +1338,7 @@ const EXERCISES = [
   "steps": [
    "Get into a forearm plank: elbows under shoulders, body in one line.",
    "Squeeze your glutes and brace your abs like you're about to be punched.",
-   "Breathe steadily — don't hold your breath.",
+   "Breathe steadily. Don't hold your breath.",
    "Stop when your hips start to sag."
   ]
  },
@@ -1353,7 +1353,7 @@ const EXERCISES = [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
    "Lower them slowly without swinging.",
-   "Keep the movement strict — momentum cheats your abs."
+   "Keep the movement strict. Momentum cheats your abs."
   ]
  },
  {
@@ -1367,7 +1367,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1399,7 +1399,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1426,7 +1426,7 @@ const EXERCISES = [
   "steps": [
    "Get into a forearm plank: elbows under shoulders, body in one line.",
    "Squeeze your glutes and brace your abs like you're about to be punched.",
-   "Breathe steadily — don't hold your breath.",
+   "Breathe steadily. Don't hold your breath.",
    "Stop when your hips start to sag."
   ]
  },
@@ -1441,7 +1441,7 @@ const EXERCISES = [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
    "Lower them slowly without swinging.",
-   "Keep the movement strict — momentum cheats your abs."
+   "Keep the movement strict. Momentum cheats your abs."
   ]
  },
  {
@@ -1457,7 +1457,7 @@ const EXERCISES = [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
    "Lower them slowly without swinging.",
-   "Keep the movement strict — momentum cheats your abs."
+   "Keep the movement strict. Momentum cheats your abs."
   ]
  },
  {
@@ -1471,7 +1471,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1485,7 +1485,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Stand sideways to a cable set at chest height, holding the handle at your sternum.",
-   "Press the handle straight out — resist the cable trying to rotate you.",
+   "Press the handle straight out. Resist the cable trying to rotate you.",
    "Hold for a breath, feeling your obliques fire.",
    "Bring it back in with control and repeat."
   ]
@@ -1501,7 +1501,7 @@ const EXERCISES = [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
    "Lower them slowly without swinging.",
-   "Keep the movement strict — momentum cheats your abs."
+   "Keep the movement strict. Momentum cheats your abs."
   ]
  },
  {
@@ -1515,7 +1515,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1561,7 +1561,7 @@ const EXERCISES = [
    "Stand sideways to the cable set high, holding the handle with both hands.",
    "Pull the handle down across your body to the opposite hip, rotating your torso.",
    "Control the return to the start.",
-   "Keep your arms fairly straight — power comes from the core."
+   "Keep your arms fairly straight. Power comes from the core."
   ]
  },
  {
@@ -1575,7 +1575,7 @@ const EXERCISES = [
    "Lie on your back, knees bent, hands lightly behind your head.",
    "Curl your shoulders off the floor, driving your ribs toward your hips.",
    "Squeeze at the top for a second.",
-   "Lower with control — don't yank your neck."
+   "Lower with control. Don't yank your neck."
   ]
  },
  {
@@ -1591,7 +1591,7 @@ const EXERCISES = [
    "Hang from a bar (or lie on the floor) with legs straight.",
    "Raise your legs until they're parallel to the floor (or higher).",
    "Lower them slowly without swinging.",
-   "Keep the movement strict — momentum cheats your abs."
+   "Keep the movement strict. Momentum cheats your abs."
   ]
  },
  {
@@ -1604,7 +1604,7 @@ const EXERCISES = [
    "forearms"
   ],
   "steps": [
-   "Pick up heavy weights and stand tall — shoulders back, core braced.",
+   "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
@@ -1621,7 +1621,7 @@ const EXERCISES = [
    "Stand sideways to the cable set high, holding the handle with both hands.",
    "Pull the handle down across your body to the opposite hip, rotating your torso.",
    "Control the return to the start.",
-   "Keep your arms fairly straight — power comes from the core."
+   "Keep your arms fairly straight. Power comes from the core."
   ]
  },
  {
@@ -1683,7 +1683,7 @@ const EXERCISES = [
   "steps": [
    "Stand with feet wide, kettlebell on the floor in front of you.",
    "Hike the bell back between your legs, then snap your hips forward.",
-   "Let the bell float to chest height — your arms are just ropes.",
+   "Let the bell float to chest height. Your arms are just ropes.",
    "Guide it back down and repeat in one fluid rhythm."
   ]
  },
@@ -1698,7 +1698,7 @@ const EXERCISES = [
    "Hinge forward, upper arm parallel to the floor, dumbbell in hand.",
    "Extend your forearm back until your arm is straight.",
    "Squeeze the triceps hard at full extension.",
-   "Lower slowly — your upper arm never moves."
+   "Lower slowly. Your upper arm never moves."
   ]
  },
  {
@@ -1711,7 +1711,7 @@ const EXERCISES = [
    "quads"
   ],
   "steps": [
-   "Pick up heavy weights and stand tall — shoulders back, core braced.",
+   "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
@@ -1742,7 +1742,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
-   "Engage your shoulders slightly — don't just dangle passively.",
+   "Engage your shoulders slightly. Don't just dangle passively.",
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
@@ -1756,7 +1756,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Grab the bar (or towels) with a full grip and hang with arms straight.",
-   "Engage your shoulders slightly — don't just dangle passively.",
+   "Engage your shoulders slightly. Don't just dangle passively.",
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
@@ -1788,7 +1788,7 @@ const EXERCISES = [
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
-   "Stand tall, squeezing your glutes — don't lean back.",
+   "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
  },
@@ -1800,7 +1800,7 @@ const EXERCISES = [
   "primary": "glutes",
   "secondary": [],
   "steps": [
-   "Pick up heavy weights and stand tall — shoulders back, core braced.",
+   "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
@@ -2001,7 +2001,7 @@ const EXERCISES = [
    "Lean your back against a wall and slide down until your thighs are parallel to the floor.",
    "Keep your knees over your ankles and your core braced.",
    "Hold the position, breathing steadily.",
-   "Push through the burn — stop if your form breaks."
+   "Push through the burn. Stop if your form breaks."
   ]
  },
  {
@@ -2015,7 +2015,7 @@ const EXERCISES = [
    "Lean your back against a wall and slide down until your thighs are parallel to the floor.",
    "Keep your knees over your ankles and your core braced.",
    "Hold the position, breathing steadily.",
-   "Push through the burn — stop if your form breaks."
+   "Push through the burn. Stop if your form breaks."
   ]
  },
  {
@@ -2092,7 +2092,7 @@ const EXERCISES = [
    "Kneel with your feet anchored, body tall, arms crossed or at your sides.",
    "Lower yourself forward as slowly as possible, resisting with your hamstrings.",
    "Catch yourself with your hands and push back up to start.",
-   "This is brutally hard — start with a limited range."
+   "This is brutally hard. Start with a limited range."
   ]
  },
  {
@@ -2168,7 +2168,7 @@ const EXERCISES = [
    "Kneel with your feet anchored, body tall, arms crossed or at your sides.",
    "Lower yourself forward as slowly as possible, resisting with your hamstrings.",
    "Catch yourself with your hands and push back up to start.",
-   "This is brutally hard — start with a limited range."
+   "This is brutally hard. Start with a limited range."
   ]
  },
  {
@@ -2312,7 +2312,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2358,7 +2358,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2372,7 +2372,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2386,7 +2386,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2400,7 +2400,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2413,7 +2413,7 @@ const EXERCISES = [
    "shoulders"
   ],
   "steps": [
-   "Start like a clean pull — bar at mid-thigh after the first pull.",
+   "Start like a clean pull. Bar at mid-thigh after the first pull.",
    "Explode upward, shrugging hard and pulling the bar to chest height.",
    "Lead with your elbows, keeping the bar close.",
    "Lower with control back to the hang."
@@ -2430,7 +2430,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2444,7 +2444,7 @@ const EXERCISES = [
    "Stand tall holding the weight at your sides with a straight back.",
    "Shrug your shoulders straight up toward your ears as high as possible.",
    "Hold the squeeze for a full second at the top.",
-   "Lower with control — no rolling the shoulders."
+   "Lower with control. No rolling the shoulders."
   ]
  },
  {
@@ -2524,7 +2524,7 @@ const EXERCISES = [
    "Stand on a box or platform holding a light barbell.",
    "Slowly round down vertebra by vertebra, reaching toward your toes.",
    "Pause at the bottom, then reverse back up with control.",
-   "Start very light — this is a mobility-strength hybrid."
+   "Start very light. This is a mobility-strength hybrid."
   ]
  },
  {
@@ -2540,7 +2540,7 @@ const EXERCISES = [
   "steps": [
    "Stand with the bar over mid-foot, shins close, grip just outside your legs.",
    "Set your back flat, chest up, and push the floor away with your legs.",
-   "Stand tall, squeezing your glutes — don't lean back.",
+   "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
  },
@@ -2591,7 +2591,7 @@ const EXERCISES = [
   "steps": [
    "Start with the weight on the floor, back flat, hips loaded.",
    "Explode upward, shrugging and pulling yourself under the weight.",
-   "Catch it solidly — front rack for cleans, overhead for snatches.",
+   "Catch it solidly. Front rack for cleans, overhead for snatches.",
    "Stand tall to finish, then lower with control."
   ]
  },
@@ -2608,7 +2608,7 @@ const EXERCISES = [
   "steps": [
    "Start with the weight on the floor, back flat, hips loaded.",
    "Explode upward, shrugging and pulling yourself under the weight.",
-   "Catch it solidly — front rack for cleans, overhead for snatches.",
+   "Catch it solidly. Front rack for cleans, overhead for snatches.",
    "Stand tall to finish, then lower with control."
   ]
  },
@@ -2707,7 +2707,7 @@ const EXERCISES = [
   "steps": [
    "Get on all fours with knees hovering just off the floor.",
    "Move opposite hand and foot together, keeping your back flat.",
-   "Stay low and controlled — no sagging hips.",
+   "Stay low and controlled. No sagging hips.",
    "Crawl for distance or time, breathing steadily."
   ]
  },
@@ -2721,7 +2721,7 @@ const EXERCISES = [
    "traps"
   ],
   "steps": [
-   "Pick up heavy weights and stand tall — shoulders back, core braced.",
+   "Pick up heavy weights and stand tall. Shoulders back, core braced.",
    "Walk with short, controlled steps, keeping your torso perfectly still.",
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
@@ -2741,7 +2741,7 @@ const EXERCISES = [
    "Hold a medicine ball at your chest facing a wall.",
    "Squat deep, then explode up, throwing the ball to the target.",
    "Catch it on the rebound and ride it into the next squat.",
-   "Keep a steady rhythm — don't pause at the top."
+   "Keep a steady rhythm. Don't pause at the top."
   ]
  },
  {
@@ -2753,7 +2753,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2770,7 +2770,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2786,7 +2786,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2803,7 +2803,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2820,7 +2820,7 @@ const EXERCISES = [
   "steps": [
    "Start in a high plank with your core braced.",
    "Drive one knee toward your chest, then switch legs quickly.",
-   "Keep your hips level — don't bounce them up.",
+   "Keep your hips level. Don't bounce them up.",
    "Move fast but controlled for time or reps."
   ]
  },
@@ -2835,7 +2835,7 @@ const EXERCISES = [
   ],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2865,7 +2865,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2895,7 +2895,7 @@ const EXERCISES = [
   "secondary": [],
   "steps": [
    "Warm up easy for 3–5 minutes before raising the intensity.",
-   "Build to a challenging but sustainable pace — you should be breathing hard but in control.",
+   "Build to a challenging but sustainable pace. You should be breathing hard but in control.",
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
@@ -2929,7 +2929,7 @@ const EXERCISES = [
    "Set up on the bench with feet planted, shoulder blades pinched, and a slight arch in your back.",
    "Unrack and lower the weight with control to mid-chest, elbows about 45° from your torso.",
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
-   "Lock out softly at the top, then repeat — exhale on the press."
+   "Lock out softly at the top, then repeat. Exhale on the press."
   ]
  },
  {
