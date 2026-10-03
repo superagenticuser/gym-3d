@@ -362,7 +362,16 @@
     document.getElementById("favCount").textContent = favs.size;
   }
   function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
-  const progById = id => PROGRAMS.find(p => p.id === id);
+  const progById = id => allPrograms().find(p => p.id === id);
+  function getCustomPrograms() {
+    try { const l = JSON.parse(localStorage.getItem("forge-custom-programs") || "[]"); return Array.isArray(l) ? l : []; }
+    catch (e) { return []; }
+  }
+  function saveCustomPrograms(l) { localStorage.setItem("forge-custom-programs", JSON.stringify(l)); }
+  function allPrograms() { return PROGRAMS.concat(getCustomPrograms()); }
+  function deleteCustomProgram(id) {
+    saveCustomPrograms(getCustomPrograms().filter(p => p.id !== id));
+  }
 
   /* ---------- accent ---------- */
   function applyAccent(id, save) {
@@ -387,12 +396,83 @@
     const s = getSettings();
     document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
     document.querySelectorAll("#speedSeg .seg").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.speed) === s.demoSpeed));
+    document.querySelectorAll("#langSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.lang === s.lang));
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
+    const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
+    $("eqGrid").innerHTML = eqs.map(q =>
+      `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
+  }
+
+  /* ---------- i18n ---------- */
+  const STRINGS = {
+    en: {
+      nav_exercises: "Exercises", nav_programs: "Programs", nav_body: "3D Body Map", nav_favorites: "Favorites", nav_progress: "Progress",
+      home_kicker: "3D GYM TRAINING", home_title: "Every muscle. Every exercise. In 3D.",
+      home_lede: "193 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.",
+      home_cta_body: "Explore the 3D body", home_cta_ex: "Browse exercises",
+      stat_exercises: "exercises", stat_muscles: "muscle groups", stat_body: "interactive body",
+      home_muscles: "Train by muscle",
+      ex_title: "All exercises", ex_search_ph: "Search exercises… (e.g. squat, cable, beginner)",
+      prog_title: "Training programs", prog_lede: "Pick a plan and just train. Every workout is laid out set by set.",
+      prog_quiz: "Find my program", prog_create: "Create program",
+      body_title: "3D Body Map", body_lede: "Click any muscle on the body to see every exercise that trains it.",
+      body_front: "Front", body_back: "Back", body_muscles: "Muscles", body_recovery: "Recovery",
+      body_hint: "Drag to rotate · scroll to zoom · click a muscle",
+      fav_title: "Your favorites", fav_empty: "Nothing saved yet. Tap ♡ on any exercise.",
+      progress_title: "Progress", tab_overview: "Overview", tab_history: "History", tab_records: "Records", tab_volume: "Volume",
+      set_title: "Settings", set_accent: "Accent color", set_accent_note: "Applies across the app, including the 3D body ring.",
+      set_units: "Units", set_myeq: "My equipment", set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
+      set_lang: "Language", set_workout: "Workout", set_sound: "Rest timer sound", set_motion: "Reduce motion",
+      set_demos: "Exercise demos", set_autoplay: "Autoplay", set_speed: "Demo speed", set_data: "Data",
+      set_export: "Export data", set_reset: "Reset all data",
+      builder_title: "Create program", builder_lede: "Build your own training plan from the exercise library.",
+    },
+    fr: {
+      nav_exercises: "Exercices", nav_programs: "Programmes", nav_body: "Corps 3D", nav_favorites: "Favoris", nav_progress: "Progrès",
+      home_kicker: "MUSCULATION 3D", home_title: "Chaque muscle. Chaque exercice. En 3D.",
+      home_lede: "193 exercices sur un corps 3D interactif. Touchez un muscle, voyez-le s'illuminer, apprenez le mouvement.",
+      home_cta_body: "Explorer le corps 3D", home_cta_ex: "Voir les exercices",
+      stat_exercises: "exercices", stat_muscles: "groupes musculaires", stat_body: "corps interactif",
+      home_muscles: "S'entraîner par muscle",
+      ex_title: "Tous les exercices", ex_search_ph: "Rechercher… (ex. squat, câble, débutant)",
+      prog_title: "Programmes", prog_lede: "Choisissez un plan et entraînez-vous. Chaque séance est détaillée série par série.",
+      prog_quiz: "Trouver mon programme", prog_create: "Créer un programme",
+      body_title: "Corps 3D", body_lede: "Cliquez sur un muscle pour voir tous les exercices qui le travaillent.",
+      body_front: "Avant", body_back: "Arrière", body_muscles: "Muscles", body_recovery: "Récupération",
+      body_hint: "Glisser pour pivoter · défiler pour zoomer · cliquer un muscle",
+      fav_title: "Mes favoris", fav_empty: "Rien enregistré. Touchez ♡ sur un exercice.",
+      progress_title: "Progrès", tab_overview: "Aperçu", tab_history: "Historique", tab_records: "Records", tab_volume: "Volume",
+      set_title: "Réglages", set_accent: "Couleur d'accent", set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
+      set_units: "Unités", set_myeq: "Mon équipement", set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
+      set_lang: "Langue", set_workout: "Séance", set_sound: "Son du minuteur", set_motion: "Réduire les animations",
+      set_demos: "Démos d'exercices", set_autoplay: "Lecture auto", set_speed: "Vitesse des démos", set_data: "Données",
+      set_export: "Exporter", set_reset: "Tout effacer",
+      builder_title: "Créer un programme", builder_lede: "Créez votre plan depuis la bibliothèque d'exercices.",
+    }
+  };
+  function t(key) {
+    const lang = getSettings().lang || "en";
+    return (STRINGS[lang] && STRINGS[lang][key]) || STRINGS.en[key] || key;
+  }
+  function applyI18n() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const txt = t(el.dataset.i18n);
+      // replace text nodes only, preserving child elements like SVG icons
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let node, first = true;
+      while ((node = walker.nextNode())) {
+        if (first) { node.textContent = txt; first = false; }
+        else node.textContent = "";
+      }
+      if (first) el.textContent = txt;
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.documentElement.lang = getSettings().lang || "en";
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en" };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -531,7 +611,7 @@
   });
 
   /* ---------- views ---------- */
-  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress"];
+  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress", "builder"];
   function show(name) {
     clearViewers();
     clearDemos();
@@ -566,7 +646,7 @@
   }
 
   // EXERCISES
-  const filters = { q: "", muscle: "", eq: "", lvl: "" };
+  const filters = { q: "", muscle: "", eq: "", lvl: "", myEq: false };
   function initExercises() {
     const chips = ["", ...Object.keys(MUSCLE_INFO)];
     $("muscleChips").innerHTML = chips.map(id =>
@@ -577,10 +657,12 @@
   }
   function filtered() {
     const q = filters.q.toLowerCase();
+    const myEq = getSettings().myEquipment || [];
     return EXERCISES.filter(e => {
       if (filters.muscle && e.primary !== filters.muscle) return false;
       if (filters.eq && e.equipment !== filters.eq) return false;
       if (filters.lvl && e.level !== filters.lvl) return false;
+      if (filters.myEq && myEq.length && !myEq.includes(e.equipment)) return false;
       if (q && !(e.name.toLowerCase().includes(q) || (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q)) || e.equipment.includes(q) || e.level.includes(q))) return false;
       return true;
     });
@@ -615,6 +697,13 @@
     $("dSimilar").innerHTML = sim.map(x =>
       `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
     ).join("");
+    const myEq = getSettings().myEquipment || [];
+    const swaps = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary && x.equipment !== ex.equipment)
+      .sort((a, b) => (myEq.includes(b.equipment) ? 1 : 0) - (myEq.includes(a.equipment) ? 1 : 0))
+      .slice(0, 3);
+    $("dSwaps").innerHTML = swaps.length ? swaps.map(x =>
+      `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="tag">${eqName[x.equipment]}</span>${window.FORGE_ICON("arrow-right")}</button>`
+    ).join("") : `<p class="muted">No swaps needed, this one covers it.</p>`;
     const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
     viewers.push(v);
     if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
@@ -679,6 +768,142 @@
     const list = EXERCISES.filter(e => favs.has(e.id));
     $("favGrid").innerHTML = list.map(cardHTML).join("");
     $("favEmpty").classList.toggle("hidden", list.length > 0);
+  }
+
+  // QUIZ
+  const QUIZ_QUESTIONS = [
+    { key: "days", title: "How many days per week can you train?", title_fr: "Combien de jours par semaine pouvez-vous vous entraîner ?", options: [
+      { v: 2, label: "2 days", label_fr: "2 jours" }, { v: 3, label: "3 days", label_fr: "3 jours" }, { v: 4, label: "4 days", label_fr: "4 jours" }, { v: 6, label: "5+ days", label_fr: "5+ jours" } ] },
+    { key: "equip", title: "What equipment do you have access to?", title_fr: "De quel équipement disposez-vous ?", options: [
+      { v: "full", label: "Full gym", label_fr: "Salle complète" }, { v: "dumbbells", label: "Dumbbells + bench", label_fr: "Haltères + banc" },
+      { v: "dumbbells-only", label: "Dumbbells only", label_fr: "Haltères uniquement" }, { v: "bodyweight", label: "Bodyweight / minimal", label_fr: "Poids du corps / minimal" } ] },
+    { key: "goal", title: "What's your main goal?", title_fr: "Quel est votre objectif principal ?", options: [
+      { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" }, { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" }, { v: "fitness", label: "General fitness", label_fr: "Forme générale" } ] },
+  ];
+  function ql(o) { return getSettings().lang === "fr" ? (o.label_fr || o.label) : o.label; }
+  function qt(q) { return getSettings().lang === "fr" ? (q.title_fr || q.title) : q.title; }
+  const QUIZ_FIT = {
+    "full-body-starter": { days: [2, 3], equip: ["dumbbells", "dumbbells-only", "bodyweight"], goal: ["muscle", "fitness"] },
+    "push-pull-legs":    { days: [6], equip: ["full"], goal: ["muscle"] },
+    "upper-lower":       { days: [4], equip: ["full"], goal: ["muscle", "strength"] },
+    "strength-5x5":      { days: [3], equip: ["full"], goal: ["strength"] },
+    "dumbbell-home":     { days: [2, 3], equip: ["dumbbells", "dumbbells-only"], goal: ["fitness", "muscle"] },
+    "hiit-conditioning": { days: [3, 4], equip: ["bodyweight", "dumbbells-only"], goal: ["fitness"] },
+  };
+  let quizState = null;
+  function openQuiz() {
+    quizState = { step: 0, answers: {} };
+    $("quizClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    renderQuizStep();
+    $("quizVeil").classList.remove("hidden");
+  }
+  function closeQuiz() { $("quizVeil").classList.add("hidden"); }
+  function renderQuizStep() {
+    const q = QUIZ_QUESTIONS[quizState.step];
+    const fr = getSettings().lang === "fr";
+    $("quizBody").innerHTML =
+      `<p class="muted" style="margin-bottom:6px">${fr ? `Question ${quizState.step + 1} sur ${QUIZ_QUESTIONS.length}` : `Question ${quizState.step + 1} of ${QUIZ_QUESTIONS.length}`}</p>
+       <h4 style="margin:0 0 16px;font-size:18px">${qt(q)}</h4>
+       <div class="quiz-opts">` +
+      q.options.map(o => `<button class="quiz-opt" data-qv="${o.v}">${ql(o)}</button>`).join("") +
+      `</div>` +
+      (quizState.step > 0 ? `<button class="btn btn-ghost btn-sm" id="quizBack" style="margin-top:14px">${fr ? "Retour" : "Back"}</button>` : "");
+  }
+  function quizScore(p, a) {
+    const fit = QUIZ_FIT[p.id];
+    if (!fit) return { score: 0, reasons: [] };
+    let s = 0; const reasons = [];
+    if (fit.days.includes(a.days)) { s += 3; reasons.push(`${p.daysPerWeek} days/week fits your schedule`); }
+    else if (fit.days.some(d => Math.abs(d - a.days) === 1)) { s += 1; }
+    if (fit.equip.includes(a.equip)) { s += 3; reasons.push(`Uses your ${QUIZ_QUESTIONS[1].options.find(o => String(o.v) === a.equip).label.toLowerCase()}`); }
+    if (fit.goal.includes(a.goal)) { s += 3; reasons.push(`Built for ${QUIZ_QUESTIONS[2].options.find(o => String(o.v) === a.goal).label.toLowerCase()}`); }
+    if (p.level === "beginner") s += 0.5;
+    return { score: s, reasons };
+  }
+  function renderQuizResult() {
+    const a = quizState.answers;
+    const fr = getSettings().lang === "fr";
+    const ranked = PROGRAMS.map(p => ({ p, ...quizScore(p, a) })).sort((x, y) => y.score - x.score);
+    const top = ranked[0];
+    $("quizBody").innerHTML =
+      `<p class="muted" style="margin-bottom:6px">${fr ? "Votre programme" : "Your match"}</p>
+       <h4 style="margin:0 0 8px;font-size:20px">${esc(top.p.name)}</h4>
+       <p class="muted" style="margin-bottom:12px">${esc(top.p.tagline)}</p>
+       ${top.reasons.map(r => `<p style="margin:6px 0;font-size:14px"><span style="color:var(--volt)">✓</span> ${esc(r)}</p>`).join("")}
+       <div class="meta" style="margin:14px 0">
+         <span class="tag volt-tag">${cap1(top.p.level)}</span>
+         <span class="tag">${top.p.daysPerWeek} ${fr ? "jours/sem" : "days/wk"}</span>
+         <span class="tag">${top.p.weeks} ${fr ? "semaines" : "weeks"}</span>
+       </div>
+       <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+         <a class="btn btn-primary btn-sm" href="#/program/${top.p.id}" id="quizGo">${fr ? "Voir le programme" : "View program"}</a>
+         <button class="btn btn-ghost btn-sm" id="quizAgain">${fr ? "Recommencer" : "Retake quiz"}</button>
+       </div>
+       ${ranked[1] ? `<p class="muted" style="margin-top:16px;font-size:13px">${fr ? "Aussi : " : "Runner-up: "}<a href="#/program/${ranked[1].p.id}" style="color:var(--volt)">${esc(ranked[1].p.name)}</a></p>` : ""}`;
+  }
+
+  // PROGRAM BUILDER
+  let builder = null;
+  let pickerDay = -1;
+  function newBuilder() {
+    builder = { name: "", tagline: "", days: [{ name: "Day 1", exercises: [] }] };
+    $("bName").value = ""; $("bTagline").value = "";
+    renderBuilder();
+  }
+  function renderBuilder() {
+    if (!builder) newBuilder();
+    $("bDays").innerHTML = builder.days.map((d, di) => `
+      <div class="day-block">
+        <div class="day-head">
+          <input type="text" value="${esc(d.name)}" data-bday="${di}" maxlength="40" aria-label="Day name" />
+          <button class="icon-btn" data-bdel-day="${di}" aria-label="Delete day">${window.FORGE_ICON("x")}</button>
+        </div>
+        ${d.exercises.map((x, xi) => {
+          const ex = byId(x.id);
+          return `<div class="bex-row">
+            <b>${esc(ex ? ex.name : x.id)}</b>
+            <input type="number" min="1" max="20" value="${x.sets}" data-bset="${di}:${xi}" aria-label="Sets" /><span class="lbl">sets</span>
+            <input type="text" value="${esc(x.reps)}" data-brep="${di}:${xi}" maxlength="12" aria-label="Reps" style="width:64px" /><span class="lbl">reps</span>
+            <button class="icon-btn" data-bdel-ex="${di}:${xi}" aria-label="Remove exercise">${window.FORGE_ICON("x")}</button>
+          </div>`;
+        }).join("")}
+        <button class="btn btn-ghost btn-sm" data-bpick="${di}" style="margin-top:10px">Add exercises</button>
+      </div>`).join("");
+  }
+  function openPicker(di) {
+    pickerDay = di;
+    $("pickerClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    $("pickerSearch").value = "";
+    renderPicker("");
+    $("pickerVeil").classList.remove("hidden");
+  }
+  function closePicker() { $("pickerVeil").classList.add("hidden"); pickerDay = -1; }
+  function renderPicker(q) {
+    q = q.toLowerCase();
+    const inDay = pickerDay >= 0 ? new Set(builder.days[pickerDay].exercises.map(x => x.id)) : new Set();
+    const list = EXERCISES.filter(e =>
+      !q || e.name.toLowerCase().includes(q) || (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q))
+    ).slice(0, 60);
+    $("pickerList").innerHTML = list.map(e =>
+      `<button class="picker-item" data-pick="${e.id}">
+        <b>${esc(e.name)}</b><span class="tag">${MUSCLE_INFO[e.primary].name}</span>
+        ${inDay.has(e.id) ? `<span class="added">Added</span>` : ""}
+      </button>`).join("") || `<p class="muted">No matches.</p>`;
+  }
+  function saveBuilder() {
+    builder.name = $("bName").value.trim();
+    builder.tagline = $("bTagline").value.trim() || "Custom program";
+    if (!builder.name) { alert("Give your program a name."); return; }
+    const days = builder.days.filter(d => d.exercises.length > 0);
+    if (!days.length) { alert("Add at least one exercise to a day."); return; }
+    const id = "custom-" + Date.now().toString(36);
+    const prog = {
+      id, name: builder.name, tagline: builder.tagline, custom: true,
+      level: "custom", daysPerWeek: days.length, weeks: 4, equipment: "Mixed",
+      days: days.map(d => ({ name: d.name.trim() || "Day", exercises: d.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps })) }))
+    };
+    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    location.hash = "#/program/" + id;
   }
 
   // PROGRESS
@@ -749,13 +974,13 @@
       $("activeBanner").classList.add("hidden");
       $("activeBanner").innerHTML = "";
     }
-    $("programGrid").innerHTML = PROGRAMS.map(p => {
+    $("programGrid").innerHTML = allPrograms().map(p => {
       const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
       const isActive = activeId === p.id;
-      const pIcon = { "full-body-starter": "dumbbell", "push-pull-legs": "arrow-right", "upper-lower": "calendar", "strength-5x5": "trophy", "dumbbell-home": "flame", "hiit-conditioning": "zap" }[p.id] || "dumbbell";
+      const pIcon = { "full-body-starter": "dumbbell", "push-pull-legs": "arrow-right", "upper-lower": "calendar", "strength-5x5": "trophy", "dumbbell-home": "flame", "hiit-conditioning": "zap" }[p.id] || (p.custom ? "plus" : "dumbbell");
       return `<div class="prog-card" data-prog="${p.id}">
         <div class="prog-top"><span class="prog-icon">${window.FORGE_ICON(pIcon)}</span>
-        <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""}</h3></div>
+        <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""} ${p.custom ? '<span class="tag">Custom</span>' : ""}</h3></div>
         <p class="muted">${esc(p.tagline)}</p>
         <div class="meta">
           <span class="tag volt-tag">${cap1(p.level)}</span>
@@ -792,6 +1017,16 @@
     if (st) st.onclick = () => { setActiveProg(p.id); renderProgram(p.id); };
     const sp = $("pgStop");
     if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
+    if (p.custom) {
+      $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">Delete program</button>`;
+      $("pgDelete").onclick = () => {
+        if (confirm(`Delete "${p.name}"? This cannot be undone.`)) {
+          if (getActiveProg() === p.id) setActiveProg(null);
+          deleteCustomProgram(p.id);
+          location.hash = "#/programs";
+        }
+      };
+    }
     $("pgDays").innerHTML = p.days.map((d, di) => {
       const key = p.id + ":" + di;
       const times = (done[key] || []).length;
@@ -930,6 +1165,9 @@
       filters.q = ""; $("search").value = "";
       filters.eq = ""; $("eqFilter").value = "";
       filters.lvl = ""; $("lvlFilter").value = "";
+      filters.myEq = false; $("myEqToggle").checked = false;
+      const hasEq = (getSettings().myEquipment || []).length > 0;
+      $("myEqWrap").classList.toggle("hidden", !hasEq);
       initExercises(); renderExercises();
     }
     else if (parts[0] === "body") { show("body"); renderBody(params.get("m")); }
@@ -938,6 +1176,7 @@
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
     else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); renderWorkout(parts[1], parseInt(parts[2], 10)); }
     else if (parts[0] === "progress") { show("progress"); renderProgress("overview"); }
+    else if (parts[0] === "builder") { show("builder"); newBuilder(); }
     else { show("home"); renderHome(); }
   }
   $("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); });
@@ -949,6 +1188,7 @@
   });
   $("eqFilter").addEventListener("change", e => { filters.eq = e.target.value; renderExercises(); });
   $("lvlFilter").addEventListener("change", e => { filters.lvl = e.target.value; renderExercises(); });
+  $("myEqToggle").addEventListener("change", e => { filters.myEq = e.target.checked; renderExercises(); });
   $("dFav").addEventListener("click", () => {
     const id = $("dFav").dataset.id;
     favs.has(id) ? favs.delete(id) : favs.add(id);
@@ -962,11 +1202,12 @@
   localStorage.removeItem("forge-theme");
   document.documentElement.removeAttribute("data-theme");
   applyAccent(localStorage.getItem("forge-accent") || "volt", false);
+  applyI18n();
   $("settingsBtn").addEventListener("click", openSettings);
   $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   $("settingsClose").addEventListener("click", closeSettings);
   $("settingsVeil").addEventListener("click", e => { if (e.target.id === "settingsVeil") closeSettings(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSettings(); closeQuiz(); } });
   $("accentGrid").addEventListener("click", e => {
     const b = e.target.closest("[data-accent]");
     if (b) applyAccent(b.dataset.accent);
@@ -978,6 +1219,17 @@
   $("speedSeg").addEventListener("click", e => {
     const b = e.target.closest("[data-speed]"); if (!b) return;
     const s = getSettings(); s.demoSpeed = parseFloat(b.dataset.speed); saveSettings(s); syncSettingsUI();
+  });
+  $("langSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-lang]"); if (!b) return;
+    const s = getSettings(); s.lang = b.dataset.lang; saveSettings(s); syncSettingsUI(); applyI18n();
+  });
+  $("eqGrid").addEventListener("click", e => {
+    const b = e.target.closest("[data-eq]"); if (!b) return;
+    const s = getSettings(); s.myEquipment = s.myEquipment || [];
+    const q = b.dataset.eq;
+    s.myEquipment = s.myEquipment.includes(q) ? s.myEquipment.filter(x => x !== q) : [...s.myEquipment, q];
+    saveSettings(s); syncSettingsUI();
   });
   [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
@@ -1006,6 +1258,72 @@
   $("progTabs").addEventListener("click", e => {
     const c = e.target.closest("[data-ptab]"); if (!c) return;
     renderProgress(c.dataset.ptab);
+  });
+  // builder events
+  $("bAddDay").addEventListener("click", () => {
+    builder.days.push({ name: "Day " + (builder.days.length + 1), exercises: [] });
+    renderBuilder();
+  });
+  $("bSave").addEventListener("click", saveBuilder);
+  $("bDays").addEventListener("click", e => {
+    const delD = e.target.closest("[data-bdel-day]");
+    if (delD) {
+      const di = parseInt(delD.dataset.bdelDay, 10);
+      if (builder.days.length > 1) { builder.days.splice(di, 1); renderBuilder(); }
+      return;
+    }
+    const delX = e.target.closest("[data-bdel-ex]");
+    if (delX) {
+      const [di, xi] = delX.dataset.bdelEx.split(":").map(Number);
+      builder.days[di].exercises.splice(xi, 1); renderBuilder();
+      return;
+    }
+    const pk = e.target.closest("[data-bpick]");
+    if (pk) { openPicker(parseInt(pk.dataset.bpick, 10)); return; }
+  });
+  $("bDays").addEventListener("input", e => {
+    const dn = e.target.closest("[data-bday]");
+    if (dn) { builder.days[parseInt(dn.dataset.bday, 10)].name = dn.value; return; }
+    const st = e.target.closest("[data-bset]");
+    if (st) {
+      const [di, xi] = st.dataset.bset.split(":").map(Number);
+      builder.days[di].exercises[xi].sets = Math.max(1, Math.min(20, parseInt(st.value) || 3));
+      return;
+    }
+    const rp = e.target.closest("[data-brep]");
+    if (rp) {
+      const [di, xi] = rp.dataset.brep.split(":").map(Number);
+      builder.days[di].exercises[xi].reps = rp.value;
+    }
+  });
+  $("pickerClose").addEventListener("click", closePicker);
+  $("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); });
+  $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
+  $("pickerList").addEventListener("click", e => {
+    const b = e.target.closest("[data-pick]"); if (!b || pickerDay < 0) return;
+    const id = b.dataset.pick;
+    const day = builder.days[pickerDay];
+    if (!day.exercises.some(x => x.id === id)) {
+      day.exercises.push({ id, sets: 3, reps: "10" });
+      renderBuilder(); renderPicker($("pickerSearch").value);
+    }
+  });
+  // quiz
+  document.addEventListener("click", e => {
+    if (e.target.closest("#quizBtn")) { openQuiz(); return; }
+    if (e.target.closest("#quizClose") || e.target.id === "quizVeil") { closeQuiz(); return; }
+    const qv = e.target.closest("[data-qv]");
+    if (qv && quizState) {
+      const q = QUIZ_QUESTIONS[quizState.step];
+      quizState.answers[q.key] = q.key === "days" ? parseInt(qv.dataset.qv, 10) : qv.dataset.qv;
+      quizState.step++;
+      if (quizState.step < QUIZ_QUESTIONS.length) renderQuizStep();
+      else renderQuizResult();
+      return;
+    }
+    if (e.target.closest("#quizBack") && quizState) { quizState.step--; renderQuizStep(); return; }
+    if (e.target.closest("#quizAgain")) { quizState = { step: 0, answers: {} }; renderQuizStep(); return; }
+    if (e.target.closest("#quizGo")) { closeQuiz(); return; }
   });
   router();
 })();
