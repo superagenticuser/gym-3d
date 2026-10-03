@@ -56,6 +56,12 @@
     const rim = new THREE.DirectionalLight(0x7c8cff, 0.85); rim.position.set(-4, 3, -4); scene.add(rim);
     const fill = new THREE.DirectionalLight(0xdde4ff, 0.35); fill.position.set(0, 2, 6); scene.add(fill);
 
+    const VIEW_THEMES = {
+      dark:  { base: 0x3b4356, neutral: 0x222836, ring: 0xd4ff3f, primary: 0x5e2a22 },
+      light: { base: 0x94a1bb, neutral: 0x6b7690, ring: 0x4d7c0f, primary: 0x7a3a2a }
+    };
+    let vTheme = VIEW_THEMES[(document.documentElement.dataset.theme === "light") ? "light" : "dark"];
+
     // soft blob shadow under feet
     const bc = document.createElement("canvas"); bc.width = bc.height = 128;
     const bg = bc.getContext("2d");
@@ -70,11 +76,6 @@
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
-    const VIEW_THEMES = {
-      dark:  { base: 0x3b4356, neutral: 0x222836, ring: 0xd4ff3f, primary: 0x5e2a22 },
-      light: { base: 0x94a1bb, neutral: 0x6b7690, ring: 0x65a30d, primary: 0x7a3a2a }
-    };
-    let vTheme = VIEW_THEMES[(document.documentElement.dataset.theme === "light") ? "light" : "dark"];
     const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.42, metalness: 0.28 });
     const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.6, metalness: 0.15 });
     const mats = {};

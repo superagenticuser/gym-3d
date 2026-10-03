@@ -201,7 +201,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
   --line: #dbe1ea;
   --ink: #14181f;
   --muted: #5d6675;
-  --volt: #65a30d;
+  --volt: #4d7c0f;
   --volt-ink: #ffffff;
   --stage-glow: #e2e9f4;
 }
@@ -282,7 +282,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   border: 1px solid var(--volt); border-radius: var(--radius);
   padding: 18px 22px; margin: 18px 0 6px;
 }
-[data-theme="light"] .active-banner { background: linear-gradient(120deg, rgba(101,163,13,.12), rgba(101,163,13,.04)); }
+[data-theme="light"] .active-banner { background: linear-gradient(120deg, rgba(77,124,15,.12), rgba(77,124,15,.04)); }
 .active-banner b { font-size: 17px; }
 .prog-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
