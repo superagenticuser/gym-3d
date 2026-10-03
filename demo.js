@@ -464,8 +464,14 @@
       if (st !== curStep) {
         curStep = st;
         items.forEach((li, si) => li.classList.toggle('on', si === st));
+        // keep the active step visible inside the step list only — never scroll the page
         const active = items[st];
-        if (active) active.scrollIntoView({ block: 'nearest' });
+        if (active) {
+          const top = active.offsetTop - stepsBox.offsetTop;
+          if (top < stepsBox.scrollTop) stepsBox.scrollTop = top;
+          else if (top + active.offsetHeight > stepsBox.scrollTop + stepsBox.clientHeight)
+            stepsBox.scrollTop = top + active.offsetHeight - stepsBox.clientHeight;
+        }
       }
     }
     playBtn.addEventListener('click', () => {
