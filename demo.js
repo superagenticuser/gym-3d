@@ -337,20 +337,24 @@
   }
   const W2S = (x, y) => [200 + x * 118, 332 - y * 118];
 
-  function drawFigure(svg, J, anim, theme) {
-    const C = theme === 'light'
-      ? { base: '#232b3a', dim: '#9aa3b5', hot: '#4d7c0f', ground: '#c6cdd9', prop: '#7d8699' }
-      : { base: '#dfe5f0', dim: '#7d8699', hot: '#d4ff3f', ground: '#2a3040', prop: '#8a93a8' };
+  function drawFigure(svg, J, anim) {
+    const C = { base: '#dfe5f0', dim: '#7d8699', hot: 'var(--volt)', ground: '#2a3040', prop: '#8a93a8' };
     svg.innerHTML = '';
     const hot = anim.hot || 'full';
     const hotLimb = part => (hot === 'full' || hot === part) ? C.hot : C.base;
+    const paint = (e, color, isFill) => {
+      if (String(color).startsWith('var(')) e.setAttribute('style', (isFill ? 'fill:' : 'stroke:') + color);
+      else e.setAttribute(isFill ? 'fill' : 'stroke', color);
+    };
     const line = (a, b, w, color) => {
       const [x1, y1] = W2S(a.x, a.y), [x2, y2] = W2S(b.x, b.y);
-      el('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': w, 'stroke-linecap': 'round' }, svg);
+      const e = el('line', { x1, y1, x2, y2, 'stroke-width': w, 'stroke-linecap': 'round' }, svg);
+      paint(e, color, false);
     };
     const dot = (p, r, color) => {
       const [x, y] = W2S(p.x, p.y);
-      el('circle', { cx: x, cy: y, r, fill: color }, svg);
+      const e = el('circle', { cx: x, cy: y, r }, svg);
+      paint(e, color, true);
     };
     // ground
     const [gx1, gy] = W2S(-1.35, 0), [gx2] = W2S(1.35, 0);
@@ -416,13 +420,12 @@
   /* ---------- player ---------- */
   function createDemo(container, templateId, steps) {
     const anim = ANIMS[T2A[templateId] || 'march'];
-    const theme = () => document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-    container.innerHTML =
+        container.innerHTML =
       `<div class="demo-player">
         <svg class="demo-svg" viewBox="0 0 400 400" role="img" aria-label="Exercise demonstration"></svg>
         <div class="demo-side">
           <ol class="demo-steps"></ol>
-          <button class="demo-play">Pause</button>
+          <button class="demo-play"></button>
         </div>
       </div>`;
     const svg = container.querySelector('.demo-svg');
@@ -459,7 +462,7 @@
       const i = frameAt(t);
       const prev = frames[(i - 1 + frames.length) % frames.length].p;
       const q = Math.min(1, (t - starts[i]) / (frames[i].dur * 0.55));
-      drawFigure(svg, lerpJ(prev, frames[i].p, ease(q)), anim, theme());
+      drawFigure(svg, lerpJ(prev, frames[i].p, ease(q)), anim);
       const st = frames[i].step;
       if (st !== curStep) {
         curStep = st;
@@ -474,9 +477,12 @@
         }
       }
     }
+    const IC = window.FORGE_ICON || (() => '');
+    const syncPlayBtn = () => { playBtn.innerHTML = IC(playing ? 'pause' : 'play') + (playing ? 'Pause' : 'Play'); };
+    syncPlayBtn();
     playBtn.addEventListener('click', () => {
       playing = !playing;
-      playBtn.textContent = playing ? 'Pause' : 'Play';
+      syncPlayBtn();
       last = performance.now();
     });
     raf = requestAnimationFrame(tick);
@@ -486,8 +492,7 @@
   /* test helper: draw one static frame */
   function drawStatic(svg, animName, frameIdx) {
     const anim = ANIMS[animName];
-    drawFigure(svg, anim.frames[frameIdx || 0].p, anim,
-      document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+    drawFigure(svg, anim.frames[frameIdx || 0].p, anim);
   }
 
   window.FORGE_DEMO = { createDemo, drawStatic, ANIMS, T2A };

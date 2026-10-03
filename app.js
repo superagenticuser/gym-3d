@@ -32,6 +32,20 @@
     return [groupId];
   }
 
+  /* ---------- accent colors ---------- */
+  const ACCENTS = [
+    { id: "volt",    name: "Volt",    color: "#d4ff3f", ink: "#0b0d12" },
+    { id: "ember",   name: "Ember",   color: "#ff7847", ink: "#0b0d12" },
+    { id: "aqua",    name: "Aqua",    color: "#38e1ff", ink: "#0b0d12" },
+    { id: "violet",  name: "Violet",  color: "#b49aff", ink: "#0b0d12" },
+    { id: "crimson", name: "Crimson", color: "#ff4d6d", ink: "#ffffff" },
+    { id: "gold",    name: "Gold",    color: "#ffd23f", ink: "#0b0d12" }
+  ];
+  function currentAccent() {
+    const id = localStorage.getItem("forge-accent") || "volt";
+    return ACCENTS.find(a => a.id === id) || ACCENTS[0];
+  }
+
   /* ---------- 3D body viewer ---------- */
   function createBodyViewer(container, opts) {
     opts = opts || {};
@@ -56,11 +70,8 @@
     const rim = new THREE.DirectionalLight(0x7c8cff, 0.85); rim.position.set(-4, 3, -4); scene.add(rim);
     const fill = new THREE.DirectionalLight(0xdde4ff, 0.35); fill.position.set(0, 2, 6); scene.add(fill);
 
-    const VIEW_THEMES = {
-      dark:  { base: 0x3b4356, neutral: 0x222836, ring: 0xd4ff3f, primary: 0x5e2a22 },
-      light: { base: 0x94a1bb, neutral: 0x6b7690, ring: 0x4d7c0f, primary: 0x7a3a2a }
-    };
-    let vTheme = VIEW_THEMES[(document.documentElement.dataset.theme === "light") ? "light" : "dark"];
+    const VTHEME = { base: 0x3b4356, neutral: 0x222836, primary: 0x5e2a22 };
+    const vTheme = VTHEME;
 
     // soft blob shadow under feet
     const bc = document.createElement("canvas"); bc.width = bc.height = 128;
@@ -72,7 +83,7 @@
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bc), transparent: true, depthWrite: false }));
     blob.rotation.x = -Math.PI / 2; blob.position.y = 0.295; scene.add(blob);
     const ring = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.63, 72),
-      new THREE.MeshBasicMaterial({ color: vTheme.ring, transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(currentAccent().color), transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
@@ -242,11 +253,8 @@
         if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.55; }
       });
     }
-    function setTheme(name) {
-      vTheme = VIEW_THEMES[name] || VIEW_THEMES.dark;
-      neutralMat.color.setHex(vTheme.neutral);
-      ring.material.color.setHex(vTheme.ring);
-      highlight(hlState.p, hlState.s, hlState.soft);
+    function setAccent(hex) {
+      ring.material.color.set(hex);
     }
 
     /* ---- interaction: rotate + pinch zoom + tap ---- */
@@ -332,7 +340,7 @@
 
     return {
       highlight,
-      setTheme,
+      setAccent,
       setView(v) { targetRotY = (v === "back") ? Math.PI : 0; rotY = targetRotY; },
       dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
     };
@@ -348,12 +356,24 @@
   function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
   const progById = id => PROGRAMS.find(p => p.id === id);
 
-  /* ---------- theme ---------- */
-  function applyTheme(name, save) {
-    document.documentElement.dataset.theme = name;
-    if (save !== false) localStorage.setItem("forge-theme", name);
-    viewers.forEach(v => { if (v.setTheme) v.setTheme(name); });
+  /* ---------- accent ---------- */
+  function applyAccent(id, save) {
+    const a = ACCENTS.find(x => x.id === id) || ACCENTS[0];
+    document.documentElement.style.setProperty("--volt", a.color);
+    document.documentElement.style.setProperty("--volt-ink", a.ink);
+    if (save !== false) localStorage.setItem("forge-accent", a.id);
+    viewers.forEach(v => { if (v.setAccent) v.setAccent(a.color); });
+    document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
   }
+  function openSettings() {
+    const grid = $("accentGrid");
+    const cur = currentAccent().id;
+    grid.innerHTML = ACCENTS.map(a =>
+      `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
+      `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`).join("");
+    $("settingsVeil").classList.remove("hidden");
+  }
+  function closeSettings() { $("settingsVeil").classList.add("hidden"); }
 
   /* ---------- active program ---------- */
   const getActiveProg = () => localStorage.getItem("forge-active") || null;
@@ -379,7 +399,7 @@
   function clearDemos() { demos.forEach(d => d.destroy()); demos = []; }
 
   function heartBtn(ex) {
-    return `<button class="heart ${favs.has(ex.id) ? "faved" : ""}" data-fav="${ex.id}" title="Save">${favs.has(ex.id) ? "♥" : "♡"}</button>`;
+    return `<button class="heart ${favs.has(ex.id) ? "faved" : ""}" data-fav="${ex.id}" title="Save" aria-label="Save to favorites">${window.FORGE_ICON("heart")}</button>`;
   }
   function cardHTML(ex) {
     return `<div class="card" data-ex="${ex.id}">
@@ -401,7 +421,7 @@
       saveFavs();
       document.querySelectorAll(`[data-fav="${id}"]`).forEach(b => {
         b.classList.toggle("faved", favs.has(id));
-        b.textContent = favs.has(id) ? "♥" : "♡";
+        /* filled state handled by .faved class */
       });
       const df = $("dFav");
       if (df && df.dataset.id === id) syncDetailFav(byId(id));
@@ -478,7 +498,7 @@
     const b = $("dFav");
     b.dataset.id = ex.id;
     b.classList.toggle("faved", favs.has(ex.id));
-    b.textContent = favs.has(ex.id) ? "♥ Saved to favorites" : "♡ Save to favorites";
+    b.innerHTML = window.FORGE_ICON("heart") + (favs.has(ex.id) ? " Saved to favorites" : " Save to favorites");
   }
   function renderDetail(id) {
     const ex = byId(id);
@@ -571,8 +591,10 @@
     $("programGrid").innerHTML = PROGRAMS.map(p => {
       const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
       const isActive = activeId === p.id;
+      const pIcon = { "full-body-starter": "dumbbell", "push-pull-legs": "arrow-right", "upper-lower": "calendar", "strength-5x5": "trophy", "dumbbell-home": "flame", "hiit-conditioning": "zap" }[p.id] || "dumbbell";
       return `<div class="prog-card" data-prog="${p.id}">
-        <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""}</h3>
+        <div class="prog-top"><span class="prog-icon">${window.FORGE_ICON(pIcon)}</span>
+        <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""}</h3></div>
         <p class="muted">${esc(p.tagline)}</p>
         <div class="meta">
           <span class="tag volt-tag">${cap1(p.level)}</span>
@@ -614,7 +636,7 @@
       const times = (done[key] || []).length;
       return `<div class="day-card">
         <div class="day-head">
-          <h3>${esc(d.name)} ${times ? `<span class="done-mark">✓ ${times}x</span>` : ""}</h3>
+          <h3>${esc(d.name)} ${times ? `<span class="done-mark">${window.FORGE_ICON("check")} ${times}x</span>` : ""}</h3>
           <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>
         </div>
         <div class="day-exercises">
@@ -658,7 +680,7 @@
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
-        <button class="guide-toggle" data-guide="${xi}">Form guide ▾</button>
+        <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
         <ol class="steps wo-steps hidden" id="guide-${xi}">
           ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
         </ol>
@@ -675,7 +697,7 @@
     if (gt) {
       const panel = $("guide-" + gt.dataset.guide);
       const open = panel.classList.toggle("hidden");
-      gt.textContent = open ? "Form guide ▾" : "Form guide ▴";
+      gt.classList.toggle("open", !open);
       return;
     }
     const sd = e.target.closest(".set-dot");
@@ -747,9 +769,18 @@
   window.addEventListener("hashchange", router);
   initExercises();
   saveFavs();
-  applyTheme(localStorage.getItem("forge-theme") || "dark", false);
-  $("themeToggle").addEventListener("click", () => {
-    applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+  // retire the old light/dark theme; dark only from here on
+  localStorage.removeItem("forge-theme");
+  document.documentElement.removeAttribute("data-theme");
+  applyAccent(localStorage.getItem("forge-accent") || "volt", false);
+  $("settingsBtn").addEventListener("click", openSettings);
+  $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+  $("settingsClose").addEventListener("click", closeSettings);
+  $("settingsVeil").addEventListener("click", e => { if (e.target.id === "settingsVeil") closeSettings(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+  $("accentGrid").addEventListener("click", e => {
+    const b = e.target.closest("[data-accent]");
+    if (b) applyAccent(b.dataset.accent);
   });
   router();
 })();
