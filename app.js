@@ -427,6 +427,9 @@
       set_demos: "Exercise demos", set_autoplay: "Autoplay", set_speed: "Demo speed", set_data: "Data",
       set_export: "Export data", set_reset: "Reset all data",
       builder_title: "Create program", builder_lede: "Build your own training plan from the exercise library.",
+      myeq_only: "My equipment only", swap_title: "Swap it", swap_sub: "same muscle, different gear",
+      b_add_day: "Add day", b_save: "Save program", b_cancel: "Cancel", b_delete: "Delete program",
+      b_name: "Program name", b_name_ph: "e.g. My Push Day Split", b_tagline: "Tagline (optional)", b_tagline_ph: "e.g. 3 days, dumbbells only",
     },
     fr: {
       nav_exercises: "Exercices", nav_programs: "Programmes", nav_body: "Corps 3D", nav_favorites: "Favoris", nav_progress: "Progrès",
@@ -449,6 +452,9 @@
       set_demos: "Démos d'exercices", set_autoplay: "Lecture auto", set_speed: "Vitesse des démos", set_data: "Données",
       set_export: "Exporter", set_reset: "Tout effacer",
       builder_title: "Créer un programme", builder_lede: "Créez votre plan depuis la bibliothèque d'exercices.",
+      myeq_only: "Mon équipement uniquement", swap_title: "Remplacer", swap_sub: "même muscle, autre matériel",
+      b_add_day: "Ajouter un jour", b_save: "Enregistrer", b_cancel: "Annuler", b_delete: "Supprimer le programme",
+      b_name: "Nom du programme", b_name_ph: "ex. Mon split push", b_tagline: "Slogan (optionnel)", b_tagline_ph: "ex. 3 jours, haltères uniquement",
     }
   };
   function t(key) {
@@ -458,13 +464,14 @@
   function applyI18n() {
     document.querySelectorAll("[data-i18n]").forEach(el => {
       const txt = t(el.dataset.i18n);
-      // replace text nodes only, preserving child elements like SVG icons
-      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-      let node, first = true;
-      while ((node = walker.nextNode())) {
-        if (first) { node.textContent = txt; first = false; }
-        else node.textContent = "";
-      }
+      // replace direct child text nodes only, preserving child elements (SVG, spans)
+      let first = true;
+      Array.from(el.childNodes).forEach(node => {
+        if (node.nodeType === 3) {
+          if (first) { node.textContent = txt; first = false; }
+          else node.textContent = "";
+        }
+      });
       if (first) el.textContent = txt;
     });
     document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
@@ -1018,7 +1025,7 @@
     const sp = $("pgStop");
     if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
     if (p.custom) {
-      $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">Delete program</button>`;
+      $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">${t("b_delete")}</button>`;
       $("pgDelete").onclick = () => {
         if (confirm(`Delete "${p.name}"? This cannot be undone.`)) {
           if (getActiveProg() === p.id) setActiveProg(null);

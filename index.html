@@ -69,7 +69,7 @@
     <div class="toolbar">
       <div class="search-wrap"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" />
   <path d="m21 21-4.3-4.3" /></svg><input id="search" type="search" data-i18n-ph="ex_search_ph" placeholder="Search exercises… (e.g. squat, cable, beginner)" autocomplete="off" /></div>
-      <label class="my-eq-toggle hidden" id="myEqWrap"><input type="checkbox" id="myEqToggle" /> My equipment only</label>
+      <label class="my-eq-toggle hidden" id="myEqWrap"><input type="checkbox" id="myEqToggle" /> <span data-i18n="myeq_only">My equipment only</span></label>
       <div class="chip-row" id="muscleChips"></div>
       <div class="selects">
         <select id="eqFilter"><option value="">All equipment</option></select>
@@ -114,7 +114,7 @@
         <div class="muscle-tags" id="dMuscles"></div>
         <h3>Try also</h3>
         <div class="mini-cards" id="dSimilar"></div>
-        <h3>Swap it <span class="muted" style="font-weight:400;font-size:13px">same muscle, different gear</span></h3>
+        <h3><span data-i18n="swap_title">Swap it</span> <span class="muted" style="font-weight:400;font-size:13px" data-i18n="swap_sub">same muscle, different gear</span></h3>
         <div id="dSwaps"></div>
       </aside>
     </div>
@@ -220,18 +220,18 @@
     <h2 class="section-title" data-i18n="builder_title">Create program</h2>
     <p class="lede" data-i18n="builder_lede">Build your own training plan from the exercise library.</p>
     <div class="builder-field">
-      <label for="bName">Program name</label>
-      <input type="text" id="bName" placeholder="e.g. My Push Day Split" maxlength="60" />
+      <label for="bName" data-i18n="b_name">Program name</label>
+      <input type="text" id="bName" data-i18n-ph="b_name_ph" placeholder="e.g. My Push Day Split" maxlength="60" />
     </div>
     <div class="builder-field">
-      <label for="bTagline">Tagline (optional)</label>
-      <input type="text" id="bTagline" placeholder="e.g. 3 days, dumbbells only" maxlength="80" />
+      <label for="bTagline" data-i18n="b_tagline">Tagline (optional)</label>
+      <input type="text" id="bTagline" data-i18n-ph="b_tagline_ph" placeholder="e.g. 3 days, dumbbells only" maxlength="80" />
     </div>
     <div id="bDays"></div>
-    <button class="btn btn-ghost btn-sm" id="bAddDay">Add day</button>
+    <button class="btn btn-ghost btn-sm" id="bAddDay" data-i18n="b_add_day">Add day</button>
     <div style="display:flex;gap:10px;margin:20px 0;flex-wrap:wrap">
-      <button class="btn btn-primary" id="bSave">Save program</button>
-      <a class="btn btn-ghost" href="#/programs">Cancel</a>
+      <button class="btn btn-primary" id="bSave" data-i18n="b_save">Save program</button>
+      <a class="btn btn-ghost" href="#/programs" data-i18n="b_cancel">Cancel</a>
     </div>
   </section>
 
@@ -243,7 +243,8 @@
         <button class="modal-x" id="pickerClose" aria-label="Close picker"></button>
       </div>
       <div class="modal-body">
-        <div class="search-wrap" style="margin-bottom:12px"><input id="pickerSearch" type="search" placeholder="Search exercises…" autocomplete="off" style="padding-left:18px" /></div>
+        <div class="search-wrap" style="margin-bottom:12px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" />
+  <path d="m21 21-4.3-4.3" /></svg><input id="pickerSearch" type="search" placeholder="Search exercises…" autocomplete="off" /></div>
         <div id="pickerList"></div>
       </div>
     </div>
