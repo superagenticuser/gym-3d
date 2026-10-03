@@ -448,7 +448,7 @@
     $("dSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
     $("dMuscles").innerHTML =
       `<span class="tag primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
-      ex.secondary.map(s => `<span class="tag" data-goto-muscle="${s}">${MUSCLE_INFO[s] ? MUSCLE_INFO[s].name : s}</span>`).join("");
+      ex.secondary.map(s => { const g = groupOf(s); return `<span class="tag" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`; }).join("");
     const sim = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary).slice(0, 4);
     $("dSimilar").innerHTML = sim.map(x =>
       `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
@@ -492,7 +492,7 @@
     const full = groupId === "full-body" || groupId === "cardio";
     v.highlight(full ? [] : expandMuscles(groupId), [], full);
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>`;
-    const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.includes(groupId));
+    const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
     $("bodyExercises").innerHTML = list.length
       ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
         list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]}</span></div>`).join("")
