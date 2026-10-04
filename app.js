@@ -1520,8 +1520,12 @@
   // ============ V10: TRAINING INTELLIGENCE ============
   // Periodization planner — 4-week mesocycle with progressive overload
   function generatePeriodized(baseProgId) {
-    const base = getProgram(baseProgId);
-    if (!base) return;
+    const base = progById(baseProgId);
+    if (!base) {
+      $("coachTool").innerHTML = `<div class="onerm-box" style="border-color:#f87171"><b>Error:</b> <span class="muted">Could not find that program.</span></div>`;
+      return;
+    }
+    $("coachTool").innerHTML = `<p class="muted">Generating your mesocycle…</p>`;
     const weeks = [];
     for (let w = 1; w <= 4; w++) {
       const isDeload = w === 4;
@@ -1530,7 +1534,6 @@
         days: base.days.map(d => ({
           name: d.name,
           exercises: d.exercises.map(x => {
-            const ex = byId(x.id);
             const last = suggestWeight(x.id);
             const baseW = last ? last.suggested : 20;
             const factor = isDeload ? 0.6 : 1 + (w - 1) * 0.025;
@@ -1541,11 +1544,17 @@
       });
     }
     const id = "meso-" + Date.now().toString(36);
-    const prog = { id, name: base.name + " — Mesocycle", tagline: "4-week periodized plan with deload",
+    const prog = { id, name: base.name + " — Mesocycle", tagline: "4-week periodized plan with deload week 4",
       custom: true, level: "custom", daysPerWeek: base.days.length, weeks: 4, equipment: base.equipment || "Mixed",
       mesocycle: weeks, days: base.days };
     const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
-    location.hash = "#/program/" + id;
+    // show success with link
+    $("coachTool").innerHTML = `
+      <div class="onerm-box" style="border-color:var(--volt)">
+        <b>Mesocycle created!</b>
+        <p class="muted" style="margin:8px 0">4 weeks: progressive overload weeks 1-3 (+2.5%/week), deload week 4 (60% volume).</p>
+        <a class="btn btn-primary btn-sm" href="#/program/${id}">View mesocycle</a>
+      </div>`;
   }
   // RPE tracking helpers
   function getRPE(exId) {
@@ -1842,7 +1851,7 @@
     a.click();
   }
   function shareProgramURL(progId) {
-    const prog = getProgram(progId);
+    const prog = progById(progId);
     if (!prog) return "";
     const json = JSON.stringify({ n: prog.name, d: prog.days.map(d => ({ n: d.name, e: d.exercises.map(x => [x.id, x.sets, x.reps]) })) });
     const b64 = btoa(unescape(encodeURIComponent(json)));
@@ -2156,7 +2165,25 @@
         }
       };
     }
-    $("pgDays").innerHTML = p.days.map((d, di) => {
+    $("pgDays").innerHTML = p.mesocycle
+      ? `<div class="onerm-box" style="margin-bottom:16px"><b>Periodized plan:</b> <span class="muted">Weights increase 2.5% weekly. Week 4 is a deload at 60%.</span></div>` +
+        p.mesocycle.map(w => `
+          <h3 style="margin:20px 0 12px">${w.deload ? "Week " + w.week + " — Deload" : "Week " + w.week}</h3>
+          ${w.days.map((d, di) => `
+            <div class="day-card">
+              <div class="day-head">
+                <h3>${esc(d.name)}</h3>
+                ${!w.deload || w.week === 1 ? `<a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>` : ""}
+              </div>
+              <div class="day-exercises">
+                ${d.exercises.map(x => {
+                  const ex = byId(x.id);
+                  return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex.name)}</b><span>${x.sets} × ${esc(x.reps)} @ ${fmtW(x.weight)}</span></div>`;
+                }).join("")}
+              </div>
+            </div>`).join("")}
+        `).join("")
+      : p.days.map((d, di) => {
       const key = p.id + ":" + di;
       const times = (done[key] || []).length;
       return `<div class="day-card">
@@ -2173,8 +2200,6 @@
       </div>`;
     }).join("");
   }
-
-  // WORKOUT MODE
   let timerInt = null, timerLeft = 0, currentWorkout = null;
   function getRestSeconds(ex) {
     const s = getSettings();

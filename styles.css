@@ -388,6 +388,9 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .modal-x .ic { width: 16px; height: 16px; }
 .modal-x:hover { color: var(--ink); }
 .setting-label { font-weight: 700; font-size: 14px; margin: 14px 0 10px; }
+.field-label { font-weight: 700; font-size: 14px; margin: 0 0 8px; display: block; }
+.field-group { margin-bottom: 16px; }
+.field-group:last-child { margin-bottom: 0; }
 .setting-note { font-size: 13px; margin-top: 12px; }
 .accent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .accent-pick {
