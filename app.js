@@ -2095,7 +2095,13 @@
       <button class="btn btn-primary btn-sm" id="mSave">Log measurements</button>
       <div id="mChart"></div>
       <h3 style="margin-top:24px">Progress photos</h3>
-      <input type="file" id="photoInput" accept="image/*" style="margin:12px 0" />
+      <div style="display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap">
+        <label class="btn btn-ghost" style="cursor:pointer;margin:0">
+          Choose file
+          <input type="file" id="photoInput" accept="image/*" style="display:none" />
+        </label>
+        <span class="muted" id="photoFileName" style="font-size:14px">No file chosen</span>
+      </div>
       <div class="photo-grid" id="photoGrid"></div>`;
     renderMeasureChart();
     renderPhotos();
@@ -2108,7 +2114,12 @@
       const all = getMeasures(); all.push(entry); saveMeasures(all);
       renderBodyTab(body);
     });
-    $("photoInput").addEventListener("change", handlePhotoUpload);
+    $("photoInput").addEventListener("change", (e) => {
+      const fn = e.target.files[0] ? e.target.files[0].name : "No file chosen";
+      const label = $("photoFileName");
+      if (label) label.textContent = fn;
+      handlePhotoUpload(e);
+    });
   }
   function renderMeasureChart() {
     const measures = getMeasures().filter(m => m.weight);
@@ -2299,7 +2310,7 @@
     const sp = $("pgStop");
     if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
     if (p.custom) {
-      $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">${t("b_delete")}</button>`;
+      $("pgActions").innerHTML += ` <button class="btn btn-ghost danger" id="pgDelete">${t("b_delete")}</button>`;
       $("pgDelete").onclick = () => {
         if (confirm(`Delete "${p.name}"? This cannot be undone.`)) {
           if (getActiveProg() === p.id) setActiveProg(null);
