@@ -67,7 +67,8 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 80px; }
 .toolbar { display: flex; flex-direction: column; gap: 14px; margin: 18px 0 24px; }
 #search { background: var(--surface); border: 1px solid var(--line); color: var(--ink); border-radius: 12px; padding: 14px 18px; font-size: 16px; width: 100%; }
 #search:focus { outline: none; border-color: var(--volt); }
-.chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
 .chip { white-space: nowrap; background: var(--surface); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .chip.on { background: var(--volt); color: #0b0d12; border-color: var(--volt); }
 .selects { display: flex; gap: 10px; }
@@ -484,7 +485,8 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 
 /* nav scroll on small screens */
 @media (max-width: 760px) {
-  .nav { max-width: 56vw; overflow-x: auto; }
+  .nav { max-width: 56vw; overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
   .nav a { font-size: 13px; padding: 8px 12px; }
 }
 
@@ -555,3 +557,19 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .swap-card .ic { width: 16px; height: 16px; color: var(--muted); }
 .btn.danger { color: #ff7a7a; border-color: #5c2a2a; }
 .btn.danger:hover { background: #2a1a1a; border-color: #ff7a7a; }
+
+/* ================= custom scrollbar ================= */
+:root { color-scheme: dark; }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2e3542 transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: #2e3542;
+  border-radius: 8px;
+  border: 2px solid #0b0e13;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--volt); border-color: #0b0e13; }
+*::-webkit-scrollbar-corner { background: transparent; }
