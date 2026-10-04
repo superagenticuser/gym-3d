@@ -194,13 +194,13 @@
   <line x1="12" x2="15" y1="14" y2="11" />
   <circle cx="12" cy="14" r="8" /></svg>Rest timer. Tap a duration to start</p>
       <button class="btn btn-ghost btn-sm" id="plateBtn" style="margin-top:8px">Plate calculator</button>
-      <button class="btn btn-ghost btn-sm" id="voiceBtn" style="margin-top:8px">🎤 Voice log</button>
+      <button class="btn btn-ghost btn-sm" id="voiceBtn" style="margin-top:8px"><span data-icon="mic"></span> Voice log</button>
       <p class="muted" id="voiceStatus" style="font-size:13px;margin-top:6px"></p>
     </div>
     <div id="woList"></div>
     <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
     <div class="done-banner hidden" id="woDone">
-      <h3>Workout complete. 💪</h3>
+      <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
       <p class="muted">Logged. Keep the streak going.</p>
       <div style="display:flex;gap:10px;justify-content:center;margin:12px 0">
         <button class="btn btn-primary btn-sm" id="shareCard">Share summary</button>
@@ -216,7 +216,7 @@
   <section id="view-favorites" class="view hidden">
     <h2 class="section-title" data-i18n="fav_title">Your favorites</h2>
     <div class="cards" id="favGrid"></div>
-    <p class="muted hidden" id="favEmpty">Nothing saved yet. Tap ♡ on any exercise.</p>
+    <p class="muted hidden" id="favEmpty" style="display:flex;align-items:center;gap:8px"><span data-icon="heart"></span> Nothing saved yet. Tap the heart on any exercise.</p>
   </section>
 
   <!-- PROGRESS -->
@@ -325,7 +325,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v9</p>
+    <p class="muted foot-copy">© 2026 FORGE · v9.1</p>
   </div>
 </footer>
 

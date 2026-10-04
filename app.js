@@ -406,7 +406,7 @@
       body_title: "3D Body Map", body_lede: "Click any muscle on the body to see every exercise that trains it.",
       body_front: "Front", body_back: "Back", body_muscles: "Muscles", body_recovery: "Recovery",
       body_hint: "Drag to rotate · scroll to zoom · click a muscle",
-      fav_title: "Your favorites", fav_empty: "Nothing saved yet. Tap ♡ on any exercise.",
+      fav_title: "Your favorites", fav_empty: "Nothing saved yet. Tap the heart on any exercise.",
       progress_title: "Progress", tab_overview: "Overview", tab_history: "History", tab_records: "Records", tab_volume: "Volume",
       set_title: "Settings", set_accent: "Accent color", set_accent_note: "Applies across the app, including the 3D body ring.",
       set_units: "Units", set_myeq: "My equipment", set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
@@ -431,7 +431,7 @@
       body_title: "Corps 3D", body_lede: "Cliquez sur un muscle pour voir tous les exercices qui le travaillent.",
       body_front: "Avant", body_back: "Arrière", body_muscles: "Muscles", body_recovery: "Récupération",
       body_hint: "Glisser pour pivoter · défiler pour zoomer · cliquer un muscle",
-      fav_title: "Mes favoris", fav_empty: "Rien enregistré. Touchez ♡ sur un exercice.",
+      fav_title: "Mes favoris", fav_empty: "Rien enregistré. Touchez le cœur sur un exercice.",
       progress_title: "Progrès", tab_overview: "Aperçu", tab_history: "Historique", tab_records: "Records", tab_volume: "Volume",
       set_title: "Réglages", set_accent: "Couleur d'accent", set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
       set_units: "Unités", set_myeq: "Mon équipement", set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
@@ -1166,32 +1166,52 @@
 
   // VOICE LOGGING
   let voiceRec = null;
+  function setVoiceBtn(listening) {
+    const b = $("voiceBtn"); if (!b) return;
+    b.innerHTML = (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") + (listening ? " Stop" : " Voice log");
+  }
   function toggleVoiceLog() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { alert("Voice not supported in this browser."); return; }
-    if (voiceRec) { voiceRec.stop(); voiceRec = null; $("voiceBtn").textContent = "🎤 Voice log"; return; }
+    if (voiceRec) { voiceRec.stop(); voiceRec = null; setVoiceBtn(false); return; }
     voiceRec = new SR();
     voiceRec.lang = "en-US";
     voiceRec.onresult = e => {
-      const text = e.results[0][0].transcript.toLowerCase();
+      let text = e.results[0][0].transcript.toLowerCase();
+      // convert word numbers to digits (speech recognition often hears "ten" not "10")
+      const WORDS = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
+        eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19, twenty:20,
+        thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90, hundred:100 };
+      text = text.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b/g, w => WORDS[w]);
+      // handle "twenty five" style compounds
+      text = text.replace(/(\d+)\s+(\d+)\b/g, (m, a, b) => (parseInt(a) >= 20 && parseInt(b) < 10) ? String(parseInt(a) + parseInt(b)) : m);
       const repsM = text.match(/(\d+)\s*reps?/);
       const wM = text.match(/(\d+(?:\.\d+)?)\s*(kg|kilos?|lb|lbs|pounds?)/);
-      if (repsM || wM) {
+      // fallback: two bare numbers = reps then weight (e.g. "10 60")
+      let reps = repsM ? repsM[1] : null, weight = wM ? wM[1] : null, wUnit = wM ? wM[2] : null;
+      if (!reps && !weight) {
+        const nums = text.match(/\d+(?:\.\d+)?/g);
+        if (nums && nums.length >= 2) { reps = nums[0]; weight = nums[1]; }
+        else if (nums && nums.length === 1) { reps = nums[0]; }
+      }
+      if (reps || weight) {
         const rows = document.querySelectorAll(".set-row2:not(.voiced)");
         if (rows.length) {
           const row = rows[0];
           row.classList.add("voiced");
-          if (repsM) {
+          if (reps) {
             const inp = row.querySelector('input[data-f="reps"]');
-            if (inp) inp.value = repsM[1];
+            if (inp) { inp.value = reps; inp.dispatchEvent(new Event("input", { bubbles: true })); }
           }
-          if (wM) {
+          if (weight) {
             const inp = row.querySelector('input[data-f="weight"]');
             if (inp) {
-              let v = parseFloat(wM[1]);
-              if (/lb|lbs|pound/.test(wM[2]) && getSettings().units === "kg") v = v * 0.453592;
-              if (/kg|kilo/.test(wM[2]) && getSettings().units === "lb") v = v * 2.20462;
+              let v = parseFloat(weight);
+              const unit = wUnit || "";
+              if (/lb|lbs|pound/.test(unit) && getSettings().units === "kg") v = v * 0.453592;
+              if (/kg|kilo/.test(unit) && getSettings().units === "lb") v = v * 2.20462;
               inp.value = Math.round(v * 10) / 10;
+              inp.dispatchEvent(new Event("input", { bubbles: true }));
             }
           }
           const btn = row.querySelector(".set-done");
@@ -1202,9 +1222,9 @@
         $("voiceStatus").textContent = `Heard: "${text}" — try "10 reps 60 kilos"`;
       }
     };
-    voiceRec.onend = () => { voiceRec = null; const b = $("voiceBtn"); if (b) b.textContent = "🎤 Voice log"; };
+    voiceRec.onend = () => { voiceRec = null; setVoiceBtn(false); };
     voiceRec.start();
-    $("voiceBtn").textContent = "⏹ Stop";
+    setVoiceBtn(true);
     $("voiceStatus").textContent = "Listening… say \"10 reps 60 kilos\"";
   }
 
@@ -1316,7 +1336,7 @@
         const pct = Math.min(100, Math.round(cur / c.target * 100));
         const done = cur >= c.target;
         return `<div class="badge-card ${done ? "earned" : ""}">
-          <div class="badge-icon">${done ? "🏆" : "🎯"}</div>
+          <div class="badge-icon">${window.FORGE_ICON ? window.FORGE_ICON(done ? "trophy" : "target") : ""}</div>
           <b>${c.name}</b><span>${c.desc}</span>
           <div style="margin-top:8px;background:var(--surface2);border-radius:999px;height:8px;overflow:hidden">
             <div style="width:${pct}%;height:100%;background:var(--volt)"></div>
@@ -1330,24 +1350,32 @@
   function streakCalendar(log) {
     const dates = new Set(log.map(w => w.date));
     const today = new Date();
-    let html = `<div class="cal-grid">`;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let html = `<div class="cal-months">`;
+    let lastMonth = -1;
     for (let i = 55; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const key = fmtDate(d);
       const isToday = i === 0;
+      const m = d.getMonth();
+      if (m !== lastMonth) {
+        if (lastMonth !== -1) html += `</div><div class="cal-month"><div class="cal-month-label">${months[m]}</div><div class="cal-grid">`;
+        else html += `<div class="cal-month"><div class="cal-month-label">${months[m]}</div><div class="cal-grid">`;
+        lastMonth = m;
+      }
       html += `<div class="cal-day ${dates.has(key) ? "has" : ""} ${isToday ? "today" : ""}" title="${key}">${d.getDate()}</div>`;
     }
-    return html + `</div>`;
+    return html + `</div></div>`;
   }
   const BADGES = [
-    { id: "first", icon: "🎯", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
-    { id: "ten", icon: "🔥", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 },
-    { id: "fifty", icon: "💪", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
-    { id: "streak7", icon: "⚡", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
-    { id: "streak30", icon: "🌟", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
-    { id: "vol10k", icon: "🏋️", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0) >= 10000) },
-    { id: "allmuscles", icon: "🗺️", name: "Full body", desc: "Train all 17 muscle groups", check: log => {
+    { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
+    { id: "ten", icon: "flame", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 },
+    { id: "fifty", icon: "dumbbell", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
+    { id: "streak7", icon: "zap", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
+    { id: "streak30", icon: "star", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
+    { id: "vol10k", icon: "dumbbell", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0) >= 10000) },
+    { id: "allmuscles", icon: "map", name: "Full body", desc: "Train all 17 muscle groups", check: log => {
       const groups = new Set();
       log.forEach(w => w.exercises.forEach(x => { const ex = byId(x.id); if (ex) groups.add(ex.primary); }));
       return groups.size >= 17;
@@ -1380,7 +1408,7 @@
     body.innerHTML = `<h3>Achievements</h3><div class="badge-grid">` +
       BADGES.map(b => `
         <div class="badge-card ${earned.includes(b.id) ? "earned" : "locked"}">
-          <div class="badge-icon">${earned.includes(b.id) ? b.icon : "🔒"}</div>
+          <div class="badge-icon">${window.FORGE_ICON ? window.FORGE_ICON(earned.includes(b.id) ? b.icon : "lock") : ""}</div>
           <b>${b.name}</b><span>${b.desc}</span>
         </div>`).join("") + `</div>`;
   }
@@ -1511,7 +1539,7 @@
         <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
         <div class="stat-card"><b>${recoveryScore()}%</b><span>recovery</span></div>
       </div>
-      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>⚠️ Deload suggested:</b> <span class="muted">Volume dropping — consider a light week.</span></div>` : ""}
+      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping — consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 8 weeks</h3>
       ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set.</p>`;
@@ -1707,7 +1735,7 @@
           ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
-        ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0">💡 Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
+        ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0;display:flex;align-items:center;gap:6px">${window.FORGE_ICON ? window.FORGE_ICON("lightbulb") : ""} Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
         <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
         ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
