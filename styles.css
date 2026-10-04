@@ -437,7 +437,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 }
 .toggle[aria-checked="true"] { background: var(--volt); border-color: var(--volt); }
 .toggle[aria-checked="true"] .knob { left: 25px; background: var(--volt-ink); }
-.setting-btns { display: flex; gap: 10px; margin-top: 4px; }
+.setting-btns { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .btn.danger { color: #ff7a7a; border-color: #5c2a2a; }
 
 /* workout set rows */

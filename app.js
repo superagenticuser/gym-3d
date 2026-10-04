@@ -1321,6 +1321,7 @@
     const xp = getXP();
     body.innerHTML = `
       <h3>Training insights</h3>
+      <p class="muted" style="font-size:13px;margin-bottom:12px">Deep analysis of your training data. Ratios near 1.0 are balanced.</p>
       <div class="stat-grid">
         <div class="stat-card"><b>${xpLevel(xp.xp)}</b><span>level (${xp.xp.toLocaleString()} XP)</span></div>
         ${dots ? `<div class="stat-card"><b>${dots}</b><span>DOTS score</span></div>` : ""}
@@ -1340,15 +1341,25 @@
       <h3>Ask your coach</h3>
       <p class="muted">Answers from your own training data.</p>
       <div style="display:flex;gap:8px;margin:12px 0">
-        <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1" />
+        <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
         <button class="btn btn-primary btn-sm" id="coachAsk">Ask</button>
       </div>
       <div id="coachA" style="margin-top:12px"></div>
       <h3 style="margin-top:24px">Quick actions</h3>
+      <p class="muted" style="font-size:13px;margin-bottom:12px">Powerful tools for structured training.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" id="mesoBtn">4-week mesocycle</button>
-        <button class="btn btn-ghost btn-sm" id="warmupBtn">Warm-up calculator</button>
-        <button class="btn btn-ghost btn-sm" id="wodBtn">WOD timer</button>
+        <div style="flex:1;min-width:200px">
+          <button class="btn btn-ghost btn-sm" id="mesoBtn" style="width:100%">4-week mesocycle</button>
+          <p class="muted" style="font-size:12px;margin-top:6px">Auto-progressive 4-week plan with deload, built from any program.</p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <button class="btn btn-ghost btn-sm" id="warmupBtn" style="width:100%">Warm-up calculator</button>
+          <p class="muted" style="font-size:12px;margin-top:6px">Enter working weight, get exact warm-up sets.</p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <button class="btn btn-ghost btn-sm" id="wodBtn" style="width:100%">WOD timer</button>
+          <p class="muted" style="font-size:12px;margin-top:6px">AMRAP, Tabata, and EMOM timers with audio cues.</p>
+        </div>
       </div>
       <div id="coachTool" style="margin-top:16px"></div>
     `;
@@ -1361,7 +1372,7 @@
       $("mesoGo").addEventListener("click", () => generatePeriodized($("mesoBase").value));
     });
     $("warmupBtn").addEventListener("click", () => {
-      $("coachTool").innerHTML = `<p>Working weight (${getSettings().units}):</p><div style="display:flex;gap:8px"><input type="number" id="wuW" style="width:100px" /><button class="btn btn-primary btn-sm" id="wuGo">Calculate</button></div><div id="wuOut" style="margin-top:12px"></div>`;
+      $("coachTool").innerHTML = `<p>Working weight (${getSettings().units}):</p><div style="display:flex;gap:8px"><input type="number" id="wuW" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" /><button class="btn btn-primary btn-sm" id="wuGo">Calculate</button></div><div id="wuOut" style="margin-top:12px"></div>`;
       $("wuGo").addEventListener("click", () => {
         const sets = warmupSets($("wuW").value);
         $("wuOut").innerHTML = sets.map(s => `<p>${fmtW(s.weight)} × ${s.reps}</p>`).join("") || "<p class='muted'>Enter a weight.</p>";
@@ -1401,15 +1412,18 @@
     }
     out.innerHTML = `<div class="onerm-box"><b>Coach:</b> <span>${ans}</span></div>`;
   }
+  let wodInterval = null;
   function startWOD(type) {
+    if (wodInterval) { clearInterval(wodInterval); wodInterval = null; }
     const out = $("wodOut");
+    if (!out) return;
     let secs, label;
     if (type === "amrap") { secs = 1200; label = "AMRAP 20:00"; }
     else if (type === "tabata") { secs = 240; label = "Tabata 4:00"; }
     else { secs = 600; label = "EMOM 10:00"; }
     let left = secs;
     out.innerHTML = `<div style="font-size:48px;font-weight:800;color:var(--volt)">${label}</div><div id="wodTimer" style="font-size:36px"></div><button class="btn btn-ghost btn-sm" id="wodStop" style="margin-top:12px">Stop</button>`;
-    const iv = setInterval(() => {
+    wodInterval = setInterval(() => {
       left--;
       const m = Math.floor(left / 60), s = left % 60;
       const t = $("wodTimer");
@@ -1419,9 +1433,9 @@
         const cycle = (secs - left) % 30;
         if (cycle === 0 || cycle === 20) beep(cycle === 0 ? 880 : 440, 0.15);
       }
-      if (left <= 0) { clearInterval(iv); beep(880, 0.5); if (t) t.textContent = "Done!"; }
+      if (left <= 0) { clearInterval(wodInterval); wodInterval = null; beep(880, 0.5); if (t) t.textContent = "Done!"; }
     }, 1000);
-    $("wodStop").addEventListener("click", () => clearInterval(iv));
+    $("wodStop").addEventListener("click", () => { clearInterval(wodInterval); wodInterval = null; });
   }
 
   // PERSONAL CHALLENGES
@@ -1687,7 +1701,7 @@
   }
   // ============ V10: NUTRITION ============
   function proteinTarget() {
-    const m = getMeasurements();
+    const m = getMeasures();
     const last = m.length ? m[m.length - 1] : null;
     const bw = last && last.weight ? last.weight : 70;
     const goal = getSettings().goal || "maintain";
@@ -1741,7 +1755,7 @@
   }
   function dotsScore() {
     // DOTS formula (men), simplified polynomial
-    const m = getMeasurements();
+    const m = getMeasures();
     const last = m.length ? m[m.length - 1] : null;
     if (!last || !last.weight) return null;
     const bw = getSettings().units === "lb" ? last.weight * 0.453592 : last.weight;
