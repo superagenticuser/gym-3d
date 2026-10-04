@@ -89,8 +89,10 @@ select { background: var(--surface); border: 1px solid var(--line); color: var(-
 .heart.faved .ic { fill: currentColor; }
 
 /* detail */
-.back { color: var(--muted); font-weight: 600; display: inline-block; margin-bottom: 18px; }
+.back { color: var(--muted); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; }
 .back:hover { color: var(--volt); }
+.back-icon { display: inline-flex; align-items: center; }
+.back-icon .ic { width: 18px; height: 18px; }
 .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
 .stage { background: radial-gradient(500px 380px at 50% 32%, #161c2a, var(--bg)); border: 1px solid var(--line); border-radius: 20px; height: 520px; position: relative; overflow: hidden; cursor: grab; }
 .stage.tall { height: 640px; }
@@ -509,7 +511,8 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 /* builder */
 .builder-field { margin-bottom: 16px; }
 .builder-field label { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
-.builder-field input[type="text"] {
+.builder-field input[type="text"],
+.builder-field input[type="number"] {
   width: 100%; background: var(--surface); border: 1px solid var(--line); color: var(--ink);
   border-radius: 12px; padding: 12px 14px; font-size: 15px;
 }

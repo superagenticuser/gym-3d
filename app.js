@@ -116,21 +116,7 @@
     /* ---- head & neck (refined) ---- */
     ball(0.185, null, 0, 3.42, 0.015);
     const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
-    part(new THREE.CylinderGeometry(0.070, 0.098, 0.28, 18), null, 0, 3.15, 0);
-    // face — subtle features
-    const darkMat = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.65, metalness: 0 });
-    const feat = (geo, x, y, z, mat) => {
-      const m = new THREE.Mesh(geo, mat || darkMat); m.position.set(x, y, z); body.add(m); return m;
-    };
-    feat(new THREE.SphereGeometry(0.024, 14, 12), -0.064, 3.455, 0.158);
-    feat(new THREE.SphereGeometry(0.024, 14, 12), 0.064, 3.455, 0.158);
-    const nose = feat(new THREE.SphereGeometry(0.022, 12, 10), 0, 3.395, 0.185, neutralMat);
-    nose.scale.set(0.8, 1.15, 0.9);
-    feat(new THREE.BoxGeometry(0.075, 0.010, 0.012), 0, 3.335, 0.168);
-    for (const s of [-1, 1]) {
-      const ear = feat(new THREE.SphereGeometry(0.038, 12, 10), s * 0.178, 3.42, 0.01, neutralMat);
-      ear.scale.set(0.45, 1.0, 0.7);
-    }
+    part(new THREE.CylinderGeometry(0.075, 0.095, 0.18, 18), null, 0, 3.12, 0);
 
     /* ---- torso: organic lathe core + muscle overlays ---- */
     const profile = [
@@ -1559,6 +1545,9 @@
   }
   $("settingsBtn").addEventListener("click", openSettings);
   $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+  document.querySelectorAll("[data-icon]").forEach(el => {
+    if (window.FORGE_ICON) el.innerHTML = window.FORGE_ICON(el.dataset.icon);
+  });
   $("settingsClose").addEventListener("click", closeSettings);
   $("settingsVeil").addEventListener("click", e => { if (e.target.id === "settingsVeil") closeSettings(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSettings(); closeQuiz(); } });
