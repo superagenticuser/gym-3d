@@ -1340,9 +1340,12 @@
     body.innerHTML = `
       <h3>Ask your coach</h3>
       <p class="muted">Answers from your own training data.</p>
-      <div style="display:flex;gap:8px;margin:12px 0">
-        <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
-        <button class="btn btn-primary btn-sm" id="coachAsk">Ask</button>
+      <div class="field-group" style="margin-top:12px">
+        <label class="field-label" for="coachQ">Your question</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+          <button class="btn btn-primary btn-sm" id="coachAsk">Ask</button>
+        </div>
       </div>
       <div id="coachA" style="margin-top:12px"></div>
       <h3 style="margin-top:24px">Quick actions</h3>
@@ -1393,7 +1396,15 @@
       });
     });
     $("warmupBtn").addEventListener("click", () => {
-      $("coachTool").innerHTML = `<p>Working weight (${getSettings().units}):</p><div style="display:flex;gap:8px"><input type="number" id="wuW" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" /><button class="btn btn-primary btn-sm" id="wuGo">Calculate</button></div><div id="wuOut" style="margin-top:12px"></div>`;
+      $("coachTool").innerHTML = `
+        <div class="field-group">
+          <label class="field-label" for="wuW">Working weight (${getSettings().units})</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="wuW" style="width:140px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+            <button class="btn btn-primary btn-sm" id="wuGo">Calculate</button>
+          </div>
+        </div>
+        <div id="wuOut" style="margin-top:12px"></div>`;
       $("wuGo").addEventListener("click", () => {
         const sets = warmupSets($("wuW").value);
         $("wuOut").innerHTML = sets.map(s => `<p>${fmtW(s.weight)} × ${s.reps}</p>`).join("") || "<p class='muted'>Enter a weight.</p>";
