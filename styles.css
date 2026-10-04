@@ -151,6 +151,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .day-head h3 { font-size: 20px; }
 .done-mark { color: var(--volt); font-size: 14px; font-weight: 700; margin-left: 8px; }
 .btn-sm { padding: 10px 22px; font-size: 14px; }
+.btn .ic { display: block; }
 .btn-block { width: 100%; margin-top: 22px; text-align: center; }
 
 /* ---------- workout mode ---------- */
@@ -330,7 +331,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 }
 
 /* ================= v5: icon library + settings + accents ================= */
-.ic { width: 18px; height: 18px; flex-shrink: 0; }
+.ic { width: 18px; height: 18px; flex-shrink: 0; display: block; }
 [data-icon] { display: inline-flex; align-items: center; }
 [data-icon] .ic { width: 18px; height: 18px; }
 .nav a .ic { width: 16px; height: 16px; }
