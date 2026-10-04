@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.2" />
+<link rel="stylesheet" href="styles.css?v=10.3" />
 </head>
 <body>
 <header class="topbar">
@@ -329,18 +329,22 @@
         <button class="seg" data-e="5">5</button>
       </div>
       <p class="setting-label" style="margin-top:12px">Water (ml)</p>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
         <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
-        <span class="muted" id="waterToday" style="align-self:center"></span>
+        <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
+        <span class="muted" id="waterToday"></span>
       </div>
       <p class="setting-label" style="margin-top:12px">Protein (g)</p>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <input type="number" id="ciProtein" min="0" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
         <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
-        <span class="muted" id="proteinToday" style="align-self:center"></span>
+        <button class="btn btn-ghost btn-sm" id="proteinClear">Clear</button>
+        <span class="muted" id="proteinToday"></span>
       </div>
       <button class="btn btn-primary btn-sm" id="checkinSave" style="margin-top:16px">Save check-in</button>
+      <h3 style="margin-top:24px">Last 7 days</h3>
+      <div id="checkinHistory"></div>
     </div>
   </div>
 </div>
@@ -360,7 +364,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.2</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.3</p>
   </div>
 </footer>
 

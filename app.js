@@ -1496,6 +1496,32 @@
     const today = fmtDate(new Date());
     $("waterToday").textContent = `${getWater(today)} ml today`;
     $("proteinToday").textContent = `${getProtein(today)}g / ${proteinTarget()}g`;
+    renderCheckinHistory();
+  }
+  function renderCheckinHistory() {
+    const hist = getCheckinHistory(7);
+    const el = $("checkinHistory");
+    if (!el) return;
+    el.innerHTML = hist.map(h => {
+      const d = new Date(h.date + "T12:00:00");
+      const label = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+      const parts = [];
+      if (h.checkin) {
+        if (h.checkin.sleep) parts.push(`😴 ${h.checkin.sleep}h`);
+        if (h.checkin.energy) parts.push(`⚡ ${h.checkin.energy}/5`);
+      }
+      if (h.water) parts.push(`💧 ${h.water}ml`);
+      if (h.protein) parts.push(`🥩 ${h.protein}g`);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+        <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "—"}</div></div>
+        ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" style="padding:6px 12px;font-size:12px">Clear</button>` : ""}
+      </div>`;
+    }).join("");
+    el.querySelectorAll("[data-clearday]").forEach(b => b.addEventListener("click", () => {
+      const day = b.dataset.clearday;
+      setWater(day, 0); setProtein(day, 0);
+      updateTrackerLabels();
+    }));
   }
   function initCheckin() {
     $("checkinClose").addEventListener("click", () => $("checkinVeil").classList.add("hidden"));
@@ -1510,6 +1536,9 @@
     $("proteinAdd").addEventListener("click", () => {
       const v = parseFloat($("ciProtein").value) || 0;
       if (v > 0) { addProtein(fmtDate(new Date()), v); $("ciProtein").value = ""; updateTrackerLabels(); }
+    });
+    $("proteinClear").addEventListener("click", () => {
+      setProtein(fmtDate(new Date()), 0); updateTrackerLabels();
     });
     $("checkinSave").addEventListener("click", () => {
       saveCheckin(fmtDate(new Date()), { sleep: parseFloat($("ciSleep").value) || null, energy: ciEnergyVal, ts: Date.now() });
@@ -1688,8 +1717,36 @@
   function addWater(dateKey, ml) {
     try {
       const m = JSON.parse(localStorage.getItem("forge-water") || "{}");
-      m[dateKey] = (m[dateKey] || 0) + ml;
+      m[dateKey] = Math.max(0, (m[dateKey] || 0) + ml);
       localStorage.setItem("forge-water", JSON.stringify(m));
+    } catch (e) {}
+  }
+  function setWater(dateKey, ml) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-water") || "{}");
+      m[dateKey] = Math.max(0, ml);
+      localStorage.setItem("forge-water", JSON.stringify(m));
+    } catch (e) {}
+  }
+  function getCheckinHistory(days) {
+    try {
+      const all = JSON.parse(localStorage.getItem("forge-checkin") || "{}");
+      const water = JSON.parse(localStorage.getItem("forge-water") || "{}");
+      const protein = JSON.parse(localStorage.getItem("forge-protein") || "{}");
+      const out = [];
+      for (let i = 0; i < (days || 7); i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const key = fmtDate(d);
+        out.push({ date: key, checkin: all[key] || null, water: water[key] || 0, protein: protein[key] || 0 });
+      }
+      return out;
+    } catch (e) { return []; }
+  }
+  function setProtein(dateKey, g) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-protein") || "{}");
+      m[dateKey] = Math.max(0, g);
+      localStorage.setItem("forge-protein", JSON.stringify(m));
     } catch (e) {}
   }
   function getCycle() {
