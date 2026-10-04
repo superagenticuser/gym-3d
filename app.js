@@ -94,35 +94,6 @@
     const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
     const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
-    /* ---- sculpting: displace vertices for organic muscle continuity ---- */
-    function sculpt(geo, fn) {
-      const pos = geo.attributes.position;
-      const v = new THREE.Vector3();
-      for (let i = 0; i < pos.count; i++) {
-        v.fromBufferAttribute(pos, i);
-        fn(v, i);
-        pos.setXYZ(i, v.x, v.y, v.z);
-      }
-      geo.computeVertexNormals();
-      return geo;
-    }
-    // smooth bump: gaussian falloff
-    const bump = (dist, radius) => Math.exp(-(dist * dist) / (radius * radius));
-    // sculpted sphere: organic muscle belly with smooth falloff
-    function muscleBall(r, mid, x, y, z, scale, parent) {
-      const geo = sculpt(new THREE.SphereGeometry(r, 28, 22), (v) => {
-        // subtle organic noise for non-perfect surface
-        const n = Math.sin(v.x * 12.7) * Math.sin(v.y * 11.3) * Math.sin(v.z * 13.1) * 0.008 * r;
-        v.multiplyScalar(1 + n);
-      });
-      const m = new THREE.Mesh(geo, mid ? matFor(mid) : neutralMat);
-      m.position.set(x, y, z);
-      if (scale) m.scale.set(scale[0], scale[1], scale[2]);
-      if (mid) { m.userData.muscle = mid; muscleMeshes.push(m); }
-      (parent || body).add(m);
-      return m;
-    }
-
     function part(geo, mid, x, y, z, parent) {
       const m = new THREE.Mesh(geo, mid ? matFor(mid) : neutralMat);
       m.position.set(x, y, z);
@@ -155,91 +126,74 @@
       const trapNeck = capMesh(0.065, V3(s * 0.04, 3.10, -0.02), V3(s * 0.12, 2.98, -0.03), "traps");
     }
 
-    /* ---- torso: ONE continuous sculpted mesh ---- */
-    // High-res base, muscles sculpted via vertex displacement for seamless continuity
-    const torsoGeo = new THREE.CylinderGeometry(0.21, 0.16, 1.25, 48, 40, false);
-    torsoGeo.translate(0, 2.45, 0);
-    sculpt(torsoGeo, (v) => {
-      const y = v.y;
-      const angle = Math.atan2(v.z, v.x); // 0 = front (+z), PI = back
-      const frontness = Math.cos(angle); // 1 = front, -1 = back
-      const sidedness = Math.abs(Math.sin(angle)); // 1 = side
-      let r = Math.hypot(v.x, v.z);
-      if (r < 0.001) return;
-      const nx = v.x / r, nz = v.z / r;
-
-      // V-taper: wider at chest, narrower at waist
-      let targetR = r;
-      if (y > 2.6 && y < 2.9) targetR *= 1.12; // chest expansion
-      if (y > 2.2 && y < 2.5) targetR *= 0.92; // waist narrowing
-
-      // Pecs: front upper bulge
-      if (frontness > 0.3 && y > 2.58 && y < 2.82) {
-        const d = Math.hypot(y - 2.70, (Math.abs(v.x) - 0.12) * 2);
-        targetR += 0.045 * bump(d, 0.14) * frontness;
-      }
-      // Abs: front segmented definition
-      if (frontness > 0.5 && y > 2.28 && y < 2.58) {
-        const row = Math.floor((2.58 - y) / 0.10);
-        const rowY = 2.53 - row * 0.10;
-        const d = Math.hypot(y - rowY, Math.abs(v.x) - 0.065);
-        targetR += 0.018 * bump(d, 0.055) * frontness;
-        // center line groove
-        if (Math.abs(v.x) < 0.02) targetR -= 0.008;
-      }
-      // Lats: back/side wings
-      if (frontness < -0.2 && y > 2.35 && y < 2.70) {
-        const d = Math.hypot(y - 2.55, (sidedness - 0.85) * 0.5);
-        targetR += 0.035 * bump(d, 0.18);
-      }
-      // Traps: upper back slope
-      if (frontness < 0 && y > 2.85 && y < 3.02) {
-        targetR += 0.030 * bump(y - 2.94, 0.09) * (0.5 - frontness * 0.5);
-      }
-      // Obliques: side definition
-      if (sidedness > 0.7 && y > 2.30 && y < 2.55) {
-        targetR += 0.015 * bump(y - 2.42, 0.12);
-      }
-
-      const nr = targetR / r;
-      v.x = nx * targetR; v.z = nz * targetR;
-    });
-    const torsoMesh = new THREE.Mesh(torsoGeo, neutralMat.clone());
-    torsoMesh.userData.muscle = "torso";
-    torsoMesh.userData.isTorso = true;
-    body.add(torsoMesh);
-    muscleMeshes.push(torsoMesh);
-    // Torso muscle regions for highlighting
-    const torsoMuscles = ["chest", "abs", "lats", "back", "obliques", "traps", "lower-back"];
-    // Map torso click position to specific muscle
-    function torsoMuscleAt(point) {
-      const y = point.y;
-      // Convert to local torso space (torso is at origin, so world = local)
-      // Front is +z, back is -z
-      const frontness = point.z > 0.05 ? 1 : (point.z < -0.05 ? -1 : 0);
-      const side = Math.abs(point.x) > 0.15;
-      if (y > 2.58 && y < 2.85) {
-        if (frontness === 1) return "chest";
-        if (frontness === -1) return side ? "lats" : "back";
-        if (side) return "lats";
-        return "back";
-      }
-      if (y > 2.85) {
-        return "traps";
-      }
-      if (y > 2.25 && y < 2.58) {
-        if (frontness === 1 && Math.abs(point.x) < 0.12) return "abs";
-        if (side) return "obliques";
-        if (frontness === -1) return "lower-back";
-        return "abs";
-      }
-      return "abs";
-    }
-    const pelvis = muscleBall(0.215, null, 0, 1.845, 0, [1.02, 0.72, 0.82]);
+    /* ---- torso: athletic V-taper with defined musculature ---- */
+    const profile = [
+      [0.012, 1.90], [0.148, 1.92], [0.188, 2.00], [0.175, 2.14], [0.162, 2.28],
+      [0.170, 2.42], [0.198, 2.56], [0.225, 2.68], [0.232, 2.76], [0.208, 2.86],
+      [0.148, 2.94], [0.094, 3.00], [0.070, 3.07]
+    ].map(p => new THREE.Vector2(p[0], p[1]));
+    const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 36), neutralMat);
+    body.add(torsoCore);
+    // traps: full sweep from neck to shoulders, thicker
     for (const s of [-1, 1]) {
-      muscleBall(0.165, "glutes", s * 0.148, 1.74, -0.115, [1, 1.12, 0.88]);
-      muscleBall(0.105, "glutes", s * 0.235, 1.84, -0.055, [0.9, 1.1, 0.8]);
+      capMesh(0.095, V3(s * 0.05, 3.02, -0.01), V3(s * 0.32, 2.88, -0.02), "traps");
+      const trapMid = ball(0.095, "traps", s * 0.18, 2.96, -0.015);
+      trapMid.scale.set(1.4, 0.7, 0.8);
     }
+    // pecs: defined with upper/lower separation, sternum gap
+    for (const s of [-1, 1]) {
+      const pecUpper = ball(0.135, "chest", s * 0.125, 2.74, 0.148);
+      pecUpper.scale.set(1.25, 0.65, 0.52);
+      pecUpper.rotation.z = s * -0.15;
+      const pecLower = ball(0.125, "chest", s * 0.135, 2.63, 0.142);
+      pecLower.scale.set(1.30, 0.60, 0.48);
+      pecLower.rotation.z = s * -0.10;
+    }
+    // abs: 6-pack with defined separations
+    for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
+      const ab = ball(0.072, "abs", s * 0.068, 2.48 - r * 0.125, 0.150);
+      ab.scale.set(1.20, 0.90, 0.55);
+    }
+    // linea alba (center line) subtle
+    // serratus anterior: finger-like projections on sides
+    for (const s of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const ser = ball(0.045, "obliques", s * 0.195, 2.58 - i * 0.09, 0.095);
+        ser.scale.set(0.7, 1.1, 0.6);
+        ser.rotation.z = s * 0.3;
+      }
+    }
+    // obliques: defined external obliques
+    for (const s of [-1, 1]) {
+      capMesh(0.062, V3(s * 0.180, 2.52, 0.055), V3(s * 0.200, 2.26, 0.045), "obliques");
+      const obBlade = ball(0.075, "obliques", s * 0.190, 2.40, 0.050);
+      obBlade.scale.set(0.6, 1.3, 0.7);
+    }
+    // lats: wider, more flared wings
+    for (const s of [-1, 1]) {
+      const l = ball(0.155, "lats", s * 0.195, 2.54, -0.125);
+      l.scale.set(0.52, 1.30, 0.44); l.rotation.z = s * 0.14;
+      const latLow = ball(0.095, "lats", s * 0.165, 2.32, -0.115);
+      latLow.scale.set(0.55, 1.1, 0.45);
+    }
+    // upper back: rhomboids + mid traps
+    const ub = ball(0.150, "back", 0, 2.72, -0.140); ub.scale.set(1.25, 0.72, 0.44);
+    for (const s of [-1, 1]) {
+      const rhomb = ball(0.075, "back", s * 0.085, 2.68, -0.135);
+      rhomb.scale.set(0.8, 1.1, 0.5);
+      rhomb.rotation.z = s * 0.25;
+    }
+    for (const s of [-1, 1])                                   // erector spinae: thicker
+      capMesh(0.068, V3(s * 0.068, 2.24, -0.152), V3(s * 0.068, 1.96, -0.152), "lower-back");
+    const pelvis = ball(0.215, null, 0, 1.845, 0); pelvis.scale.set(1.02, 0.72, 0.82);
+    for (const s of [-1, 1]) {                                 // glutes: fuller
+      const gl = ball(0.165, "glutes", s * 0.148, 1.74, -0.115);
+      gl.scale.set(1, 1.12, 0.88);
+      const glMed = ball(0.105, "glutes", s * 0.235, 1.84, -0.055);
+      glMed.scale.set(0.9, 1.1, 0.8);
+    }
+    // shoulder blend
+    for (const s of [-1, 1]) ball(0.115, null, s * 0.27, 2.82, 0);
 
     /* ---- arms: defined delts, bicep peak, tricep horseshoe ---- */
     for (const s of [-1, 1]) {
@@ -328,31 +282,15 @@
     function highlight(primaryIds, secondaryIds, allSoft) {
       hlState = { p: primaryIds || [], s: secondaryIds || [], soft: !!allSoft };
       reset();
-      // Reset torso
-      if (torsoMesh) {
-        torsoMesh.material.emissive.setHex(0x000000);
-        torsoMesh.material.emissiveIntensity = 0;
-        torsoMesh.material.color.setHex(vTheme.neutral);
-      }
       if (allSoft) {
         for (const id in mats) { mats[id].emissive.setHex(0xff5c1a); mats[id].emissiveIntensity = 0.38; }
         return;
       }
       (primaryIds || []).forEach(id => {
         if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.1; mats[id].color.setHex(vTheme.primary); }
-        // Highlight torso if it's a torso muscle
-        if (torsoMuscles.includes(id) && torsoMesh) {
-          torsoMesh.material.emissive.setHex(0xff3b1f);
-          torsoMesh.material.emissiveIntensity = 0.85;
-          torsoMesh.material.color.setHex(vTheme.primary);
-        }
       });
       (secondaryIds || []).forEach(id => {
         if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.55; }
-        if (torsoMuscles.includes(id) && torsoMesh && !(primaryIds || []).includes(id)) {
-          torsoMesh.material.emissive.setHex(0xff9f2e);
-          torsoMesh.material.emissiveIntensity = 0.45;
-        }
       });
     }
     function setAccent(hex) {
@@ -414,14 +352,7 @@
             ((e.clientX - r.left) / r.width) * 2 - 1,
             -((e.clientY - r.top) / r.height) * 2 + 1), camera);
           const hit = ray.intersectObjects(muscleMeshes, false)[0];
-          if (hit) {
-            let muscle = hit.object.userData.muscle;
-            // Map torso mesh clicks to specific muscle region
-            if (hit.object.userData.isTorso) {
-              muscle = torsoMuscleAt(hit.point);
-            }
-            opts.onMuscleClick(muscle);
-          }
+          if (hit) opts.onMuscleClick(hit.object.userData.muscle);
         }
         tapOK = false;
       }
@@ -2164,7 +2095,7 @@
       <button class="btn btn-primary btn-sm" id="mSave">Log measurements</button>
       <div id="mChart"></div>
       <h3 style="margin-top:24px">Progress photos</h3>
-      <input type="file" id="photoInput" accept="image/*" class="file-styled" style="margin:12px 0;max-width:100%" />
+      <input type="file" id="photoInput" accept="image/*" style="margin:12px 0" />
       <div class="photo-grid" id="photoGrid"></div>`;
     renderMeasureChart();
     renderPhotos();
