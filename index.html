@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.6" />
+<link rel="stylesheet" href="styles.css?v=10.7" />
 </head>
 <body>
 <header class="topbar">
@@ -203,10 +203,10 @@
     <div class="done-banner hidden" id="woDone">
       <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
       <p class="muted">Logged. Keep the streak going.</p>
-      <div style="display:flex;gap:10px;justify-content:center;margin:12px 0">
-        <button class="btn btn-primary btn-sm" id="shareCard">Share summary</button>
-        <button class="btn btn-ghost btn-sm" id="replayBtn">3D replay</button>
-        <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs">Back to programs</a>
+      <div style="display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="shareCard" style="white-space:nowrap">Share summary</button>
+        <button class="btn btn-ghost btn-sm" id="replayBtn" style="white-space:nowrap">3D replay</button>
+        <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs" style="white-space:nowrap">Back to programs</a>
       </div>
       <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
     </div>
@@ -364,7 +364,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.6</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.7</p>
   </div>
 </footer>
 

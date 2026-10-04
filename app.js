@@ -2458,7 +2458,11 @@
     $("woDone").classList.remove("hidden");
     $("woFinish").classList.add("hidden");
     clearInterval(timerInt); timerInt = null;
-    window.scrollTo(0, 0);
+    // scroll to the summary so the user sees it
+    setTimeout(() => {
+      const el = $("woDone");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   });
   $("shareCard").addEventListener("click", () => {
     if (!window._lastEntry) return;
