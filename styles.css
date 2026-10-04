@@ -371,7 +371,13 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   width: 17px; height: 17px; color: var(--muted); pointer-events: none;
 }
-.search-wrap input { width: 100%; padding-left: 40px !important; }
+.search-wrap input {
+  width: 100%; padding: 12px 14px 12px 40px !important;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 12px; font-size: 15px; font-family: inherit;
+}
+.search-wrap input:focus { outline: none; border-color: var(--volt); }
+.search-wrap input::placeholder { color: var(--muted); }
 
 /* settings modal */
 .modal-veil {
