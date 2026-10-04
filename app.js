@@ -208,22 +208,32 @@
     torsoMesh.userData.muscle = "torso";
     torsoMesh.userData.isTorso = true;
     body.add(torsoMesh);
+    muscleMeshes.push(torsoMesh);
     // Torso muscle regions for highlighting
     const torsoMuscles = ["chest", "abs", "lats", "back", "obliques", "traps", "lower-back"];
-    // Register torso regions for highlighting (transparent proxies for raycasting)
-    for (const [mid, x, y, z, sr] of [
-      ["chest", 0, 2.70, 0.16, 0.20], ["abs", 0, 2.43, 0.15, 0.18],
-      ["lats", 0, 2.55, -0.16, 0.20], ["back", 0, 2.75, -0.15, 0.18],
-      ["obliques", 0.19, 2.42, 0.03, 0.14], ["traps", 0, 2.95, -0.05, 0.16]
-    ]) {
-      for (const s of (x === 0 ? [0] : [-1, 1])) {
-        const proxyMat = matFor(mid).clone();
-        proxyMat.transparent = true; proxyMat.opacity = 0; proxyMat.depthWrite = false;
-        const proxy = new THREE.Mesh(new THREE.SphereGeometry(sr, 12, 10), proxyMat);
-        proxy.position.set(x === 0 ? 0 : s * Math.abs(x), y, z);
-        proxy.userData.muscle = mid; proxy.userData.proxy = true;
-        muscleMeshes.push(proxy); body.add(proxy);
+    // Map torso click position to specific muscle
+    function torsoMuscleAt(point) {
+      const y = point.y;
+      // Convert to local torso space (torso is at origin, so world = local)
+      // Front is +z, back is -z
+      const frontness = point.z > 0.05 ? 1 : (point.z < -0.05 ? -1 : 0);
+      const side = Math.abs(point.x) > 0.15;
+      if (y > 2.58 && y < 2.85) {
+        if (frontness === 1) return "chest";
+        if (frontness === -1) return side ? "lats" : "back";
+        if (side) return "lats";
+        return "back";
       }
+      if (y > 2.85) {
+        return "traps";
+      }
+      if (y > 2.25 && y < 2.58) {
+        if (frontness === 1 && Math.abs(point.x) < 0.12) return "abs";
+        if (side) return "obliques";
+        if (frontness === -1) return "lower-back";
+        return "abs";
+      }
+      return "abs";
     }
     const pelvis = muscleBall(0.215, null, 0, 1.845, 0, [1.02, 0.72, 0.82]);
     for (const s of [-1, 1]) {
@@ -404,7 +414,14 @@
             ((e.clientX - r.left) / r.width) * 2 - 1,
             -((e.clientY - r.top) / r.height) * 2 + 1), camera);
           const hit = ray.intersectObjects(muscleMeshes, false)[0];
-          if (hit) opts.onMuscleClick(hit.object.userData.muscle);
+          if (hit) {
+            let muscle = hit.object.userData.muscle;
+            // Map torso mesh clicks to specific muscle region
+            if (hit.object.userData.isTorso) {
+              muscle = torsoMuscleAt(hit.point);
+            }
+            opts.onMuscleClick(muscle);
+          }
         }
         tapOK = false;
       }
