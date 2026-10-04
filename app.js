@@ -1,4 +1,4 @@
-/* FORGE — 3D gym training app */
+/* FORGE - 3D gym training app */
 (function () {
   'use strict';
 
@@ -119,7 +119,6 @@
     const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
     // face: subtle brow, nose, chin for human read
     const brow = ball(0.045, null, 0, 3.46, 0.155); brow.scale.set(1.6, 0.5, 0.6);
-    const nose = ball(0.032, null, 0, 3.40, 0.175); nose.scale.set(0.8, 1.2, 0.9);
     part(new THREE.CylinderGeometry(0.075, 0.095, 0.18, 18), null, 0, 3.12, 0);
     // trapezius neck blend
     for (const s of [-1, 1]) {
@@ -1284,7 +1283,7 @@
     $("voiceStatus").textContent = "Listening… say \"10 reps 60 kilos\"";
   }
 
-  // AI COACH — generates a program from your history
+  // AI COACH - generates a program from your history
   function generateCoachProgram() {
     const log = getLog();
     const myEq = getSettings().myEquipment || [];
@@ -1379,8 +1378,8 @@
       <div class="stat-grid">
         <div class="stat-card"><b>${xpLevel(xp.xp)}</b><span>level (${xp.xp.toLocaleString()} XP)</span></div>
         ${dots ? `<div class="stat-card"><b>${dots}</b><span>DOTS score</span></div>` : ""}
-        <div class="stat-card"><b>${bal.ratio ? bal.ratio.toFixed(2) : "—"}</b><span>push/pull ratio</span></div>
-        <div class="stat-card"><b>${bal.legRatio ? bal.legRatio.toFixed(2) : "—"}</b><span>quad/ham ratio</span></div>
+        <div class="stat-card"><b>${bal.ratio ? bal.ratio.toFixed(2) : "-"}</b><span>push/pull ratio</span></div>
+        <div class="stat-card"><b>${bal.legRatio ? bal.legRatio.toFixed(2) : "-"}</b><span>quad/ham ratio</span></div>
       </div>
       ${bal.ratio > 1.3 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Push volume ${Math.round(bal.ratio * 100)}% of pull. Add more rows and pull-ups.</span></div>` : ""}
       ${bal.legRatio > 1.6 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Quads dominate hamstrings. Add Romanian deadlifts and leg curls.</span></div>` : ""}
@@ -1633,7 +1632,7 @@
   }
 
   // ============ V10: TRAINING INTELLIGENCE ============
-  // Periodization planner — 4-week mesocycle with progressive overload
+  // Periodization planner - 4-week mesocycle with progressive overload
   function generatePeriodized(baseProgId) {
     const base = progById(baseProgId);
     if (!base) {
@@ -1683,7 +1682,7 @@
       localStorage.setItem("forge-rpe", JSON.stringify(m));
     } catch (e) {}
   }
-  // Plateau detection — 3+ sessions without progress on a lift
+  // Plateau detection - 3+ sessions without progress on a lift
   function detectPlateaus() {
     const log = getLog();
     const byEx = {};
