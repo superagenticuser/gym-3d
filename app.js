@@ -87,8 +87,8 @@
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
 
     const body = new THREE.Group(); scene.add(body);
-    const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.52, metalness: 0.10 });
-    const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.62, metalness: 0.06 });
+    const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.45, metalness: 0.08 });
+    const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.55, metalness: 0.05 });
     const mats = {};
     const muscleMeshes = [];
     const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
@@ -113,72 +113,117 @@
     const ball = (r, mid, x, y, z, parent) => part(new THREE.SphereGeometry(r, 26, 20), mid, x, y, z, parent);
     const box = (w, h, d, mid, x, y, z, parent) => part(new THREE.BoxGeometry(w, h, d), mid, x, y, z, parent);
 
-    /* ---- head & neck (refined) ---- */
-    ball(0.185, null, 0, 3.42, 0.015);
+    /* ---- head & neck (anatomical) ---- */
+    const skull = ball(0.185, null, 0, 3.42, 0.015);
+    skull.scale.set(0.92, 1.05, 0.98);
     const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
+    // face: subtle brow, nose, chin for human read
+    const brow = ball(0.045, null, 0, 3.46, 0.155); brow.scale.set(1.6, 0.5, 0.6);
+    const nose = ball(0.032, null, 0, 3.40, 0.175); nose.scale.set(0.8, 1.2, 0.9);
     part(new THREE.CylinderGeometry(0.075, 0.095, 0.18, 18), null, 0, 3.12, 0);
+    // trapezius neck blend
+    for (const s of [-1, 1]) {
+      const trapNeck = capMesh(0.065, V3(s * 0.04, 3.10, -0.02), V3(s * 0.12, 2.98, -0.03), "traps");
+    }
 
-    /* ---- torso: organic lathe core + muscle overlays ---- */
+    /* ---- torso: athletic V-taper with defined musculature ---- */
     const profile = [
-      [0.012, 1.90], [0.155, 1.92], [0.198, 2.00], [0.186, 2.14], [0.172, 2.28],
-      [0.180, 2.42], [0.205, 2.56], [0.228, 2.68], [0.232, 2.76], [0.210, 2.86],
-      [0.150, 2.94], [0.096, 3.00], [0.072, 3.07]
+      [0.012, 1.90], [0.148, 1.92], [0.188, 2.00], [0.175, 2.14], [0.162, 2.28],
+      [0.170, 2.42], [0.198, 2.56], [0.225, 2.68], [0.232, 2.76], [0.208, 2.86],
+      [0.148, 2.94], [0.094, 3.00], [0.070, 3.07]
     ].map(p => new THREE.Vector2(p[0], p[1]));
-    const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 30), neutralMat);
+    const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 36), neutralMat);
     body.add(torsoCore);
-    // traps — sloped capsules from neck to shoulders
-    for (const s of [-1, 1])
-      capMesh(0.085, V3(s * 0.05, 3.03, -0.01), V3(s * 0.30, 2.90, -0.02), "traps");
-    // pecs — flatter, blended
+    // traps: full sweep from neck to shoulders, thicker
     for (const s of [-1, 1]) {
-      const p = ball(0.145, "chest", s * 0.14, 2.70, 0.145);
-      p.scale.set(1.30, 0.72, 0.48);
+      capMesh(0.095, V3(s * 0.05, 3.02, -0.01), V3(s * 0.32, 2.88, -0.02), "traps");
+      const trapMid = ball(0.095, "traps", s * 0.18, 2.96, -0.015);
+      trapMid.scale.set(1.4, 0.7, 0.8);
     }
-    // abs — six low blocks reading as definition, not attachments
+    // pecs: defined with upper/lower separation, sternum gap
+    for (const s of [-1, 1]) {
+      const pecUpper = ball(0.135, "chest", s * 0.125, 2.74, 0.148);
+      pecUpper.scale.set(1.25, 0.65, 0.52);
+      pecUpper.rotation.z = s * -0.15;
+      const pecLower = ball(0.125, "chest", s * 0.135, 2.63, 0.142);
+      pecLower.scale.set(1.30, 0.60, 0.48);
+      pecLower.rotation.z = s * -0.10;
+    }
+    // abs: 6-pack with defined separations
     for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
-      const ab = ball(0.068, "abs", s * 0.066, 2.48 - r * 0.12, 0.148);
-      ab.scale.set(1.25, 0.95, 0.50);
+      const ab = ball(0.072, "abs", s * 0.068, 2.48 - r * 0.125, 0.150);
+      ab.scale.set(1.20, 0.90, 0.55);
     }
-    // obliques
-    for (const s of [-1, 1])
-      capMesh(0.058, V3(s * 0.185, 2.52, 0.055), V3(s * 0.205, 2.26, 0.045), "obliques");
-    // lats — smooth flared wings hugging the back
+    // linea alba (center line) subtle
+    // serratus anterior: finger-like projections on sides
     for (const s of [-1, 1]) {
-      const l = ball(0.150, "lats", s * 0.19, 2.56, -0.125);
-      l.scale.set(0.50, 1.25, 0.42); l.rotation.z = s * 0.12;
+      for (let i = 0; i < 3; i++) {
+        const ser = ball(0.045, "obliques", s * 0.195, 2.58 - i * 0.09, 0.095);
+        ser.scale.set(0.7, 1.1, 0.6);
+        ser.rotation.z = s * 0.3;
+      }
     }
-    // upper back
-    const ub = ball(0.150, "back", 0, 2.70, -0.140); ub.scale.set(1.25, 0.70, 0.42);
-    for (const s of [-1, 1])                                   // erector spinae
-      capMesh(0.060, V3(s * 0.070, 2.22, -0.150), V3(s * 0.070, 1.98, -0.150), "lower-back");
+    // obliques: defined external obliques
+    for (const s of [-1, 1]) {
+      capMesh(0.062, V3(s * 0.180, 2.52, 0.055), V3(s * 0.200, 2.26, 0.045), "obliques");
+      const obBlade = ball(0.075, "obliques", s * 0.190, 2.40, 0.050);
+      obBlade.scale.set(0.6, 1.3, 0.7);
+    }
+    // lats: wider, more flared wings
+    for (const s of [-1, 1]) {
+      const l = ball(0.155, "lats", s * 0.195, 2.54, -0.125);
+      l.scale.set(0.52, 1.30, 0.44); l.rotation.z = s * 0.14;
+      const latLow = ball(0.095, "lats", s * 0.165, 2.32, -0.115);
+      latLow.scale.set(0.55, 1.1, 0.45);
+    }
+    // upper back: rhomboids + mid traps
+    const ub = ball(0.150, "back", 0, 2.72, -0.140); ub.scale.set(1.25, 0.72, 0.44);
+    for (const s of [-1, 1]) {
+      const rhomb = ball(0.075, "back", s * 0.085, 2.68, -0.135);
+      rhomb.scale.set(0.8, 1.1, 0.5);
+      rhomb.rotation.z = s * 0.25;
+    }
+    for (const s of [-1, 1])                                   // erector spinae: thicker
+      capMesh(0.068, V3(s * 0.068, 2.24, -0.152), V3(s * 0.068, 1.96, -0.152), "lower-back");
     const pelvis = ball(0.215, null, 0, 1.845, 0); pelvis.scale.set(1.02, 0.72, 0.82);
-    for (const s of [-1, 1]) {                                 // glutes
-      const gl = ball(0.16, "glutes", s * 0.15, 1.74, -0.115);
-      gl.scale.set(1, 1.12, 0.85);
-      ball(0.10, "glutes", s * 0.235, 1.83, -0.05);
+    for (const s of [-1, 1]) {                                 // glutes: fuller
+      const gl = ball(0.165, "glutes", s * 0.148, 1.74, -0.115);
+      gl.scale.set(1, 1.12, 0.88);
+      const glMed = ball(0.105, "glutes", s * 0.235, 1.84, -0.055);
+      glMed.scale.set(0.9, 1.1, 0.8);
     }
-    // shoulder blend — smooths arm into torso
+    // shoulder blend
     for (const s of [-1, 1]) ball(0.115, null, s * 0.27, 2.82, 0);
 
-    /* ---- arms (grouped at shoulder, slight A-pose) ---- */
+    /* ---- arms: defined delts, bicep peak, tricep horseshoe ---- */
     for (const s of [-1, 1]) {
       const g = new THREE.Group();
       g.position.set(s * 0.38, 2.84, 0);
-      ball(0.125, "front-delt", 0, 0.02, 0.095, g);
-      const sd = ball(0.135, "side-delt", s * 0.055, 0.0, 0.0, g);
-      sd.scale.set(0.95, 1.15, 0.95);
-      ball(0.115, "rear-delt", 0, 0.02, -0.10, g);
-      capMesh(0.105, V3(s * 0.03, -0.08, 0.05), V3(s * 0.045, -0.44, 0.055), "biceps", g);
-      const peak = ball(0.10, "biceps", s * 0.038, -0.20, 0.058, g);
-      peak.scale.set(1, 1.3, 1);
-      capMesh(0.10, V3(s * 0.03, -0.08, -0.055), V3(s * 0.045, -0.44, -0.06), "triceps", g);
-      ball(0.075, null, s * 0.05, -0.50, 0, g);                // elbow
-      // forearm in its own group for a natural slight bend + articulated hand
+      // deltoids: three distinct heads, capped
+      const deltF = ball(0.128, "front-delt", 0, 0.03, 0.098, g);
+      deltF.scale.set(1, 1.1, 0.95);
+      const deltS = ball(0.142, "side-delt", s * 0.058, 0.01, 0.0, g);
+      deltS.scale.set(0.95, 1.20, 0.95);
+      const deltR = ball(0.120, "rear-delt", 0, 0.03, -0.102, g);
+      deltR.scale.set(1, 1.05, 0.9);
+      // biceps: long head + short head with peak
+      capMesh(0.108, V3(s * 0.028, -0.08, 0.055), V3(s * 0.042, -0.42, 0.060), "biceps", g);
+      const peak = ball(0.105, "biceps", s * 0.036, -0.22, 0.062, g);
+      peak.scale.set(1, 1.35, 1.05);
+      // triceps: horseshoe with lateral head
+      capMesh(0.102, V3(s * 0.028, -0.08, -0.058), V3(s * 0.042, -0.42, -0.062), "triceps", g);
+      const triLat = ball(0.088, "triceps", s * 0.075, -0.20, -0.045, g);
+      triLat.scale.set(0.9, 1.25, 0.9);
+      ball(0.078, null, s * 0.05, -0.50, 0, g);                // elbow
+      // forearm: defined extensors/flexors
       const foreG = new THREE.Group();
       foreG.position.set(s * 0.05, -0.50, 0);
-      const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.062, 0.44, 20), matFor("forearms"));
-      fore.position.set(s * 0.005, -0.24, 0.005);
-      fore.userData.muscle = "forearms"; muscleMeshes.push(fore); foreG.add(fore);
+      const foreTop = new THREE.Mesh(new THREE.CylinderGeometry(0.098, 0.068, 0.30, 20), matFor("forearms"));
+      foreTop.position.set(s * 0.005, -0.16, 0.005);
+      foreTop.userData.muscle = "forearms"; muscleMeshes.push(foreTop); foreG.add(foreTop);
+      const foreLow = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.052, 0.18, 18), matFor("forearms"));
+      foreLow.position.set(s * 0.005, -0.38, 0.005);
+      foreLow.userData.muscle = "forearms"; muscleMeshes.push(foreLow); foreG.add(foreLow);
       const palm = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.095, 0.038), neutralMat);
       palm.position.set(s * 0.01, -0.51, 0.008); foreG.add(palm);
       for (let f = 0; f < 4; f++) {
@@ -198,20 +243,29 @@
       body.add(g);
     }
 
-    /* ---- legs ---- */
+    /* ---- legs: defined quads, hams, calves ---- */
     for (const s of [-1, 1]) {
-      capMesh(0.13, V3(s * 0.16, 1.64, 0.08), V3(s * 0.17, 1.10, 0.08), "quads");
-      const tear = ball(0.115, "quads", s * 0.15, 1.20, 0.085);   // vastus medialis teardrop
-      tear.scale.set(1, 1.35, 1);
-      capMesh(0.095, V3(s * 0.205, 1.58, 0.03), V3(s * 0.215, 1.16, 0.03), "quads"); // outer sweep
-      capMesh(0.092, V3(s * 0.125, 1.62, -0.085), V3(s * 0.13, 1.10, -0.085), "hamstrings");
-      capMesh(0.092, V3(s * 0.20, 1.62, -0.085), V3(s * 0.205, 1.10, -0.085), "hamstrings");
-      ball(0.085, null, s * 0.172, 1.02, 0.03);                   // knee
-      ball(0.088, "calves", s * 0.13, 0.88, -0.055);              // calf heads
-      ball(0.088, "calves", s * 0.215, 0.88, -0.055);
-      const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.058, 0.36, 20), matFor("calves"));
-      calf.position.set(s * 0.172, 0.62, -0.05);
-      calf.userData.muscle = "calves"; muscleMeshes.push(calf); body.add(calf);
+      // quads: rectus femoris center, vastus lateralis outer, vastus medialis teardrop
+      capMesh(0.132, V3(s * 0.155, 1.64, 0.085), V3(s * 0.165, 1.12, 0.085), "quads");
+      const rectus = ball(0.118, "quads", s * 0.160, 1.42, 0.090);
+      rectus.scale.set(0.95, 1.45, 0.95);
+      capMesh(0.098, V3(s * 0.208, 1.58, 0.030), V3(s * 0.218, 1.16, 0.030), "quads"); // vastus lateralis sweep
+      const tear = ball(0.118, "quads", s * 0.148, 1.20, 0.088);   // vastus medialis teardrop
+      tear.scale.set(1, 1.35, 1.05);
+      // hamstrings: biceps femoris + semitendinosus separation
+      capMesh(0.095, V3(s * 0.122, 1.62, -0.088), V3(s * 0.128, 1.10, -0.088), "hamstrings");
+      capMesh(0.095, V3(s * 0.202, 1.62, -0.088), V3(s * 0.208, 1.10, -0.088), "hamstrings");
+      const hamMid = ball(0.085, "hamstrings", s * 0.165, 1.38, -0.088);
+      hamMid.scale.set(1.1, 1.3, 0.9);
+      ball(0.088, null, s * 0.172, 1.02, 0.03);                   // knee
+      // calves: two gastrocnemius heads + soleus
+      const gastMed = ball(0.092, "calves", s * 0.128, 0.88, -0.058);
+      gastMed.scale.set(0.95, 1.25, 0.95);
+      const gastLat = ball(0.092, "calves", s * 0.216, 0.88, -0.058);
+      gastLat.scale.set(0.95, 1.25, 0.95);
+      const soleus = new THREE.Mesh(new THREE.CylinderGeometry(0.088, 0.055, 0.32, 20), matFor("calves"));
+      soleus.position.set(s * 0.172, 0.60, -0.048);
+      soleus.userData.muscle = "calves"; muscleMeshes.push(soleus); body.add(soleus);
       box(0.105, 0.085, 0.13, null, s * 0.172, 0.355, -0.035);    // heel
       const toe = box(0.10, 0.07, 0.19, null, s * 0.172, 0.345, 0.095); // forefoot
       toe.rotation.x = -0.06; toe.rotation.y = s * 0.12;                // toes out, natural stance
