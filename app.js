@@ -381,11 +381,13 @@
   function syncSettingsUI() {
     const s = getSettings();
     document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
+    document.querySelectorAll("#goalSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.goal === (s.goal || "maintain")));
     document.querySelectorAll("#speedSeg .seg").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.speed) === s.demoSpeed));
     document.querySelectorAll("#langSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.lang === s.lang));
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
     tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
+    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast);
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
       `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
@@ -1311,6 +1313,117 @@
     return Math.max(0, Math.round(score));
   }
 
+  function renderInsightsTab(body) {
+    const bal = muscleBalance();
+    const dots = dotsScore();
+    const corr = correlationInsights();
+    const plats = detectPlateaus();
+    const xp = getXP();
+    body.innerHTML = `
+      <h3>Training insights</h3>
+      <div class="stat-grid">
+        <div class="stat-card"><b>${xpLevel(xp.xp)}</b><span>level (${xp.xp.toLocaleString()} XP)</span></div>
+        ${dots ? `<div class="stat-card"><b>${dots}</b><span>DOTS score</span></div>` : ""}
+        <div class="stat-card"><b>${bal.ratio ? bal.ratio.toFixed(2) : "—"}</b><span>push/pull ratio</span></div>
+        <div class="stat-card"><b>${bal.legRatio ? bal.legRatio.toFixed(2) : "—"}</b><span>quad/ham ratio</span></div>
+      </div>
+      ${bal.ratio > 1.3 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Push volume ${Math.round(bal.ratio * 100)}% of pull. Add more rows and pull-ups.</span></div>` : ""}
+      ${bal.legRatio > 1.6 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Quads dominate hamstrings. Add Romanian deadlifts and leg curls.</span></div>` : ""}
+      ${plats.length ? `<h3 style="margin-top:20px">Plateaus detected</h3>` + plats.map(p => `<div class="onerm-box"><b>${p.name}</b> <span class="muted">stuck for ${p.sessions} sessions. Try: +1 set, swap variation, or deload.</span></div>`).join("") : ""}
+      ${corr.length ? `<h3 style="margin-top:20px">Correlations</h3>` + corr.map(c => `<p>💡 ${c}</p>`).join("") : ""}
+      <h3 style="margin-top:20px">Total volume lifted</h3>
+      <p style="font-size:28px;font-weight:800;color:var(--volt)">${Math.round(totalVolumeAll()).toLocaleString()} kg</p>
+    `;
+  }
+  function renderCoachTab(body) {
+    body.innerHTML = `
+      <h3>Ask your coach</h3>
+      <p class="muted">Answers from your own training data.</p>
+      <div style="display:flex;gap:8px;margin:12px 0">
+        <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1" />
+        <button class="btn btn-primary btn-sm" id="coachAsk">Ask</button>
+      </div>
+      <div id="coachA" style="margin-top:12px"></div>
+      <h3 style="margin-top:24px">Quick actions</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="mesoBtn">4-week mesocycle</button>
+        <button class="btn btn-ghost btn-sm" id="warmupBtn">Warm-up calculator</button>
+        <button class="btn btn-ghost btn-sm" id="wodBtn">WOD timer</button>
+      </div>
+      <div id="coachTool" style="margin-top:16px"></div>
+    `;
+    $("coachAsk").addEventListener("click", answerCoach);
+    $("coachQ").addEventListener("keydown", e => { if (e.key === "Enter") answerCoach(); });
+    $("mesoBtn").addEventListener("click", () => {
+      const progs = getCustomPrograms().concat(PROGRAMS);
+      const opts = progs.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+      $("coachTool").innerHTML = `<p>Base program:</p><select id="mesoBase">${opts}</select> <button class="btn btn-primary btn-sm" id="mesoGo">Generate</button>`;
+      $("mesoGo").addEventListener("click", () => generatePeriodized($("mesoBase").value));
+    });
+    $("warmupBtn").addEventListener("click", () => {
+      $("coachTool").innerHTML = `<p>Working weight (${getSettings().units}):</p><div style="display:flex;gap:8px"><input type="number" id="wuW" style="width:100px" /><button class="btn btn-primary btn-sm" id="wuGo">Calculate</button></div><div id="wuOut" style="margin-top:12px"></div>`;
+      $("wuGo").addEventListener("click", () => {
+        const sets = warmupSets($("wuW").value);
+        $("wuOut").innerHTML = sets.map(s => `<p>${fmtW(s.weight)} × ${s.reps}</p>`).join("") || "<p class='muted'>Enter a weight.</p>";
+      });
+    });
+    $("wodBtn").addEventListener("click", () => {
+      $("coachTool").innerHTML = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" data-wod="amrap">AMRAP 20</button>
+          <button class="btn btn-ghost btn-sm" data-wod="tabata">Tabata</button>
+          <button class="btn btn-ghost btn-sm" data-wod="emom">EMOM 10</button>
+        </div><div id="wodOut" style="margin-top:16px;text-align:center"></div>`;
+      $("coachTool").addEventListener("click", e => {
+        const b = e.target.closest("[data-wod]");
+        if (b) startWOD(b.dataset.wod);
+      });
+    });
+  }
+  function answerCoach() {
+    const q = $("coachQ").value.toLowerCase();
+    const out = $("coachA");
+    let ans = "I need more data — log a few workouts first.";
+    if (/bench|stuck|plateau/.test(q)) {
+      const plats = detectPlateaus();
+      const bp = plats.find(p => /bench|press/i.test(p.name));
+      ans = bp ? `Your ${bp.name} has stalled for ${bp.sessions} sessions. Try adding a back-off set, swapping to incline for 2 weeks, or checking your sleep.` : "No bench plateau detected. Keep progressing!";
+    } else if (/sleep|recover/.test(q)) {
+      const corr = correlationInsights();
+      ans = corr.length ? corr[0] : "Log sleep in daily check-ins to unlock recovery insights.";
+    } else if (/volume|how much/.test(q)) {
+      ans = `You've lifted ${Math.round(totalVolumeAll()).toLocaleString()} kg total across ${getLog().length} workouts.`;
+    } else if (/balance|imbalance/.test(q)) {
+      const bal = muscleBalance();
+      ans = `Push/pull ratio is ${bal.ratio ? bal.ratio.toFixed(2) : "unknown"}. Aim for 1.0 or slightly pull-dominant.`;
+    } else if (/deload|tired/.test(q)) {
+      ans = checkDeload() ? "Yes — your volume is dropping. Take a light week." : "No deload needed right now. Keep pushing.";
+    }
+    out.innerHTML = `<div class="onerm-box"><b>Coach:</b> <span>${ans}</span></div>`;
+  }
+  function startWOD(type) {
+    const out = $("wodOut");
+    let secs, label;
+    if (type === "amrap") { secs = 1200; label = "AMRAP 20:00"; }
+    else if (type === "tabata") { secs = 240; label = "Tabata 4:00"; }
+    else { secs = 600; label = "EMOM 10:00"; }
+    let left = secs;
+    out.innerHTML = `<div style="font-size:48px;font-weight:800;color:var(--volt)">${label}</div><div id="wodTimer" style="font-size:36px"></div><button class="btn btn-ghost btn-sm" id="wodStop" style="margin-top:12px">Stop</button>`;
+    const iv = setInterval(() => {
+      left--;
+      const m = Math.floor(left / 60), s = left % 60;
+      const t = $("wodTimer");
+      if (t) t.textContent = `${m}:${String(s).padStart(2, "0")}`;
+      if (type === "emom" && left % 60 === 0 && left > 0) beep(880, 0.2);
+      if (type === "tabata") {
+        const cycle = (secs - left) % 30;
+        if (cycle === 0 || cycle === 20) beep(cycle === 0 ? 880 : 440, 0.15);
+      }
+      if (left <= 0) { clearInterval(iv); beep(880, 0.5); if (t) t.textContent = "Done!"; }
+    }, 1000);
+    $("wodStop").addEventListener("click", () => clearInterval(iv));
+  }
+
   // PERSONAL CHALLENGES
   const CHALLENGES = [
     { id: "vol-week", name: "Volume week", desc: "Hit 20,000 kg total volume in 7 days", target: 20000, metric: "volume7" },
@@ -1344,6 +1457,389 @@
           <span style="font-size:12px">${Math.round(cur).toLocaleString()} / ${c.target.toLocaleString()}</span>
         </div>`;
       }).join("") + `</div>`;
+  }
+
+  function applyA11y() {
+    const s = getSettings();
+    document.body.classList.toggle("big-text", !!s.bigText);
+    document.body.classList.toggle("high-contrast", !!s.highContrast);
+  }
+  // DAILY CHECK-IN UI
+  let ciEnergyVal = 3;
+  function openCheckin() {
+    $("checkinClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    const today = fmtDate(new Date());
+    const existing = getCheckin(today);
+    if (existing) {
+      $("ciSleep").value = existing.sleep || "";
+      ciEnergyVal = existing.energy || 3;
+    }
+    document.querySelectorAll("#ciEnergy .seg").forEach(b => b.classList.toggle("on", parseInt(b.dataset.e) === ciEnergyVal));
+    updateTrackerLabels();
+    $("checkinVeil").classList.remove("hidden");
+  }
+  function updateTrackerLabels() {
+    const today = fmtDate(new Date());
+    $("waterToday").textContent = `${getWater(today)} ml today`;
+    $("proteinToday").textContent = `${getProtein(today)}g / ${proteinTarget()}g`;
+  }
+  function initCheckin() {
+    $("checkinClose").addEventListener("click", () => $("checkinVeil").classList.add("hidden"));
+    $("checkinVeil").addEventListener("click", e => { if (e.target.id === "checkinVeil") $("checkinVeil").classList.add("hidden"); });
+    $("ciEnergy").addEventListener("click", e => {
+      const b = e.target.closest("[data-e]");
+      if (b) { ciEnergyVal = parseInt(b.dataset.e); document.querySelectorAll("#ciEnergy .seg").forEach(x => x.classList.toggle("on", x === b)); }
+    });
+    document.querySelectorAll("[data-water]").forEach(b => b.addEventListener("click", () => {
+      addWater(fmtDate(new Date()), parseInt(b.dataset.water)); updateTrackerLabels();
+    }));
+    $("proteinAdd").addEventListener("click", () => {
+      const v = parseFloat($("ciProtein").value) || 0;
+      if (v > 0) { addProtein(fmtDate(new Date()), v); $("ciProtein").value = ""; updateTrackerLabels(); }
+    });
+    $("checkinSave").addEventListener("click", () => {
+      saveCheckin(fmtDate(new Date()), { sleep: parseFloat($("ciSleep").value) || null, energy: ciEnergyVal, ts: Date.now() });
+      $("checkinVeil").classList.add("hidden");
+    });
+  }
+
+  // ============ V10: TRAINING INTELLIGENCE ============
+  // Periodization planner — 4-week mesocycle with progressive overload
+  function generatePeriodized(baseProgId) {
+    const base = getProgram(baseProgId);
+    if (!base) return;
+    const weeks = [];
+    for (let w = 1; w <= 4; w++) {
+      const isDeload = w === 4;
+      weeks.push({
+        week: w, deload: isDeload,
+        days: base.days.map(d => ({
+          name: d.name,
+          exercises: d.exercises.map(x => {
+            const ex = byId(x.id);
+            const last = suggestWeight(x.id);
+            const baseW = last ? last.suggested : 20;
+            const factor = isDeload ? 0.6 : 1 + (w - 1) * 0.025;
+            return { id: x.id, sets: isDeload ? Math.max(2, x.sets - 1) : x.sets, reps: x.reps,
+              weight: Math.round(baseW * factor * 4) / 4 };
+          })
+        }))
+      });
+    }
+    const id = "meso-" + Date.now().toString(36);
+    const prog = { id, name: base.name + " — Mesocycle", tagline: "4-week periodized plan with deload",
+      custom: true, level: "custom", daysPerWeek: base.days.length, weeks: 4, equipment: base.equipment || "Mixed",
+      mesocycle: weeks, days: base.days };
+    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    location.hash = "#/program/" + id;
+  }
+  // RPE tracking helpers
+  function getRPE(exId) {
+    try { const m = JSON.parse(localStorage.getItem("forge-rpe") || "{}"); return m[exId] || null; }
+    catch (e) { return null; }
+  }
+  function saveRPE(exId, rpe) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-rpe") || "{}");
+      m[exId] = { rpe, ts: Date.now() };
+      localStorage.setItem("forge-rpe", JSON.stringify(m));
+    } catch (e) {}
+  }
+  // Plateau detection — 3+ sessions without progress on a lift
+  function detectPlateaus() {
+    const log = getLog();
+    const byEx = {};
+    log.forEach(w => w.exercises.forEach(x => {
+      if (!byEx[x.id]) byEx[x.id] = [];
+      const best = Math.max(...x.sets.map(s => s.weight || 0));
+      byEx[x.id].push({ ts: w.ts, best });
+    }));
+    const plateaus = [];
+    for (const id in byEx) {
+      const hist = byEx[id].slice(-4);
+      if (hist.length >= 3) {
+        const first = hist[0].best, last = hist[hist.length - 1].best;
+        if (last <= first && first > 0) {
+          const ex = byId(id);
+          if (ex) plateaus.push({ id, name: ex.name, sessions: hist.length });
+        }
+      }
+    }
+    return plateaus.slice(0, 5);
+  }
+  // %1RM helpers
+  function parsePercent(repsStr) {
+    const m = String(repsStr).match(/(\d+)%/);
+    return m ? parseInt(m[1]) : null;
+  }
+  function weightFromPercent(exId, pct) {
+    const orm = oneRM(exId);
+    if (!orm) return null;
+    return Math.round(orm * pct / 100 * 4) / 4;
+  }
+  // Warm-up calculator
+  function warmupSets(workingWeight) {
+    const w = parseFloat(workingWeight) || 0;
+    if (w <= 0) return [];
+    const steps = [];
+    if (w > 60) steps.push({ weight: 20, reps: 10 });
+    if (w > 40) steps.push({ weight: Math.round(w * 0.4), reps: 8 });
+    if (w > 30) steps.push({ weight: Math.round(w * 0.6), reps: 5 });
+    steps.push({ weight: Math.round(w * 0.8), reps: 3 });
+    return steps;
+  }
+  // Per-exercise rest memory
+  function getRestFor(exId) {
+    try { return JSON.parse(localStorage.getItem("forge-restmem") || "{}")[exId] || null; }
+    catch (e) { return null; }
+  }
+  function saveRestFor(exId, secs) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-restmem") || "{}");
+      m[exId] = secs; localStorage.setItem("forge-restmem", JSON.stringify(m));
+    } catch (e) {}
+  }
+  // Exercise notes
+  function getExNote(exId) {
+    try { return localStorage.getItem("forge-note-" + exId) || ""; }
+    catch (e) { return ""; }
+  }
+  function saveExNote(exId, note) {
+    try { localStorage.setItem("forge-note-" + exId, note); } catch (e) {}
+  }
+  // Tempo coach
+  let tempoTimer = null;
+  function startTempo(ecc, pause, con) {
+    stopTempo();
+    const phases = [["Lower", ecc * 1000], ["Hold", pause * 1000], ["Lift", con * 1000]];
+    let pi = 0;
+    const el = $("tempoDisplay");
+    const tick = () => {
+      if (pi >= phases.length) pi = 0;
+      const [name, dur] = phases[pi];
+      if (el) el.textContent = name;
+      if (window.speechSynthesis && getSettings().voiceCues) {
+        speechSynthesis.speak(new SpeechSynthesisUtterance(name));
+      }
+      beep(660, 0.1);
+      pi++;
+      tempoTimer = setTimeout(tick, dur);
+    };
+    tick();
+  }
+  function stopTempo() { if (tempoTimer) { clearTimeout(tempoTimer); tempoTimer = null; } }
+  function beep(freq, dur) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq; o.type = "sine";
+      g.gain.setValueAtTime(0.3, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
+      o.start(); o.stop(ctx.currentTime + dur);
+    } catch (e) {}
+  }
+
+  // ============ V10: RECOVERY & HEALTH ============
+  function getCheckin(dateKey) {
+    try { return JSON.parse(localStorage.getItem("forge-checkin") || "{}")[dateKey] || null; }
+    catch (e) { return null; }
+  }
+  function saveCheckin(dateKey, data) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-checkin") || "{}");
+      m[dateKey] = data; localStorage.setItem("forge-checkin", JSON.stringify(m));
+    } catch (e) {}
+  }
+  function getSupplements() {
+    try { return JSON.parse(localStorage.getItem("forge-supp") || "[]"); }
+    catch (e) { return []; }
+  }
+  function saveSupplements(list) {
+    try { localStorage.setItem("forge-supp", JSON.stringify(list)); } catch (e) {}
+  }
+  function getWater(dateKey) {
+    try { return JSON.parse(localStorage.getItem("forge-water") || "{}")[dateKey] || 0; }
+    catch (e) { return 0; }
+  }
+  function addWater(dateKey, ml) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-water") || "{}");
+      m[dateKey] = (m[dateKey] || 0) + ml;
+      localStorage.setItem("forge-water", JSON.stringify(m));
+    } catch (e) {}
+  }
+  function getCycle() {
+    try { return JSON.parse(localStorage.getItem("forge-cycle") || "null"); }
+    catch (e) { return null; }
+  }
+  function saveCycle(data) {
+    try { localStorage.setItem("forge-cycle", JSON.stringify(data)); } catch (e) {}
+  }
+  function cyclePhase() {
+    const c = getCycle();
+    if (!c || !c.lastStart) return null;
+    const day = Math.floor((Date.now() - c.lastStart) / 864e5) % (c.length || 28) + 1;
+    if (day <= 5) return { phase: "Menstrual", day, tip: "Lower intensity, focus on technique and mobility." };
+    if (day <= 13) return { phase: "Follicular", day, tip: "Energy rising — great window for PRs and volume." };
+    if (day <= 16) return { phase: "Ovulatory", day, tip: "Peak strength window. Push hard but warm up well." };
+    return { phase: "Luteal", day, tip: "Energy may dip. Moderate intensity, prioritize recovery." };
+  }
+  // ============ V10: NUTRITION ============
+  function proteinTarget() {
+    const m = getMeasurements();
+    const last = m.length ? m[m.length - 1] : null;
+    const bw = last && last.weight ? last.weight : 70;
+    const goal = getSettings().goal || "maintain";
+    const mult = goal === "bulk" ? 2.0 : goal === "cut" ? 2.4 : 1.8;
+    const kg = getSettings().units === "lb" ? bw * 0.453592 : bw;
+    return Math.round(kg * mult);
+  }
+  function getProtein(dateKey) {
+    try { return JSON.parse(localStorage.getItem("forge-protein") || "{}")[dateKey] || 0; }
+    catch (e) { return 0; }
+  }
+  function addProtein(dateKey, g) {
+    try {
+      const m = JSON.parse(localStorage.getItem("forge-protein") || "{}");
+      m[dateKey] = (m[dateKey] || 0) + g;
+      localStorage.setItem("forge-protein", JSON.stringify(m));
+    } catch (e) {}
+  }
+  // ============ V10: INSIGHTS ============
+  function exerciseHistory(exId, limit) {
+    const hist = [];
+    getLog().forEach(w => {
+      const x = w.exercises.find(e => e.id === exId);
+      if (x) {
+        const best = Math.max(...x.sets.map(s => s.weight || 0));
+        const orm = oneRMFromSets(x.sets);
+        hist.push({ date: w.date, ts: w.ts, best, orm });
+      }
+    });
+    return limit ? hist.slice(-limit) : hist;
+  }
+  function oneRMFromSets(sets) {
+    let best = 0;
+    sets.forEach(s => {
+      if (s.weight > 0 && s.reps > 0) {
+        const e = s.weight * (1 + s.reps / 30);
+        if (e > best) best = e;
+      }
+    });
+    return best;
+  }
+  function muscleBalance() {
+    const vol = volumeByMuscle(28);
+    const push = (vol.chest || 0) + (vol.shoulders || 0) + (vol.triceps || 0);
+    const pull = (vol.back || 0) + (vol.lats || 0) + (vol.biceps || 0);
+    const quad = vol.quads || 0, ham = vol.hamstrings || 0;
+    return {
+      push, pull, ratio: pull > 0 ? push / pull : 0,
+      quad, ham, legRatio: ham > 0 ? quad / ham : 0
+    };
+  }
+  function dotsScore() {
+    // DOTS formula (men), simplified polynomial
+    const m = getMeasurements();
+    const last = m.length ? m[m.length - 1] : null;
+    if (!last || !last.weight) return null;
+    const bw = getSettings().units === "lb" ? last.weight * 0.453592 : last.weight;
+    const total = ["squat", "bench", "deadlift"].reduce((a, name) => {
+      const ex = EXERCISES.find(e => e.name.toLowerCase().includes(name));
+      if (!ex) return a;
+      const orm = oneRM(ex.id);
+      return a + (orm || 0);
+    }, 0);
+    if (total <= 0 || bw <= 0) return null;
+    const bwKg = bw;
+    const x = Math.min(Math.max(bwKg, 40), 200);
+    const coef = 0.000001093 * Math.pow(x, 4) - 0.0007391293 * Math.pow(x, 3) + 0.19147565 * Math.pow(x, 2) - 22.41233541 * x + 1143.86505292;
+    const totalKg = getSettings().units === "lb" ? total * 0.453592 : total;
+    return Math.round(totalKg * 500 / coef * 10) / 10;
+  }
+  function correlationInsights() {
+    const insights = [];
+    const log = getLog();
+    if (log.length < 5) return insights;
+    // sleep vs performance (from check-ins)
+    const pairs = [];
+    log.forEach(w => {
+      const ci = getCheckin(w.date);
+      if (ci && ci.sleep) {
+        const vol = w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0);
+        pairs.push({ sleep: ci.sleep, vol });
+      }
+    });
+    if (pairs.length >= 5) {
+      const high = pairs.filter(p => p.sleep >= 8), low = pairs.filter(p => p.sleep < 7);
+      if (high.length >= 2 && low.length >= 2) {
+        const avgH = high.reduce((a, p) => a + p.vol, 0) / high.length;
+        const avgL = low.reduce((a, p) => a + p.vol, 0) / low.length;
+        if (avgH > avgL * 1.1) {
+          insights.push(`You lift ${Math.round((avgH / avgL - 1) * 100)}% more volume on 8+ hour sleep nights.`);
+        }
+      }
+    }
+    return insights;
+  }
+  function totalVolumeAll() {
+    return getLog().reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
+  }
+  // ============ V10: MOTIVATION ============
+  function getXP() {
+    try { return JSON.parse(localStorage.getItem("forge-xp") || '{"xp":0,"freeze":1}'); }
+    catch (e) { return { xp: 0, freeze: 1 }; }
+  }
+  function addXP(amount) {
+    const d = getXP();
+    d.xp += amount;
+    try { localStorage.setItem("forge-xp", JSON.stringify(d)); } catch (e) {}
+    return d;
+  }
+  function xpLevel(xp) {
+    return Math.floor(Math.sqrt(xp / 100)) + 1;
+  }
+  // ============ V10: DATA ============
+  function exportCSV() {
+    const log = getLog();
+    let csv = "date,exercise,sets,reps,weight\n";
+    log.forEach(w => w.exercises.forEach(x => {
+      const ex = byId(x.id);
+      x.sets.forEach(s => {
+        csv += `${w.date},"${ex ? ex.name : x.id}",${x.sets.length},${s.reps},${s.weight}\n`;
+      });
+    }));
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "forge-export.csv";
+    a.click();
+  }
+  function backupData() {
+    const data = {};
+    ["forge-log", "forge-favs", "forge-settings", "forge-measurements", "forge-photos", "forge-badges", "forge-xp", "forge-custom-programs"].forEach(k => {
+      try { data[k] = localStorage.getItem(k); } catch (e) {}
+    });
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `forge-backup-${fmtDate(new Date())}.json`;
+    a.click();
+  }
+  function shareProgramURL(progId) {
+    const prog = getProgram(progId);
+    if (!prog) return "";
+    const json = JSON.stringify({ n: prog.name, d: prog.days.map(d => ({ n: d.name, e: d.exercises.map(x => [x.id, x.sets, x.reps]) })) });
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    return location.origin + location.pathname + "#/shared/" + b64;
+  }
+  function parseSharedProgram(b64) {
+    try {
+      const json = decodeURIComponent(escape(atob(b64)));
+      const d = JSON.parse(json);
+      return { name: d.n, days: d.d.map(x => ({ name: x.n, exercises: x.e.map(e => ({ id: e[0], sets: e[1], reps: e[2] })) })) };
+    } catch (e) { return null; }
   }
 
   // ACHIEVEMENTS
@@ -1525,6 +2021,8 @@
     if (tab === "body") { renderBodyTab(body); return; }
     if (tab === "badges") { renderBadgesTab(body); return; }
     if (tab === "challenges") { renderChallengesTab(body); return; }
+    if (tab === "insights") { renderInsightsTab(body); return; }
+    if (tab === "coach") { renderCoachTab(body); return; }
     if (!log.length) {
       body.innerHTML = `<div class="empty-note"><p><b>No workouts logged yet.</b></p><p>Finish a workout and it will show up here with your history, records and volume.</p></div>`;
       return;
@@ -1721,14 +2219,18 @@
           <button class="set-done" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} done">${window.FORGE_ICON("check")}</button>
           <span class="set-num">Set ${si + 1}</span>
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
-          ${isBW ? `<span class="set-bw">Bodyweight</span>`
+          ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
+          <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE" style="width:56px;padding:6px;font-size:12px">
+            <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}">${r}</option>`).join("")}
+          </select>
         </div>`;
       }).join("");
       const pairs = currentWorkout._pairs;
       const isPaired = pairs.has(xi) || pairs.has(xi - 1);
       const pairLabel = pairs.has(xi) ? "A1" : pairs.has(xi - 1) ? "A2" : "";
       const sug = suggestWeight(x.id);
+      const note = getExNote(x.id);
       return `<div class="wo-ex ${isPaired ? "superset" : ""}">
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
@@ -1736,6 +2238,7 @@
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
         ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0;display:flex;align-items:center;gap:6px">${window.FORGE_ICON ? window.FORGE_ICON("lightbulb") : ""} Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
+        ${note ? `<p class="muted" style="font-size:13px;margin:4px 0;font-style:italic">📝 ${esc(note)}</p>` : ""}
         <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
         ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
@@ -1935,10 +2438,14 @@
     s.myEquipment = s.myEquipment.includes(q) ? s.myEquipment.filter(x => x !== q) : [...s.myEquipment, q];
     saveSettings(s); syncSettingsUI();
   });
-  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"]].forEach(([id, key]) => {
+  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
-      const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI();
+      const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y();
     });
+  });
+  $("goalSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-goal]");
+    if (b) { const s = getSettings(); s.goal = b.dataset.goal; saveSettings(s); syncSettingsUI(); }
   });
   $("exportData").addEventListener("click", () => {
     const data = {
@@ -1953,6 +2460,8 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   });
+  $("csvExport").addEventListener("click", exportCSV);
+  $("backupData").addEventListener("click", backupData);
   $("resetData").addEventListener("click", () => {
     if (confirm("Delete all favorites, workout history, records and settings? This cannot be undone.")) {
       localStorage.clear();
@@ -2019,6 +2528,9 @@
   $("plateBar").addEventListener("input", calcPlates);
   $("plateTarget").addEventListener("input", calcPlates);
   $("coachBtn").addEventListener("click", generateCoachProgram);
+  initCheckin();
+  $("checkinBtn").addEventListener("click", openCheckin);
+  applyA11y();
   $("formCheckBtn").addEventListener("click", openFormCheck);
   $("formClose").addEventListener("click", stopFormCheck);
   $("formVeil").addEventListener("click", e => { if (e.target.id === "formVeil") stopFormCheck(); });

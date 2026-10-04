@@ -52,6 +52,7 @@
         <div class="hero-cta">
           <a class="btn btn-primary" href="#/body" data-i18n="home_cta_body">Explore the 3D body</a>
           <a class="btn btn-ghost" href="#/exercises" data-i18n="home_cta_ex">Browse exercises</a>
+          <button class="btn btn-ghost" id="checkinBtn">Daily check-in</button>
         </div>
         <div class="hero-stats">
           <div><b id="statEx">190</b><span>exercises</span></div>
@@ -230,6 +231,8 @@
       <button class="chip" data-ptab="body">Body</button>
       <button class="chip" data-ptab="badges">Badges</button>
       <button class="chip" data-ptab="challenges">Challenges</button>
+      <button class="chip" data-ptab="insights">Insights</button>
+      <button class="chip" data-ptab="coach">Coach</button>
     </div>
     <div id="progressBody"></div>
   </section>
@@ -309,6 +312,38 @@
     </div>
   </div>
 </div>
+<!-- DAILY CHECK-IN -->
+<div class="modal-veil hidden" id="checkinVeil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="checkinTitle">
+    <div class="modal-head">
+      <h3 id="checkinTitle">Daily check-in</h3>
+      <button class="modal-x" id="checkinClose" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p class="setting-label">Sleep (hours)</p>
+      <input type="number" id="ciSleep" min="0" max="14" step="0.5" style="width:100px" />
+      <p class="setting-label" style="margin-top:12px">Energy (1-5)</p>
+      <div class="seg-row" id="ciEnergy">
+        <button class="seg" data-e="1">1</button><button class="seg" data-e="2">2</button>
+        <button class="seg" data-e="3">3</button><button class="seg" data-e="4">4</button>
+        <button class="seg" data-e="5">5</button>
+      </div>
+      <p class="setting-label" style="margin-top:12px">Water (ml)</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
+        <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
+        <span class="muted" id="waterToday" style="align-self:center"></span>
+      </div>
+      <p class="setting-label" style="margin-top:12px">Protein (g)</p>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="ciProtein" min="0" style="width:100px" />
+        <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
+        <span class="muted" id="proteinToday" style="align-self:center"></span>
+      </div>
+      <button class="btn btn-primary btn-sm" id="checkinSave" style="margin-top:16px">Save check-in</button>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer>
@@ -325,7 +360,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v9.7</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10</p>
   </div>
 </footer>
 
@@ -345,6 +380,15 @@
         <button class="seg" data-unit="kg">kg</button>
         <button class="seg" data-unit="lb">lb</button>
       </div>
+      <p class="setting-label">Goal</p>
+      <div class="seg-row" id="goalSeg">
+        <button class="seg" data-goal="cut">Cut</button>
+        <button class="seg" data-goal="maintain">Maintain</button>
+        <button class="seg" data-goal="bulk">Bulk</button>
+      </div>
+      <p class="setting-label">Accessibility</p>
+      <div class="toggle-row"><span>Big text mode</span><button class="toggle" id="tglBigText" role="switch" aria-checked="false"><span class="knob"></span></button></div>
+      <div class="toggle-row"><span>High contrast</span><button class="toggle" id="tglContrast" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <p class="setting-label" data-i18n="set_myeq">My equipment</p>
       <div class="eq-grid" id="eqGrid"></div>
       <p class="muted setting-note" data-i18n="set_myeq_note">Used by the program quiz and exercise swaps. Empty means everything.</p>
@@ -369,8 +413,11 @@
       <p class="setting-label" data-i18n="set_data">Data</p>
       <div class="setting-btns">
         <button class="btn btn-ghost btn-sm" id="exportData" data-i18n="set_export">Export data</button>
+        <button class="btn btn-ghost btn-sm" id="csvExport">CSV export</button>
+        <button class="btn btn-ghost btn-sm" id="backupData">Backup</button>
         <button class="btn btn-ghost btn-sm danger" id="resetData" data-i18n="set_reset">Reset all data</button>
       </div>
+      <p class="muted setting-note">Your data never leaves this device. Export anytime.</p>
     </div>
   </div>
 </div>
