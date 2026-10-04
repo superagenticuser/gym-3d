@@ -2092,11 +2092,11 @@
         <div class="builder-field"><label>Chest (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mChest" step="any" placeholder="–" /></div>
         <div class="builder-field"><label>Arms (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mArms" step="any" placeholder="–" /></div>
       </div>
-      <button class="btn btn-primary btn-sm" id="mSave">Log measurements</button>
+      <button class="btn btn-primary btn-sm" id="mSave" style="margin-bottom:14px">Log measurements</button>
       <div id="mChart"></div>
       <h3 style="margin-top:24px">Progress photos</h3>
       <div style="display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap">
-        <label class="btn btn-ghost" style="cursor:pointer;margin:0">
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">
           Choose file
           <input type="file" id="photoInput" accept="image/*" style="display:none" />
         </label>
