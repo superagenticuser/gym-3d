@@ -2147,7 +2147,7 @@
       <button class="btn btn-primary btn-sm" id="mSave">Log measurements</button>
       <div id="mChart"></div>
       <h3 style="margin-top:24px">Progress photos</h3>
-      <input type="file" id="photoInput" accept="image/*" style="margin:12px 0" />
+      <input type="file" id="photoInput" accept="image/*" class="file-styled" style="margin:12px 0;max-width:100%" />
       <div class="photo-grid" id="photoGrid"></div>`;
     renderMeasureChart();
     renderPhotos();

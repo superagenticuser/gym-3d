@@ -47,14 +47,23 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 80px; }
 .volt { color: var(--volt); }
 .hero .lede { font-size: 19px; margin: 22px 0 30px; }
 .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 15px 30px; border-radius: 999px; font-size: 16px; transition: transform .15s; vertical-align: middle; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 15px 30px; border-radius: 999px; font-size: 16px; transition: transform .15s; vertical-align: middle; border: none; cursor: pointer; font-family: inherit; }
 .btn .ic { width: 18px; height: 18px; }
 .btn-sm .ic { width: 16px; height: 16px; }
 .btn-ic { display: inline-flex; align-items: center; }
 .btn-ic .ic { width: 16px; height: 16px; }
 .btn:hover { transform: translateY(-2px); }
-.btn-primary { background: var(--volt); color: #0b0d12; }
+.btn-primary { background: var(--volt); color: #0b0d12; border: none; }
 .btn-ghost { border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
+.btn-danger, .btn.danger { border: 1px solid #f87171; color: #f87171; background: transparent; }
+/* global button reset for consistency */
+button { font-family: inherit; }
+/* styled file input */
+.file-input-wrap { position: relative; display: inline-block; }
+.file-input-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+input[type="file"].file-styled { font-family: inherit; font-size: 14px; color: var(--ink); }
+input[type="file"].file-styled::file-selector-button { font-family: inherit; font-weight: 700; font-size: 14px; padding: 10px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; margin-right: 12px; }
+input[type="file"].file-styled::file-selector-button:hover { border-color: var(--volt); }
 .hero-stats { display: flex; gap: 40px; margin-top: 36px; }
 .hero-stats b { display: block; font-size: 32px; color: var(--volt); }
 .hero-stats span { color: var(--muted); font-size: 14px; }
