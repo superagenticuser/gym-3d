@@ -454,11 +454,13 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .set-done .ic { width: 18px; height: 18px; }
 .set-done.hit { background: var(--volt); border-color: var(--volt); color: var(--volt-ink); }
 .set-num { font-weight: 700; font-size: 14px; min-width: 44px; }
-.set-reps { color: var(--muted); font-size: 14px; flex: 1; }
+.set-reps { color: var(--muted); font-size: 14px; flex: 1; white-space: nowrap; }
 .set-reps input {
   width: 56px; background: var(--surface2); border: 1px solid var(--line);
   color: var(--ink); border-radius: 8px; padding: 7px 6px; font-size: 14px; text-align: center;
 }
+.set-rpe { white-space: nowrap; }
+.set-row2 { flex-wrap: nowrap; }
 .set-weight {
   width: 76px; background: var(--surface2); border: 1px solid var(--line);
   color: var(--ink); border-radius: 8px; padding: 8px 6px; font-size: 15px; text-align: center;

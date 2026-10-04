@@ -2336,7 +2336,7 @@
     if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name;
-    $("woList").innerHTML = d.exercises.map((x, xi) => {
+    $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + d.exercises.map((x, xi) => {
       const ex = byId(x.id);
       const isBW = ex.equipment === "Bodyweight";
       const lw = lastWeightKg(x.id);
@@ -2349,7 +2349,7 @@
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
-          <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE" style="width:56px;padding:6px;font-size:12px">
+          <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE — Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
             <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}">${r}</option>`).join("")}
           </select>
         </div>`;
