@@ -119,6 +119,7 @@
         <h3><span data-i18n="swap_title">Swap it</span> <span class="muted" style="font-weight:400;font-size:13px" data-i18n="swap_sub">same muscle, different gear</span></h3>
         <div id="dSwaps"></div>
         <div id="dOnerm"></div>
+        <button class="btn btn-ghost btn-sm" id="formCheckBtn" style="margin-top:12px">AI form check</button>
       </aside>
     </div>
   </section>
@@ -137,6 +138,7 @@
         <div class="view-toggle" style="margin-top:8px">
           <button id="bMuscles" class="on" data-i18n="body_muscles">Muscles</button>
           <button id="bRecovery" data-i18n="body_recovery">Recovery</button>
+          <button id="bFatigue">Fatigue</button>
         </div>
         <p class="hint" data-i18n="body_hint">Drag to rotate · scroll to zoom · click a muscle</p>
         <div class="heat-legend hidden" id="heatLegend">
@@ -158,6 +160,7 @@
     <div class="prog-actions">
       <button class="btn btn-primary btn-sm" id="quizBtn" data-i18n="prog_quiz">Find my program</button>
       <a class="btn btn-ghost btn-sm" href="#/builder" data-i18n="prog_create">Create program</a>
+      <button class="btn btn-ghost btn-sm" id="coachBtn">AI coach plan</button>
     </div>
     <div class="active-banner hidden" id="activeBanner"></div>
     <div class="prog-grid" id="programGrid"></div>
@@ -191,6 +194,8 @@
   <line x1="12" x2="15" y1="14" y2="11" />
   <circle cx="12" cy="14" r="8" /></svg>Rest timer. Tap a duration to start</p>
       <button class="btn btn-ghost btn-sm" id="plateBtn" style="margin-top:8px">Plate calculator</button>
+      <button class="btn btn-ghost btn-sm" id="voiceBtn" style="margin-top:8px">🎤 Voice log</button>
+      <p class="muted" id="voiceStatus" style="font-size:13px;margin-top:6px"></p>
     </div>
     <div id="woList"></div>
     <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
@@ -199,6 +204,7 @@
       <p class="muted">Logged. Keep the streak going.</p>
       <div style="display:flex;gap:10px;justify-content:center;margin:12px 0">
         <button class="btn btn-primary btn-sm" id="shareCard">Share summary</button>
+        <button class="btn btn-ghost btn-sm" id="replayBtn">3D replay</button>
         <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs">Back to programs</a>
       </div>
       <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
@@ -223,6 +229,7 @@
       <button class="chip" data-ptab="volume" data-i18n="tab_volume">Volume</button>
       <button class="chip" data-ptab="body">Body</button>
       <button class="chip" data-ptab="badges">Badges</button>
+      <button class="chip" data-ptab="challenges">Challenges</button>
     </div>
     <div id="progressBody"></div>
   </section>
@@ -280,6 +287,28 @@
     </div>
   </div>
 </div>
+<!-- FORM CHECK -->
+<div class="modal-veil hidden" id="formVeil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle" style="max-width:640px">
+    <div class="modal-head">
+      <h3 id="formTitle">AI form check</h3>
+      <button class="modal-x" id="formClose" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p class="muted" style="margin-bottom:12px">Position your phone so your full body is visible from the side. Works best for squats.</p>
+      <div style="position:relative;background:#000;border-radius:12px;overflow:hidden">
+        <video id="formVideo" playsinline muted style="width:100%;display:block;transform:scaleX(-1)"></video>
+        <canvas id="formCanvas" style="position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)"></canvas>
+      </div>
+      <div id="formFeedback" style="margin-top:12px;font-size:16px;font-weight:600;min-height:48px"></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" id="formStart">Start camera</button>
+        <button class="btn btn-ghost btn-sm hidden" id="formStop">Stop</button>
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:8px">Runs on-device. No video leaves your phone.</p>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer>
@@ -296,7 +325,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v8</p>
+    <p class="muted foot-copy">© 2026 FORGE · v9</p>
   </div>
 </footer>
 

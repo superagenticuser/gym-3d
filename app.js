@@ -524,6 +524,62 @@
     for (const g in last) heat[g] = last[g] <= 1 ? 1 : last[g] === 2 ? 0.65 : last[g] === 3 ? 0.35 : 0;
     return heat;
   }
+  function muscleFatigue() {
+    // accumulated volume per muscle, decaying over 7 days
+    const fatigue = {};
+    const now = Date.now();
+    getLog().forEach(w => {
+      const daysAgo = (now - w.ts) / 864e5;
+      if (daysAgo > 7) return;
+      const decay = 1 - daysAgo / 7;
+      w.exercises.forEach(x => {
+        const ex = byId(x.id); if (!ex) return;
+        const vol = x.sets.reduce((a, s) => a + s.weight * s.reps, 0);
+        const g = groupOf(ex.primary);
+        fatigue[g] = (fatigue[g] || 0) + vol * decay;
+      });
+    });
+    const max = Math.max(1, ...Object.values(fatigue));
+    const out = {};
+    for (const g in fatigue) out[g] = Math.min(1, fatigue[g] / max);
+    return out;
+  }
+  function startReplay(entry) {
+    const v = window._bodyViewer;
+    if (!v || !entry) return;
+    const muscles = [];
+    entry.exercises.forEach(x => {
+      const ex = byId(x.id);
+      if (ex) muscles.push(groupOf(ex.primary));
+    });
+    let i = 0;
+    window._bodyMode = "muscles";
+    if (window._syncBodyMode) window._syncBodyMode();
+    const step = () => {
+      if (i >= muscles.length) {
+        v.setHeat(muscleHeat());
+        return;
+      }
+      const heat = {};
+      muscles.slice(0, i + 1).forEach(g => heat[g] = 1);
+      v.setHeat(heat);
+      // show exercise name
+      const ex = byId(entry.exercises[i].id);
+      if (ex) {
+        let label = document.getElementById("replayLabel");
+        if (!label) {
+          label = document.createElement("div");
+          label.id = "replayLabel";
+          label.style.cssText = "text-align:center;font-size:18px;font-weight:700;margin:12px 0;color:var(--volt)";
+          $("body3d").parentNode.insertBefore(label, $("body3d").nextSibling);
+        }
+        label.textContent = `${i + 1}/${muscles.length}: ${ex.name}`;
+      }
+      i++;
+      setTimeout(step, 1200);
+    };
+    step();
+  }
   function volumeByMuscle(days) {
     const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
     const vol = {};
@@ -747,17 +803,19 @@
       $("bFront").classList.toggle("on", front); $("bBack").classList.toggle("on", !front);
     };
     const syncMode = () => {
-      const heat = !!window._bodyHeatMode;
-      $("bMuscles").classList.toggle("on", !heat);
-      $("bRecovery").classList.toggle("on", heat);
-      $("heatLegend").classList.toggle("hidden", !heat);
+      const mode = window._bodyMode || "muscles";
+      $("bMuscles").classList.toggle("on", mode === "muscles");
+      $("bRecovery").classList.toggle("on", mode === "recovery");
+      $("bFatigue").classList.toggle("on", mode === "fatigue");
+      $("heatLegend").classList.toggle("hidden", mode === "muscles");
     };
     window._syncBodyMode = syncMode;
-    window._bodyHeatMode = false;
+    window._bodyMode = "muscles";
     $("bFront").onclick = () => setV(true);
     $("bBack").onclick = () => setV(false);
-    $("bMuscles").onclick = () => { window._bodyHeatMode = false; syncMode(); selectMuscle(window._lastMuscle || "chest"); };
-    $("bRecovery").onclick = () => { window._bodyHeatMode = true; syncMode(); v.setHeat(muscleHeat()); };
+    $("bMuscles").onclick = () => { window._bodyMode = "muscles"; syncMode(); selectMuscle(window._lastMuscle || "chest"); };
+    $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
+    $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
     window._bodyViewer = v;
     selectMuscle(selected || "chest");
   }
@@ -1009,7 +1067,265 @@
     return canvas.toDataURL("image/png");
   }
 
-  // PROGRESS
+  // AI FORM CHECK (MoveNet pose estimation, on-device)
+  let formStream = null, formDetector = null, formRunning = false, formRaf = 0;
+  let squatState = "up", squatReps = 0;
+  async function loadFormModel() {
+    if (formDetector) return formDetector;
+    if (!window.tf) {
+      await new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js";
+        s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      });
+    }
+    if (!window.poseDetection) {
+      await new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js";
+        s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      });
+    }
+    const model = poseDetection.SupportedModels.MoveNet;
+    formDetector = await poseDetection.createDetector(model, { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING });
+    return formDetector;
+  }
+  async function startFormCheck() {
+    $("formFeedback").textContent = "Loading AI model…";
+    try {
+      await loadFormModel();
+      formStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 } });
+      const video = $("formVideo");
+      video.srcObject = formStream;
+      await video.play();
+      $("formStart").classList.add("hidden");
+      $("formStop").classList.remove("hidden");
+      squatState = "up"; squatReps = 0;
+      formRunning = true;
+      formLoop();
+    } catch (e) {
+      $("formFeedback").textContent = "Camera unavailable: " + e.message;
+    }
+  }
+  function stopFormCheck() {
+    formRunning = false;
+    cancelAnimationFrame(formRaf);
+    if (formStream) { formStream.getTracks().forEach(t => t.stop()); formStream = null; }
+    $("formStart").classList.remove("hidden");
+    $("formStop").classList.add("hidden");
+    $("formVeil").classList.add("hidden");
+  }
+  async function formLoop() {
+    if (!formRunning) return;
+    const video = $("formVideo"), canvas = $("formCanvas");
+    if (video.readyState >= 2 && formDetector) {
+      const poses = await formDetector.estimatePoses(video);
+      drawPose(canvas, video, poses[0]);
+      analyzeSquat(poses[0]);
+    }
+    formRaf = requestAnimationFrame(formLoop);
+  }
+  function drawPose(canvas, video, pose) {
+    const ctx = canvas.getContext("2d");
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!pose) return;
+    ctx.fillStyle = "#a3e635";
+    pose.keypoints.forEach(kp => {
+      if (kp.score > 0.3) { ctx.beginPath(); ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI); ctx.fill(); }
+    });
+  }
+  function analyzeSquat(pose) {
+    if (!pose) { $("formFeedback").textContent = "No body detected — step back."; return; }
+    const kp = n => pose.keypoints.find(k => k.name === n);
+    const hip = kp("left_hip"), knee = kp("left_knee");
+    if (!hip || !knee || hip.score < 0.3 || knee.score < 0.3) {
+      $("formFeedback").textContent = "Show your side profile to the camera.";
+      return;
+    }
+    // in image coords, y increases downward. Hip below knee = hip.y > knee.y
+    const depth = hip.y - knee.y;
+    let msg;
+    if (squatState === "up" && depth > 20) {
+      squatState = "down";
+      msg = "Good depth! Drive up.";
+    } else if (squatState === "down" && depth < 0) {
+      squatState = "up"; squatReps++;
+      msg = `Rep ${squatReps} — nice!`;
+    } else if (squatState === "up") {
+      msg = depth > -30 ? "Bend your knees…" : "Going down…";
+    } else {
+      msg = "Hold… now drive up!";
+    }
+    $("formFeedback").innerHTML = `${msg}<br><span class="muted" style="font-size:13px">Reps: ${squatReps}</span>`;
+  }
+  function openFormCheck() {
+    $("formClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    $("formVeil").classList.remove("hidden");
+  }
+
+  // VOICE LOGGING
+  let voiceRec = null;
+  function toggleVoiceLog() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Voice not supported in this browser."); return; }
+    if (voiceRec) { voiceRec.stop(); voiceRec = null; $("voiceBtn").textContent = "🎤 Voice log"; return; }
+    voiceRec = new SR();
+    voiceRec.lang = "en-US";
+    voiceRec.onresult = e => {
+      const text = e.results[0][0].transcript.toLowerCase();
+      const repsM = text.match(/(\d+)\s*reps?/);
+      const wM = text.match(/(\d+(?:\.\d+)?)\s*(kg|kilos?|lb|lbs|pounds?)/);
+      if (repsM || wM) {
+        const rows = document.querySelectorAll(".set-row2:not(.voiced)");
+        if (rows.length) {
+          const row = rows[0];
+          row.classList.add("voiced");
+          if (repsM) {
+            const inp = row.querySelector('input[data-f="reps"]');
+            if (inp) inp.value = repsM[1];
+          }
+          if (wM) {
+            const inp = row.querySelector('input[data-f="weight"]');
+            if (inp) {
+              let v = parseFloat(wM[1]);
+              if (/lb|lbs|pound/.test(wM[2]) && getSettings().units === "kg") v = v * 0.453592;
+              if (/kg|kilo/.test(wM[2]) && getSettings().units === "lb") v = v * 2.20462;
+              inp.value = Math.round(v * 10) / 10;
+            }
+          }
+          const btn = row.querySelector(".set-done");
+          if (btn) btn.click();
+          $("voiceStatus").textContent = `Logged: ${text}`;
+        }
+      } else {
+        $("voiceStatus").textContent = `Heard: "${text}" — try "10 reps 60 kilos"`;
+      }
+    };
+    voiceRec.onend = () => { voiceRec = null; const b = $("voiceBtn"); if (b) b.textContent = "🎤 Voice log"; };
+    voiceRec.start();
+    $("voiceBtn").textContent = "⏹ Stop";
+    $("voiceStatus").textContent = "Listening… say \"10 reps 60 kilos\"";
+  }
+
+  // AI COACH — generates a program from your history
+  function generateCoachProgram() {
+    const log = getLog();
+    const myEq = getSettings().myEquipment || [];
+    // find weak muscle groups (low 28-day volume)
+    const vol = {};
+    const cutoff = Date.now() - 28 * 864e5;
+    log.forEach(w => {
+      if (w.ts < cutoff) return;
+      w.exercises.forEach(x => {
+        const ex = byId(x.id);
+        if (!ex) return;
+        vol[ex.primary] = (vol[ex.primary] || 0) + x.sets.length;
+      });
+    });
+    const weak = Object.keys(MUSCLE_INFO)
+      .filter(g => MANNEQUIN_IDS.includes(g))
+      .sort((a, b) => (vol[a] || 0) - (vol[b] || 0))
+      .slice(0, 4);
+    // pick exercises for weak groups, preferring user's equipment
+    const picks = [];
+    weak.forEach(g => {
+      const cands = EXERCISES.filter(e => e.primary === g && (!myEq.length || myEq.includes(e.equipment)));
+      if (cands.length) picks.push(cands[Math.floor(Math.random() * cands.length)]);
+    });
+    // fill to 6 exercises with compounds
+    const compounds = EXERCISES.filter(e => ["chest", "back", "quads"].includes(e.primary) && (!myEq.length || myEq.includes(e.equipment)));
+    while (picks.length < 6 && compounds.length) {
+      const c = compounds.splice(Math.floor(Math.random() * compounds.length), 1)[0];
+      if (!picks.includes(c)) picks.push(c);
+    }
+    const id = "coach-" + Date.now().toString(36);
+    const prog = {
+      id, name: "AI Coach Plan", tagline: "Generated for your weak points: " + weak.map(g => MUSCLE_INFO[g].name).join(", "),
+      custom: true, level: "custom", daysPerWeek: 3, weeks: 4, equipment: "Mixed",
+      days: [
+        { name: "Day 1", exercises: picks.slice(0, 3).map(e => ({ id: e.id, sets: 3, reps: "10" })) },
+        { name: "Day 2", exercises: picks.slice(3, 6).map(e => ({ id: e.id, sets: 3, reps: "10" })) },
+        { name: "Day 3", exercises: picks.slice(0, 3).map(e => ({ id: e.id, sets: 3, reps: "12" })) },
+      ]
+    };
+    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    location.hash = "#/program/" + id;
+  }
+  // AUTO-REGULATION + DELOAD + RECOVERY
+  function suggestWeight(exId) {
+    // find last logged weight for this exercise, suggest +2.5% if reps were high
+    const log = getLog();
+    for (let i = log.length - 1; i >= 0; i--) {
+      const w = log[i];
+      const x = w.exercises.find(e => e.id === exId);
+      if (x && x.sets.length) {
+        const last = x.sets[x.sets.length - 1];
+        const avgReps = x.sets.reduce((a, s) => a + s.reps, 0) / x.sets.length;
+        let suggested = last.weight;
+        if (avgReps >= 10) suggested = last.weight * 1.025; // progressive overload
+        return { last: last.weight, suggested: Math.round(suggested * 4) / 4, reps: last.reps };
+      }
+    }
+    return null;
+  }
+  function checkDeload() {
+    const log = getLog();
+    if (log.length < 6) return false;
+    // check if last 2 weeks volume is dropping while frequency stays high
+    const now = Date.now();
+    const week1 = log.filter(w => now - w.ts < 7 * 864e5);
+    const week2 = log.filter(w => now - w.ts >= 7 * 864e5 && now - w.ts < 14 * 864e5);
+    if (week1.length < 2 || week2.length < 2) return false;
+    const vol = ws => ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
+    return vol(week1) < vol(week2) * 0.85;
+  }
+  function recoveryScore() {
+    const log = getLog();
+    if (!log.length) return 100;
+    const last = log[log.length - 1];
+    const daysSince = (Date.now() - last.ts) / 864e5;
+    const lastVol = last.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0);
+    // base 100, -10 per day since workout (up to 3 days), -volume factor
+    let score = 100 - Math.min(30, daysSince * 10) - Math.min(20, lastVol / 500);
+    return Math.max(0, Math.round(score));
+  }
+
+  // PERSONAL CHALLENGES
+  const CHALLENGES = [
+    { id: "vol-week", name: "Volume week", desc: "Hit 20,000 kg total volume in 7 days", target: 20000, metric: "volume7" },
+    { id: "freq-week", name: "5x week", desc: "Train 5 times in 7 days", target: 5, metric: "freq7" },
+    { id: "streak-14", name: "2-week streak", desc: "14-day streak", target: 14, metric: "streak" },
+  ];
+  function challengeProgress() {
+    const log = getLog();
+    const now = Date.now();
+    const week = log.filter(w => now - w.ts < 7 * 864e5);
+    const vol7 = week.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
+    return {
+      volume7: vol7,
+      freq7: week.length,
+      streak: workoutStreak(),
+    };
+  }
+  function renderChallengesTab(body) {
+    const prog = challengeProgress();
+    body.innerHTML = `<h3>Challenges</h3><p class="muted">Beat your own records.</p><div class="badge-grid">` +
+      CHALLENGES.map(c => {
+        const cur = prog[c.metric] || 0;
+        const pct = Math.min(100, Math.round(cur / c.target * 100));
+        const done = cur >= c.target;
+        return `<div class="badge-card ${done ? "earned" : ""}">
+          <div class="badge-icon">${done ? "🏆" : "🎯"}</div>
+          <b>${c.name}</b><span>${c.desc}</span>
+          <div style="margin-top:8px;background:var(--surface2);border-radius:999px;height:8px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:var(--volt)"></div>
+          </div>
+          <span style="font-size:12px">${Math.round(cur).toLocaleString()} / ${c.target.toLocaleString()}</span>
+        </div>`;
+      }).join("") + `</div>`;
+  }
+
   // ACHIEVEMENTS
   function streakCalendar(log) {
     const dates = new Set(log.map(w => w.date));
@@ -1180,6 +1496,7 @@
     const body = $("progressBody");
     if (tab === "body") { renderBodyTab(body); return; }
     if (tab === "badges") { renderBadgesTab(body); return; }
+    if (tab === "challenges") { renderChallengesTab(body); return; }
     if (!log.length) {
       body.innerHTML = `<div class="empty-note"><p><b>No workouts logged yet.</b></p><p>Finish a workout and it will show up here with your history, records and volume.</p></div>`;
       return;
@@ -1192,7 +1509,9 @@
         <div class="stat-card"><b>${workoutStreak()}</b><span>day streak</span></div>
         <div class="stat-card"><b>${totalSets}</b><span>total sets</span></div>
         <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
+        <div class="stat-card"><b>${recoveryScore()}%</b><span>recovery</span></div>
       </div>
+      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>⚠️ Deload suggested:</b> <span class="muted">Volume dropping — consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 8 weeks</h3>
       ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set.</p>`;
@@ -1381,12 +1700,14 @@
       const pairs = currentWorkout._pairs;
       const isPaired = pairs.has(xi) || pairs.has(xi - 1);
       const pairLabel = pairs.has(xi) ? "A1" : pairs.has(xi - 1) ? "A2" : "";
+      const sug = suggestWeight(x.id);
       return `<div class="wo-ex ${isPaired ? "superset" : ""}">
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
           ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
+        ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0">💡 Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
         <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
         ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
@@ -1488,6 +1809,12 @@
     a.download = `forge-workout-${window._lastEntry.date}.png`;
     a.click();
   });
+  $("replayBtn").addEventListener("click", () => {
+    if (!window._lastEntry) return;
+    // store the entry for replay and go to body map
+    window._replayEntry = window._lastEntry;
+    location.hash = "#/body?replay=1";
+  });
 
   /* ---------- router ---------- */
   function router() {
@@ -1507,7 +1834,13 @@
       $("myEqWrap").classList.toggle("hidden", !hasEq);
       initExercises(); renderExercises();
     }
-    else if (parts[0] === "body") { show("body"); renderBody(params.get("m")); }
+    else if (parts[0] === "body") {
+      show("body");
+      renderBody(params.get("m"));
+      if (params.get("replay") && window._replayEntry) {
+        setTimeout(() => startReplay(window._replayEntry), 800);
+      }
+    }
     else if (parts[0] === "favorites") { show("favorites"); renderFavorites(); }
     else if (parts[0] === "programs") { show("programs"); renderPrograms(); }
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
@@ -1652,10 +1985,17 @@
     }
   });
   $("plateBtn").addEventListener("click", openPlates);
+  $("voiceBtn").addEventListener("click", toggleVoiceLog);
   $("plateClose").addEventListener("click", () => $("plateVeil").classList.add("hidden"));
   $("plateVeil").addEventListener("click", e => { if (e.target.id === "plateVeil") $("plateVeil").classList.add("hidden"); });
   $("plateBar").addEventListener("input", calcPlates);
   $("plateTarget").addEventListener("input", calcPlates);
+  $("coachBtn").addEventListener("click", generateCoachProgram);
+  $("formCheckBtn").addEventListener("click", openFormCheck);
+  $("formClose").addEventListener("click", stopFormCheck);
+  $("formVeil").addEventListener("click", e => { if (e.target.id === "formVeil") stopFormCheck(); });
+  $("formStart").addEventListener("click", startFormCheck);
+  $("formStop").addEventListener("click", stopFormCheck);
   // quiz
   document.addEventListener("click", e => {
     if (e.target.closest("#quizBtn")) { openQuiz(); return; }
