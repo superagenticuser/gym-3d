@@ -50,6 +50,8 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 80px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 15px 30px; border-radius: 999px; font-size: 16px; transition: transform .15s; }
 .btn .ic { width: 18px; height: 18px; }
 .btn-sm .ic { width: 16px; height: 16px; }
+.btn-ic { display: inline-flex; align-items: center; }
+.btn-ic .ic { width: 16px; height: 16px; }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: var(--volt); color: #0b0d12; }
 .btn-ghost { border: 1px solid var(--line); color: var(--ink); background: var(--surface); }

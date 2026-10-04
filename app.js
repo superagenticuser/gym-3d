@@ -1168,7 +1168,7 @@
   let voiceRec = null;
   function setVoiceBtn(listening) {
     const b = $("voiceBtn"); if (!b) return;
-    b.innerHTML = (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") + (listening ? " Stop" : " Voice log");
+    b.innerHTML = `<span class="btn-ic">` + (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") + `</span>` + (listening ? " Stop" : " Voice log");
   }
   function toggleVoiceLog() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
