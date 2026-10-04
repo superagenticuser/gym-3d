@@ -1367,9 +1367,30 @@
     $("coachQ").addEventListener("keydown", e => { if (e.key === "Enter") answerCoach(); });
     $("mesoBtn").addEventListener("click", () => {
       const progs = getCustomPrograms().concat(PROGRAMS);
-      const opts = progs.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
-      $("coachTool").innerHTML = `<p>Base program:</p><select id="mesoBase">${opts}</select> <button class="btn btn-primary btn-sm" id="mesoGo">Generate</button>`;
-      $("mesoGo").addEventListener("click", () => generatePeriodized($("mesoBase").value));
+      if (!progs.length) {
+        $("coachTool").innerHTML = `<div class="onerm-box" style="border-color:#f87171"><b>No programs found.</b></div>`;
+        return;
+      }
+      const opts = progs.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+      $("coachTool").innerHTML = `
+        <div class="field-group">
+          <label class="field-label" for="mesoBase">Base program</label>
+          <select id="mesoBase" style="width:100%;max-width:400px">${opts}</select>
+        </div>
+        <p class="muted" style="font-size:13px;margin:8px 0 12px">Creates a 4-week plan: weights increase 2.5% each week for weeks 1-3, week 4 is a deload at 60%.</p>
+        <button class="btn btn-primary btn-sm" id="mesoGo">Generate mesocycle</button>`;
+      $("mesoGo").addEventListener("click", () => {
+        const sel = $("mesoBase");
+        if (!sel || !sel.value) {
+          $("coachTool").innerHTML = `<div class="onerm-box" style="border-color:#f87171"><b>Error:</b> <span class="muted">Please select a program.</span></div>`;
+          return;
+        }
+        try {
+          generatePeriodized(sel.value);
+        } catch (err) {
+          $("coachTool").innerHTML = `<div class="onerm-box" style="border-color:#f87171"><b>Error:</b> <span class="muted">${esc(err.message)}</span></div>`;
+        }
+      });
     });
     $("warmupBtn").addEventListener("click", () => {
       $("coachTool").innerHTML = `<p>Working weight (${getSettings().units}):</p><div style="display:flex;gap:8px"><input type="number" id="wuW" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" /><button class="btn btn-primary btn-sm" id="wuGo">Calculate</button></div><div id="wuOut" style="margin-top:12px"></div>`;
