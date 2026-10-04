@@ -1014,7 +1014,7 @@
   // FORM CUES
   const FORM_CUES = {
     "chest": ["Squeeze shoulder blades together", "Keep a slight arch in your back", "Lower with control, don't bounce"],
-    "back": ["Lead with your elbows", "Squeeze at the top for 1 second", "Don't swing — control the weight"],
+    "back": ["Lead with your elbows", "Squeeze at the top for 1 second", "Don't swing, control the weight"],
     "shoulders": ["Keep core braced", "Don't shrug your traps up", "Control the negative"],
     "biceps": ["Pin elbows to your sides", "Don't swing your torso", "Full range of motion"],
     "triceps": ["Keep upper arms still", "Lock out at the top", "Don't flare elbows"],
@@ -1062,7 +1062,7 @@
     entry.exercises.slice(0, 6).forEach(x => {
       const ex = byId(x.id);
       if (ex && y < 1000) {
-        ctx.fillText(`• ${ex.name} — ${x.sets.length} sets`, 120, y);
+        ctx.fillText(`• ${ex.name}: ${x.sets.length} sets`, 120, y);
         y += 45;
       }
     });
@@ -1138,7 +1138,7 @@
     });
   }
   function analyzeSquat(pose) {
-    if (!pose) { $("formFeedback").textContent = "No body detected — step back."; return; }
+    if (!pose) { $("formFeedback").textContent = "No body detected, step back."; return; }
     const kp = n => pose.keypoints.find(k => k.name === n);
     const hip = kp("left_hip"), knee = kp("left_knee");
     if (!hip || !knee || hip.score < 0.3 || knee.score < 0.3) {
@@ -1153,7 +1153,7 @@
       msg = "Good depth! Drive up.";
     } else if (squatState === "down" && depth < 0) {
       squatState = "up"; squatReps++;
-      msg = `Rep ${squatReps} — nice!`;
+      msg = `Rep ${squatReps}, nice!`;
     } else if (squatState === "up") {
       msg = depth > -30 ? "Bend your knees…" : "Going down…";
     } else {
@@ -1221,7 +1221,7 @@
           $("voiceStatus").textContent = `Logged: ${text}`;
         }
       } else {
-        $("voiceStatus").textContent = `Heard: "${text}" — try "10 reps 60 kilos"`;
+        $("voiceStatus").textContent = `Heard: "${text}". Try "10 reps 60 kilos"`;
       }
     };
     voiceRec.onend = () => { voiceRec = null; setVoiceBtn(false); };
@@ -1426,7 +1426,7 @@
   function answerCoach() {
     const q = $("coachQ").value.toLowerCase();
     const out = $("coachA");
-    let ans = "I need more data — log a few workouts first.";
+    let ans = "I need more data. Log a few workouts first.";
     if (/bench|stuck|plateau/.test(q)) {
       const plats = detectPlateaus();
       const bp = plats.find(p => /bench|press/i.test(p.name));
@@ -1440,7 +1440,7 @@
       const bal = muscleBalance();
       ans = `Push/pull ratio is ${bal.ratio ? bal.ratio.toFixed(2) : "unknown"}. Aim for 1.0 or slightly pull-dominant.`;
     } else if (/deload|tired/.test(q)) {
-      ans = checkDeload() ? "Yes — your volume is dropping. Take a light week." : "No deload needed right now. Keep pushing.";
+      ans = checkDeload() ? "Yes, your volume is dropping. Take a light week." : "No deload needed right now. Keep pushing.";
     }
     out.innerHTML = `<div class="onerm-box"><b>Coach:</b> <span>${ans}</span></div>`;
   }
@@ -1545,7 +1545,7 @@
       if (h.water) parts.push(`💧 ${h.water}ml`);
       if (h.protein) parts.push(`🥩 ${h.protein}g`);
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
-        <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "—"}</div></div>
+        <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "-"}</div></div>
         ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" style="padding:6px 12px;font-size:12px">Clear</button>` : ""}
       </div>`;
     }).join("");
@@ -1605,7 +1605,7 @@
       });
     }
     const id = "meso-" + Date.now().toString(36);
-    const prog = { id, name: base.name + " — Mesocycle", tagline: "4-week periodized plan with deload week 4",
+    const prog = { id, name: base.name + " Mesocycle", tagline: "4-week periodized plan with deload week 4",
       custom: true, level: "custom", daysPerWeek: base.days.length, weeks: 4, equipment: base.equipment || "Mixed",
       mesocycle: weeks, days: base.days };
     const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
@@ -1793,7 +1793,7 @@
     if (!c || !c.lastStart) return null;
     const day = Math.floor((Date.now() - c.lastStart) / 864e5) % (c.length || 28) + 1;
     if (day <= 5) return { phase: "Menstrual", day, tip: "Lower intensity, focus on technique and mobility." };
-    if (day <= 13) return { phase: "Follicular", day, tip: "Energy rising — great window for PRs and volume." };
+    if (day <= 13) return { phase: "Follicular", day, tip: "Energy rising, great window for PRs and volume." };
     if (day <= 16) return { phase: "Ovulatory", day, tip: "Peak strength window. Push hard but warm up well." };
     return { phase: "Luteal", day, tip: "Energy may dip. Moderate intensity, prioritize recovery." };
   }
@@ -2149,7 +2149,7 @@
         <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
         <div class="stat-card"><b>${recoveryScore()}%</b><span>recovery</span></div>
       </div>
-      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping — consider a light week.</span></div>` : ""}
+      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 8 weeks</h3>
       ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set.</p>`;
@@ -2161,7 +2161,7 @@
         const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
         const dstr = new Date(dt + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
         return `<div class="hist-day"><div class="hd"><b>${dstr}</b><span class="muted">${sets} sets</span></div><ul>` +
-          ws.map(w => `<li>${esc(w.programName)} — ${esc(w.dayName)} (${w.exercises.length} exercises)</li>`).join("") + `</ul></div>`;
+          ws.map(w => `<li>${esc(w.programName)}: ${esc(w.dayName)} (${w.exercises.length} exercises)</li>`).join("") + `</ul></div>`;
       }).join("");
     } else if (tab === "records") {
       const recs = [];
@@ -2257,7 +2257,7 @@
     $("pgDays").innerHTML = p.mesocycle
       ? `<div class="onerm-box" style="margin-bottom:16px"><b>Periodized plan:</b> <span class="muted">Weights increase 2.5% weekly. Week 4 is a deload at 60%.</span></div>` +
         p.mesocycle.map(w => `
-          <h3 style="margin:20px 0 12px">${w.deload ? "Week " + w.week + " — Deload" : "Week " + w.week}</h3>
+          <h3 style="margin:20px 0 12px">${w.deload ? "Week " + w.week + " (Deload)" : "Week " + w.week}</h3>
           ${w.days.map((d, di) => `
             <div class="day-card">
               <div class="day-head">
@@ -2349,7 +2349,7 @@
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
-          <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE — Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
+          <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
             <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}">${r}</option>`).join("")}
           </select>
         </div>`;
