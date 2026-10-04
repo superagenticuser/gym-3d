@@ -688,3 +688,5 @@ body.high-contrast { --ink: #ffffff; --muted: #c8d0e0; --line: #3a4358; }
 @keyframes prFade { from { opacity: 0; } }
 @keyframes prPop { from { transform: scale(.7); opacity: 0; } }
 @keyframes prBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+#woDone { scroll-margin-top: 300px; }
