@@ -1395,7 +1395,7 @@
         // toast notification
         const toast = document.createElement("div");
         toast.className = "badge-toast";
-        toast.innerHTML = `<span style="font-size:24px">${b.icon}</span><div><b>Badge earned!</b><br>${b.name}</div>`;
+        toast.innerHTML = `<span class="toast-icon">${window.FORGE_ICON ? window.FORGE_ICON(b.icon) : ""}</span><div><b>Badge earned!</b><br>${b.name}</div>`;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add("show"), 100);
         setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 500); }, 4000);
