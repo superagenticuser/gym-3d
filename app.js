@@ -399,6 +399,7 @@
     document.querySelectorAll("#langSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.lang === s.lang));
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
+    tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
       `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
@@ -479,7 +480,7 @@
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en" };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -697,6 +698,8 @@
        <span class="tag">${cap1(ex.level)}</span>`;
     syncDetailFav(ex);
     $("dSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
+    const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
+    $("dSteps").innerHTML += `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
     $("dMuscles").innerHTML =
       `<span class="tag primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
       ex.secondary.map(s => { const g = groupOf(s); return `<span class="tag" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`; }).join("");
@@ -711,6 +714,24 @@
     $("dSwaps").innerHTML = swaps.length ? swaps.map(x =>
       `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="tag">${eqName[x.equipment]}</span>${window.FORGE_ICON("arrow-right")}</button>`
     ).join("") : `<p class="muted">No swaps needed, this one covers it.</p>`;
+    // 1RM estimator from logged sets (Epley formula)
+    const log = getLog();
+    let best1rm = 0;
+    log.forEach(w => {
+      (w.exercises || []).forEach(x => {
+        if (x.id === ex.id) {
+          (x.sets || []).forEach(s => {
+            if (s.weight > 0 && s.reps > 0) {
+              const est = s.weight * (1 + s.reps / 30);
+              if (est > best1rm) best1rm = est;
+            }
+          });
+        }
+      });
+    });
+    $("dOnerm").innerHTML = best1rm > 0
+      ? `<div class="onerm-box"><b>Estimated 1RM:</b> ${fmtW(best1rm)} <span class="muted">based on your logged sets</span></div>`
+      : "";
     const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
     viewers.push(v);
     if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
@@ -913,12 +934,266 @@
     location.hash = "#/program/" + id;
   }
 
+  // PLATE CALCULATOR
+  function calcPlates() {
+    const units = getSettings().units;
+    const bar = parseFloat($("plateBar").value) || 0;
+    const target = parseFloat($("plateTarget").value) || 0;
+    const plates = units === "kg" ? [25, 20, 15, 10, 5, 2.5, 1.25] : [45, 35, 25, 10, 5, 2.5];
+    let remaining = (target - bar) / 2;
+    if (remaining < 0) {
+      $("plateResult").innerHTML = `<p class="muted">Target must be heavier than the bar.</p>`;
+      return;
+    }
+    const used = [];
+    for (const p of plates) {
+      while (remaining >= p - 0.001) { used.push(p); remaining -= p; }
+    }
+    if (remaining > 0.01) {
+      $("plateResult").innerHTML = `<p class="muted">Closest: ${used.length ? used.join(" + ") : "bar only"} per side (${(remaining * 2).toFixed(1)} ${units} short).</p>`;
+    } else {
+      $("plateResult").innerHTML = used.length
+        ? `<p style="font-size:16px"><b>Per side:</b> ${used.join(" + ")} <span class="muted">${units}</span></p>`
+        : `<p class="muted">Just the bar.</p>`;
+    }
+  }
+  function openPlates() {
+    const units = getSettings().units;
+    $("plateBar").value = units === "kg" ? 20 : 45;
+    $("plateClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    calcPlates();
+    $("plateVeil").classList.remove("hidden");
+  }
+
+  // FORM CUES
+  const FORM_CUES = {
+    "chest": ["Squeeze shoulder blades together", "Keep a slight arch in your back", "Lower with control, don't bounce"],
+    "back": ["Lead with your elbows", "Squeeze at the top for 1 second", "Don't swing — control the weight"],
+    "shoulders": ["Keep core braced", "Don't shrug your traps up", "Control the negative"],
+    "biceps": ["Pin elbows to your sides", "Don't swing your torso", "Full range of motion"],
+    "triceps": ["Keep upper arms still", "Lock out at the top", "Don't flare elbows"],
+    "quads": ["Knees track over toes", "Chest up, core tight", "Drive through your heels"],
+    "hamstrings": ["Hinge at the hips", "Slight bend in knees", "Feel the stretch, then squeeze"],
+    "glutes": ["Squeeze hard at the top", "Don't hyperextend your back", "Drive through heels"],
+    "calves": ["Full stretch at bottom", "Pause at the top", "Don't bounce"],
+    "abs": ["Exhale on the effort", "Don't pull your neck", "Slow and controlled"],
+    "default": ["Breathe steadily", "Control the weight both ways", "Stop if form breaks down"]
+  };
+
+  // SHARE CARD
+  function generateShareCard(entry) {
+    const canvas = $("shareCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = 1080, H = 1080;
+    // background
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#0b0e13"); grad.addColorStop(1, "#1a1f2a");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+    // accent bar
+    ctx.fillStyle = "#a3e635"; ctx.fillRect(0, 0, W, 12);
+    // title
+    ctx.fillStyle = "#fff"; ctx.font = "bold 72px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("FORGE", W/2, 140);
+    ctx.font = "36px sans-serif"; ctx.fillStyle = "#888";
+    ctx.fillText(entry.dayName || "Workout", W/2, 200);
+    ctx.fillText(entry.date, W/2, 250);
+    // stats
+    const totalSets = entry.exercises.reduce((a, x) => a + x.sets.length, 0);
+    const totalVol = entry.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 96px sans-serif";
+    ctx.fillText(entry.exercises.length, W/2 - 200, 450);
+    ctx.fillText(totalSets, W/2 + 200, 450);
+    ctx.font = "32px sans-serif"; ctx.fillStyle = "#888";
+    ctx.fillText("exercises", W/2 - 200, 500);
+    ctx.fillText("sets", W/2 + 200, 500);
+    ctx.fillStyle = "#a3e635"; ctx.font = "bold 80px sans-serif";
+    ctx.fillText(fmtW(totalVol), W/2, 650);
+    ctx.font = "32px sans-serif"; ctx.fillStyle = "#888";
+    ctx.fillText("total volume", W/2, 700);
+    // exercises list
+    ctx.textAlign = "left"; ctx.font = "28px sans-serif"; ctx.fillStyle = "#ccc";
+    let y = 800;
+    entry.exercises.slice(0, 6).forEach(x => {
+      const ex = byId(x.id);
+      if (ex && y < 1000) {
+        ctx.fillText(`• ${ex.name} — ${x.sets.length} sets`, 120, y);
+        y += 45;
+      }
+    });
+    return canvas.toDataURL("image/png");
+  }
+
   // PROGRESS
+  // ACHIEVEMENTS
+  function streakCalendar(log) {
+    const dates = new Set(log.map(w => w.date));
+    const today = new Date();
+    let html = `<div class="cal-grid">`;
+    for (let i = 55; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = fmtDate(d);
+      const isToday = i === 0;
+      html += `<div class="cal-day ${dates.has(key) ? "has" : ""} ${isToday ? "today" : ""}" title="${key}">${d.getDate()}</div>`;
+    }
+    return html + `</div>`;
+  }
+  const BADGES = [
+    { id: "first", icon: "🎯", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
+    { id: "ten", icon: "🔥", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 },
+    { id: "fifty", icon: "💪", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
+    { id: "streak7", icon: "⚡", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
+    { id: "streak30", icon: "🌟", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
+    { id: "vol10k", icon: "🏋️", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0) >= 10000) },
+    { id: "allmuscles", icon: "🗺️", name: "Full body", desc: "Train all 17 muscle groups", check: log => {
+      const groups = new Set();
+      log.forEach(w => w.exercises.forEach(x => { const ex = byId(x.id); if (ex) groups.add(ex.primary); }));
+      return groups.size >= 17;
+    }},
+  ];
+  function getBadges() {
+    try { return JSON.parse(localStorage.getItem("forge-badges") || "[]"); }
+    catch (e) { return []; }
+  }
+  function checkBadges() {
+    const log = getLog();
+    const streak = workoutStreak();
+    const earned = getBadges();
+    BADGES.forEach(b => {
+      if (!earned.includes(b.id) && b.check(log, streak)) {
+        earned.push(b.id);
+        // toast notification
+        const toast = document.createElement("div");
+        toast.className = "badge-toast";
+        toast.innerHTML = `<span style="font-size:24px">${b.icon}</span><div><b>Badge earned!</b><br>${b.name}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add("show"), 100);
+        setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 500); }, 4000);
+      }
+    });
+    localStorage.setItem("forge-badges", JSON.stringify(earned));
+  }
+  function renderBadgesTab(body) {
+    const earned = getBadges();
+    body.innerHTML = `<h3>Achievements</h3><div class="badge-grid">` +
+      BADGES.map(b => `
+        <div class="badge-card ${earned.includes(b.id) ? "earned" : "locked"}">
+          <div class="badge-icon">${earned.includes(b.id) ? b.icon : "🔒"}</div>
+          <b>${b.name}</b><span>${b.desc}</span>
+        </div>`).join("") + `</div>`;
+  }
+
+  // BODY MEASUREMENTS
+  function getMeasures() {
+    try { return JSON.parse(localStorage.getItem("forge-measures") || "[]"); }
+    catch (e) { return []; }
+  }
+  function saveMeasures(m) { localStorage.setItem("forge-measures", JSON.stringify(m)); }
+  function renderBodyTab(body) {
+    const measures = getMeasures();
+    const units = getSettings().units;
+    body.innerHTML = `
+      <h3>Body measurements</h3>
+      <div class="measure-grid">
+        <div class="builder-field"><label>Weight (${units})</label><input type="number" id="mWeight" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Waist (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mWaist" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Chest (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mChest" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Arms (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mArms" step="any" placeholder="–" /></div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="mSave">Log measurements</button>
+      <div id="mChart"></div>
+      <h3 style="margin-top:24px">Progress photos</h3>
+      <input type="file" id="photoInput" accept="image/*" style="margin:12px 0" />
+      <div class="photo-grid" id="photoGrid"></div>`;
+    renderMeasureChart();
+    renderPhotos();
+    $("mSave").addEventListener("click", () => {
+      const entry = { date: fmtDate(new Date()), ts: Date.now() };
+      const w = parseFloat($("mWeight").value), wa = parseFloat($("mWaist").value);
+      const c = parseFloat($("mChest").value), a = parseFloat($("mArms").value);
+      if (w) entry.weight = w; if (wa) entry.waist = wa; if (c) entry.chest = c; if (a) entry.arms = a;
+      if (!entry.weight && !entry.waist && !entry.chest && !entry.arms) { alert("Enter at least one measurement."); return; }
+      const all = getMeasures(); all.push(entry); saveMeasures(all);
+      renderBodyTab(body);
+    });
+    $("photoInput").addEventListener("change", handlePhotoUpload);
+  }
+  function renderMeasureChart() {
+    const measures = getMeasures().filter(m => m.weight);
+    if (measures.length < 2) {
+      $("mChart").innerHTML = `<p class="muted">Log weight twice to see a trend.</p>`;
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    $("mChart").innerHTML = `<div class="chart-wrap"><h4>Weight trend</h4></div>`;
+    $("mChart").querySelector(".chart-wrap").appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width = 600, h = canvas.height = 200;
+    const vals = measures.map(m => m.weight);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const range = max - min || 1;
+    ctx.strokeStyle = "#a3e635"; ctx.lineWidth = 3; ctx.beginPath();
+    vals.forEach((v, i) => {
+      const x = 30 + (i / (vals.length - 1)) * (w - 60);
+      const y = h - 30 - ((v - min) / range) * (h - 60);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+    ctx.fillStyle = "#888"; ctx.font = "12px sans-serif";
+    ctx.fillText(max.toFixed(1), 5, 20); ctx.fillText(min.toFixed(1), 5, h - 10);
+  }
+  function getPhotos() {
+    try { return JSON.parse(localStorage.getItem("forge-photos") || "[]"); }
+    catch (e) { return []; }
+  }
+  function savePhotos(p) { localStorage.setItem("forge-photos", JSON.stringify(p)); }
+  function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const max = 800;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        canvas.width = img.width * scale; canvas.height = img.height * scale;
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        if (dataUrl.length > 1500000) { alert("Photo too large, try a smaller one."); return; }
+        const photos = getPhotos();
+        photos.push({ date: fmtDate(new Date()), ts: Date.now(), src: dataUrl });
+        savePhotos(photos);
+        renderPhotos();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function renderPhotos() {
+    const photos = getPhotos().sort((a, b) => a.ts - b.ts);
+    const grid = $("photoGrid");
+    if (!grid) return;
+    grid.innerHTML = photos.map((p, i) => `
+      <div class="photo-item">
+        <img src="${p.src}" alt="Progress photo ${p.date}" />
+        <div class="photo-date">${p.date}</div>
+        <button class="photo-del" data-pdel="${i}" aria-label="Delete photo">×</button>
+      </div>`).join("") || `<p class="muted">No photos yet.</p>`;
+    grid.querySelectorAll("[data-pdel]").forEach(b => {
+      b.addEventListener("click", () => {
+        const all = getPhotos(); all.splice(parseInt(b.dataset.pdel, 10), 1); savePhotos(all); renderPhotos();
+      });
+    });
+  }
+
   function renderProgress(tab) {
     tab = tab || "overview";
     document.querySelectorAll("#progTabs .chip").forEach(c => c.classList.toggle("on", c.dataset.ptab === tab));
     const log = getLog();
     const body = $("progressBody");
+    if (tab === "body") { renderBodyTab(body); return; }
+    if (tab === "badges") { renderBadgesTab(body); return; }
     if (!log.length) {
       body.innerHTML = `<div class="empty-note"><p><b>No workouts logged yet.</b></p><p>Finish a workout and it will show up here with your history, records and volume.</p></div>`;
       return;
@@ -932,6 +1207,8 @@
         <div class="stat-card"><b>${totalSets}</b><span>total sets</span></div>
         <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
       </div>
+      <h3 style="margin-top:20px">Last 8 weeks</h3>
+      ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set.</p>`;
     } else if (tab === "history") {
       const byDate = {};
@@ -1053,7 +1330,30 @@
   }
 
   // WORKOUT MODE
-  let timerInt = null, timerLeft = 0;
+  let timerInt = null, timerLeft = 0, currentWorkout = null;
+  function getRestSeconds(ex) {
+    const s = getSettings();
+    if (!ex) return s.restShort;
+    // heavy compounds get long rest
+    if (ex.equipment === "barbell" || ex.level === "advanced") return s.restLong;
+    return s.restShort;
+  }
+  function startTimer(sec) {
+    clearInterval(timerInt);
+    timerLeft = sec;
+    $("timerDisplay").textContent = fmtT(timerLeft);
+    timerInt = setInterval(() => {
+      timerLeft--;
+      $("timerDisplay").textContent = fmtT(Math.max(0, timerLeft));
+      if (timerLeft <= 0) {
+        clearInterval(timerInt); timerInt = null;
+        beep();
+        if (getSettings().voiceCues && window.speechSynthesis) {
+          speechSynthesis.speak(new SpeechSynthesisUtterance("Rest over. Next set."));
+        }
+      }
+    }, 1000);
+  }
   function fmtT(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
   function beep() {
     if (!getSettings().sound) return;
@@ -1073,6 +1373,8 @@
     const p = progById(pid);
     const d = p && p.days[di];
     if (!d) { location.hash = "#/program/" + pid; return; }
+    currentWorkout = d;
+    if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name;
     $("woList").innerHTML = d.exercises.map((x, xi) => {
@@ -1090,12 +1392,17 @@
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
         </div>`;
       }).join("");
-      return `<div class="wo-ex">
+      const pairs = currentWorkout._pairs;
+      const isPaired = pairs.has(xi) || pairs.has(xi - 1);
+      const pairLabel = pairs.has(xi) ? "A1" : pairs.has(xi - 1) ? "A2" : "";
+      return `<div class="wo-ex ${isPaired ? "superset" : ""}">
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
+          ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
         <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
+        ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
           ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
         </ol>
@@ -1116,7 +1423,34 @@
       return;
     }
     const sd = e.target.closest(".set-done");
-    if (sd) { sd.classList.toggle("hit"); return; }
+    if (sd) {
+      const wasHit = sd.classList.contains("hit");
+      sd.classList.toggle("hit");
+      if (!wasHit && getSettings().autoRest) {
+        const xi = parseInt(sd.dataset.x, 10);
+        const woEx = currentWorkout && currentWorkout.exercises[xi];
+        const ex = woEx && byId(woEx.id);
+        // superset pairs get short rest
+        const isPair = currentWorkout && currentWorkout._pairs && (currentWorkout._pairs.has(xi) || currentWorkout._pairs.has(xi - 1));
+        startTimer(isPair ? 30 : getRestSeconds(ex));
+        if (getSettings().voiceCues && window.speechSynthesis) {
+          const setNum = parseInt(sd.dataset.s, 10) + 1;
+          const total = woEx ? woEx.sets : 0;
+          speechSynthesis.speak(new SpeechSynthesisUtterance(`Set ${setNum} of ${total} done. Rest.`));
+        }
+      }
+      return;
+    }
+    const pr = e.target.closest("[data-pair]");
+    if (pr && currentWorkout) {
+      const xi = parseInt(pr.dataset.pair, 10);
+      if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
+      if (currentWorkout._pairs.has(xi)) currentWorkout._pairs.delete(xi);
+      else currentWorkout._pairs.add(xi);
+      const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
+      renderWorkout(raw[1], parseInt(raw[2], 10));
+      return;
+    }
     const tp = e.target.closest("[data-timer]");
     if (tp) {
       const sec = parseInt(tp.dataset.timer, 10);
@@ -1151,12 +1485,22 @@
     });
     if (!entry.exercises.length) { alert("Mark at least one set as done to log this workout."); return; }
     const log = getLog(); log.push(entry); saveLog(log);
+    checkBadges();
+    window._lastEntry = entry;
     done[key] = done[key] || [];
     done[key].push(today); saveDone();
     $("woDone").classList.remove("hidden");
     $("woFinish").classList.add("hidden");
     clearInterval(timerInt); timerInt = null;
     window.scrollTo(0, 0);
+  });
+  $("shareCard").addEventListener("click", () => {
+    if (!window._lastEntry) return;
+    const dataUrl = generateShareCard(window._lastEntry);
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `forge-workout-${window._lastEntry.date}.png`;
+    a.click();
   });
 
   /* ---------- router ---------- */
@@ -1210,6 +1554,9 @@
   document.documentElement.removeAttribute("data-theme");
   applyAccent(localStorage.getItem("forge-accent") || "volt", false);
   applyI18n();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
   $("settingsBtn").addEventListener("click", openSettings);
   $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   $("settingsClose").addEventListener("click", closeSettings);
@@ -1238,7 +1585,7 @@
     s.myEquipment = s.myEquipment.includes(q) ? s.myEquipment.filter(x => x !== q) : [...s.myEquipment, q];
     saveSettings(s); syncSettingsUI();
   });
-  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"]].forEach(([id, key]) => {
+  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
       const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI();
     });
@@ -1315,6 +1662,11 @@
       renderBuilder(); renderPicker($("pickerSearch").value);
     }
   });
+  $("plateBtn").addEventListener("click", openPlates);
+  $("plateClose").addEventListener("click", () => $("plateVeil").classList.add("hidden"));
+  $("plateVeil").addEventListener("click", e => { if (e.target.id === "plateVeil") $("plateVeil").classList.add("hidden"); });
+  $("plateBar").addEventListener("input", calcPlates);
+  $("plateTarget").addEventListener("input", calcPlates);
   // quiz
   document.addEventListener("click", e => {
     if (e.target.closest("#quizBtn")) { openQuiz(); return; }

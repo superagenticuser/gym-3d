@@ -167,5 +167,88 @@ const PROGRAMS = [
         { id: "devil-press", sets: 1, reps: "30s" }
       ]}
     ]
+  },
+  {
+    id: "powerbuilding",
+    name: "Powerbuilding",
+    tagline: "Heavy compounds for strength, volume work for size. 4 days.",
+    level: "intermediate",
+    daysPerWeek: 4,
+    weeks: 8,
+    equipment: "Full gym",
+    days: [
+      { name: "Day 1 · Upper Strength", exercises: [
+        { id: "barbell-bench-press", sets: 5, reps: "5" },
+        { id: "bent-over-barbell-row", sets: 4, reps: "8" },
+        { id: "dumbbell-shoulder-press", sets: 3, reps: "10" },
+        { id: "lat-pulldown", sets: 3, reps: "12" }
+      ]},
+      { name: "Day 2 · Lower Strength", exercises: [
+        { id: "back-squat", sets: 5, reps: "5" },
+        { id: "romanian-deadlift", sets: 3, reps: "10" },
+        { id: "leg-press", sets: 3, reps: "12" },
+        { id: "plank", sets: 3, reps: "60s" }
+      ]},
+      { name: "Day 3 · Upper Volume", exercises: [
+        { id: "barbell-bench-press", sets: 4, reps: "10" },
+        { id: "pull-up", sets: 4, reps: "8" },
+        { id: "dumbbell-shoulder-press", sets: 3, reps: "12" },
+        { id: "push-up", sets: 3, reps: "15" }
+      ]},
+      { name: "Day 4 · Lower Volume", exercises: [
+        { id: "deadlift", sets: 4, reps: "6" },
+        { id: "front-squat", sets: 3, reps: "10" },
+        { id: "bulgarian-split-squat", sets: 3, reps: "10 / side" },
+        { id: "plank", sets: 3, reps: "60s" }
+      ]}
+    ]
+  },
+  {
+    id: "calisthenics",
+    name: "Calisthenics Skills",
+    tagline: "Master your bodyweight. Progress from basics to advanced skills.",
+    level: "beginner",
+    daysPerWeek: 3,
+    weeks: 8,
+    equipment: "Bodyweight + pull-up bar",
+    days: [
+      { name: "Day 1 · Push", exercises: [
+        { id: "push-up", sets: 4, reps: "12" },
+        { id: "plank", sets: 3, reps: "60s" },
+        { id: "push-up", sets: 3, reps: "8" }
+      ]},
+      { name: "Day 2 · Pull", exercises: [
+        { id: "pull-up", sets: 4, reps: "6" },
+        { id: "plank", sets: 3, reps: "60s" }
+      ]},
+      { name: "Day 3 · Legs + Core", exercises: [
+        { id: "goblet-squat", sets: 4, reps: "15" },
+        { id: "bulgarian-split-squat", sets: 3, reps: "10 / side" },
+        { id: "plank", sets: 3, reps: "60s" }
+      ]}
+    ]
+  },
+  {
+    id: "runner-strength",
+    name: "Runner's Strength",
+    tagline: "Injury-proof your running. 2 days, single-leg focus.",
+    level: "beginner",
+    daysPerWeek: 2,
+    weeks: 6,
+    equipment: "Dumbbells + bodyweight",
+    days: [
+      { name: "Day 1 · Legs", exercises: [
+        { id: "goblet-squat", sets: 3, reps: "12" },
+        { id: "bulgarian-split-squat", sets: 3, reps: "10 / side" },
+        { id: "romanian-deadlift", sets: 3, reps: "10" },
+        { id: "plank", sets: 3, reps: "45s" }
+      ]},
+      { name: "Day 2 · Full Body", exercises: [
+        { id: "push-up", sets: 3, reps: "12" },
+        { id: "goblet-squat", sets: 3, reps: "12" },
+        { id: "dumbbell-shoulder-press", sets: 3, reps: "10" },
+        { id: "plank", sets: 3, reps: "45s" }
+      ]}
+    ]
   }
 ];

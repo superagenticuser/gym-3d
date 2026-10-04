@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FORGE · 3D Gym Training</title>
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
+<meta name="theme-color" content="#0b0e13" />
+<link rel="manifest" href="manifest.json" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -116,6 +118,7 @@
         <div class="mini-cards" id="dSimilar"></div>
         <h3><span data-i18n="swap_title">Swap it</span> <span class="muted" style="font-weight:400;font-size:13px" data-i18n="swap_sub">same muscle, different gear</span></h3>
         <div id="dSwaps"></div>
+        <div id="dOnerm"></div>
       </aside>
     </div>
   </section>
@@ -187,13 +190,19 @@
       <p class="hint timer-hint"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2" />
   <line x1="12" x2="15" y1="14" y2="11" />
   <circle cx="12" cy="14" r="8" /></svg>Rest timer. Tap a duration to start</p>
+      <button class="btn btn-ghost btn-sm" id="plateBtn" style="margin-top:8px">Plate calculator</button>
     </div>
     <div id="woList"></div>
     <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
     <div class="done-banner hidden" id="woDone">
       <h3>Workout complete. 💪</h3>
       <p class="muted">Logged. Keep the streak going.</p>
-      <a class="btn btn-ghost" id="woDoneBack" href="#/programs">Back to programs</a>
+      <div style="display:flex;gap:10px;justify-content:center;margin:12px 0">
+        <button class="btn btn-primary btn-sm" id="shareCard">Share summary</button>
+        <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs">Back to programs</a>
+      </div>
+      <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
+    </div>
     </div>
   </section>
 
@@ -212,6 +221,8 @@
       <button class="chip" data-ptab="history" data-i18n="tab_history">History</button>
       <button class="chip" data-ptab="records" data-i18n="tab_records">Records</button>
       <button class="chip" data-ptab="volume" data-i18n="tab_volume">Volume</button>
+      <button class="chip" data-ptab="body">Body</button>
+      <button class="chip" data-ptab="badges">Badges</button>
     </div>
     <div id="progressBody"></div>
   </section>
@@ -249,6 +260,26 @@
       </div>
     </div>
   </div>
+<!-- PLATE CALC -->
+<div class="modal-veil hidden" id="plateVeil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plateTitle">
+    <div class="modal-head">
+      <h3 id="plateTitle">Plate calculator</h3>
+      <button class="modal-x" id="plateClose" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <div class="builder-field">
+        <label for="plateBar">Bar weight</label>
+        <input type="number" id="plateBar" value="20" step="any" min="0" />
+      </div>
+      <div class="builder-field">
+        <label for="plateTarget">Target weight</label>
+        <input type="number" id="plateTarget" value="100" step="any" min="0" />
+      </div>
+      <div id="plateResult"></div>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer>
@@ -265,7 +296,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 6 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v7</p>
+    <p class="muted foot-copy">© 2026 FORGE · v8</p>
   </div>
 </footer>
 
@@ -295,6 +326,8 @@
       </div>
       <p class="setting-label" data-i18n="set_workout">Workout</p>
       <div class="toggle-row"><span data-i18n="set_sound">Rest timer sound</span><button class="toggle" id="tglSound" role="switch" aria-checked="true"><span class="knob"></span></button></div>
+      <div class="toggle-row"><span>Auto-start rest timer</span><button class="toggle" id="tglAutoRest" role="switch" aria-checked="true"><span class="knob"></span></button></div>
+      <div class="toggle-row"><span>Voice cues</span><button class="toggle" id="tglVoice" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <div class="toggle-row"><span data-i18n="set_motion">Reduce motion</span><button class="toggle" id="tglMotion" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <p class="setting-label" data-i18n="set_demos">Exercise demos</p>
       <div class="toggle-row"><span data-i18n="set_autoplay">Autoplay</span><button class="toggle" id="tglDemoPlay" role="switch" aria-checked="true"><span class="knob"></span></button></div>
