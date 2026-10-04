@@ -539,6 +539,8 @@
     catch (e) { return []; }
   }
   function saveLog(l) { localStorage.setItem("forge-log", JSON.stringify(l)); }
+  function getTemplates() { try { const t = JSON.parse(localStorage.getItem("forge-templates") || "[]"); return Array.isArray(t) ? t : []; } catch (e) { return []; } }
+  function saveTemplates(t) { localStorage.setItem("forge-templates", JSON.stringify(t)); }
   function lastWeightKg(exId) {
     const log = getLog();
     for (let i = log.length - 1; i >= 0; i--) {
@@ -557,6 +559,18 @@
       });
     }));
     return best;
+  }
+  function muscleLastTrained() {
+    const last = {};
+    getLog().forEach(w => {
+      (w.exercises || []).forEach(x => {
+        const ex = byId(x.id);
+        if (!ex) return;
+        const g = groupOf(ex.primary);
+        if (!last[g] || w.date > last[g]) last[g] = w.date;
+      });
+    });
+    return last;
   }
   function daysAgo(dateStr) {
     const d = new Date(dateStr + "T12:00:00"), n = new Date();
@@ -882,7 +896,14 @@
     if (window._bodyHeatMode) { window._bodyHeatMode = false; if (window._syncBodyMode) window._syncBodyMode(); }
     const full = groupId === "full-body" || groupId === "cardio";
     v.highlight(full ? [] : expandMuscles(groupId), [], full);
-    $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>`;
+    const lastTr = muscleLastTrained();
+    const ld = lastTr[groupId];
+    const ago = ld ? daysAgo(ld) : null;
+    const recLabel = ago === null ? "Not trained yet" : ago === 0 ? "Trained today" : ago === 1 ? "Trained yesterday" : `Trained ${ago} days ago`;
+    const recState = ago === null ? "muted" : ago <= 1 ? "Recovering" : ago <= 3 ? "Recovered" : "Ready";
+    const recColor = ago === null ? "var(--muted)" : ago <= 1 ? "#f59e0b" : "var(--volt)";
+    $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
+      <p style="margin-top:8px;font-size:14px"><span style="color:${recColor};font-weight:700">${recState}</span> <span class="muted">- ${recLabel}</span></p>`;
     const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
     $("bodyExercises").innerHTML = list.length
       ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
@@ -994,17 +1015,39 @@
             <button class="icon-btn" data-bdel-ex="${di}:${xi}" aria-label="Remove exercise">${window.FORGE_ICON("x")}</button>
           </div>`;
         }).join("")}
-        <button class="btn btn-ghost btn-sm" data-bpick="${di}" style="margin-top:10px">Add exercises</button>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" data-bpick="${di}">Add exercises</button>
+          <button class="btn btn-ghost btn-sm" data-btpl-save="${di}">Save as template</button>
+          <button class="btn btn-ghost btn-sm" data-btpl-apply="${di}">From template</button>
+        </div>
       </div>`).join("");
   }
   function openPicker(di) {
-    pickerDay = di;
+    pickerDay = di; templateDay = -1;
+    $("pickerTitle").textContent = "Add exercises";
+    $("pickerSearch").style.display = "";
     $("pickerClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     $("pickerSearch").value = "";
     renderPicker("");
     $("pickerVeil").classList.remove("hidden");
   }
   function closePicker() { $("pickerVeil").classList.add("hidden"); pickerDay = -1; }
+  let templateDay = -1;
+  function openTemplatePicker(di) {
+    templateDay = di;
+    const tpl = getTemplates();
+    $("pickerTitle").textContent = "Apply template";
+    $("pickerSearch").style.display = "none";
+    $("pickerList").innerHTML = tpl.length ? tpl.map(t =>
+      `<div class="picker-item" style="cursor:default">
+        <b>${esc(t.name)}</b><span class="tag">${t.exercises.length} exercises</span>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary btn-sm" data-tpl-apply="${t.id}">Apply</button>
+          <button class="btn btn-ghost btn-sm danger" data-tpl-del="${t.id}">Delete</button>
+        </div>
+      </div>`).join("") : `<p class="muted">No templates yet. Build a day and tap "Save as template".</p>`;
+    $("pickerVeil").classList.remove("hidden");
+  }
   function renderPicker(q) {
     q = q.toLowerCase();
     const inDay = pickerDay >= 0 ? new Set(builder.days[pickerDay].exercises.map(x => x.id)) : new Set();
@@ -2172,23 +2215,81 @@
     };
     reader.readAsDataURL(file);
   }
+  let compareSel = [];
   function renderPhotos() {
     const photos = getPhotos().sort((a, b) => a.ts - b.ts);
     const grid = $("photoGrid");
     if (!grid) return;
-    grid.innerHTML = photos.map((p, i) => `
-      <div class="photo-item">
+    grid.innerHTML = (photos.length >= 2 ? `<p class="muted" style="grid-column:1/-1;font-size:13px">Tap two photos to compare them side by side.</p>` : "") + photos.map((p, i) => `
+      <div class="photo-item ${compareSel.includes(i) ? "cmp-sel" : ""}" data-pcmp="${i}">
         <img src="${p.src}" alt="Progress photo ${p.date}" />
         <div class="photo-date">${p.date}</div>
         <button class="photo-del" data-pdel="${i}" aria-label="Delete photo">×</button>
       </div>`).join("") || `<p class="muted">No photos yet.</p>`;
     grid.querySelectorAll("[data-pdel]").forEach(b => {
-      b.addEventListener("click", () => {
-        const all = getPhotos(); all.splice(parseInt(b.dataset.pdel, 10), 1); savePhotos(all); renderPhotos();
+      b.addEventListener("click", ev => {
+        ev.stopPropagation();
+        const all = getPhotos(); all.splice(parseInt(b.dataset.pdel, 10), 1); savePhotos(all); compareSel = []; renderPhotos();
+      });
+    });
+    grid.querySelectorAll("[data-pcmp]").forEach(el => {
+      el.addEventListener("click", () => {
+        const i = parseInt(el.dataset.pcmp, 10);
+        if (compareSel.includes(i)) compareSel = compareSel.filter(x => x !== i);
+        else { compareSel.push(i); if (compareSel.length > 2) compareSel.shift(); }
+        if (compareSel.length === 2) openCompare(photos[compareSel[0]], photos[compareSel[1]]);
+        renderPhotos();
       });
     });
   }
+  function openCompare(a, b) {
+    compareSel = [];
+    const veil = document.createElement("div");
+    veil.className = "modal-veil";
+    veil.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:640px">
+      <div class="modal-head"><h3>Compare photos</h3><button class="modal-x" aria-label="Close">×</button></div>
+      <div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><img src="${a.src}" style="width:100%;border-radius:12px" alt="Photo ${a.date}" /><p class="muted" style="text-align:center;margin-top:6px">${a.date}</p></div>
+        <div><img src="${b.src}" style="width:100%;border-radius:12px" alt="Photo ${b.date}" /><p class="muted" style="text-align:center;margin-top:6px">${b.date}</p></div>
+      </div></div>
+    </div>`;
+    veil.addEventListener("click", e => { if (e.target === veil || e.target.closest(".modal-x")) veil.remove(); });
+    document.body.appendChild(veil);
+  }
 
+  const STD_LIFTS = [
+    { id: "barbell-back-squat", name: "Squat", ratios: [0.75, 1.0, 1.5, 2.0, 2.5] },
+    { id: "barbell-bench-press", name: "Bench", ratios: [0.5, 0.75, 1.0, 1.5, 1.75] },
+    { id: "barbell-deadlift", name: "Deadlift", ratios: [1.0, 1.25, 1.75, 2.25, 2.75] },
+    { id: "barbell-overhead-press", name: "Overhead press", ratios: [0.35, 0.5, 0.75, 1.0, 1.25] },
+  ];
+  const STD_LEVELS = ["Beginner", "Novice", "Intermediate", "Advanced", "Elite"];
+  function epley1RM(weight, reps) { return weight * (1 + Math.max(0, reps) / 30); }
+  function renderStandards() {
+    const measures = getMeasures();
+    const bw = measures.length && measures[measures.length - 1].weight ? toKg(measures[measures.length - 1].weight) : 0;
+    if (!bw) return `<div class="empty-note"><p><b>Log your bodyweight first.</b></p><p>Standards compare your estimated 1RM against bodyweight ratios. Add a weight in Progress > Body.</p></div>`;
+    const rows = STD_LIFTS.map(lift => {
+      let ex = byId(lift.id) || EXERCISES.find(e => e.name.toLowerCase().includes(lift.name.toLowerCase().split(" ")[0]));
+      const pr = ex ? exercisePR(ex.id) : null;
+      const est = pr && pr.weight > 0 ? epley1RM(pr.weight, pr.reps) : 0;
+      const ratio = est / bw;
+      let level = 0;
+      lift.ratios.forEach((r, i) => { if (ratio >= r) level = i + 1; });
+      const lvlName = level === 0 ? "Untrained" : STD_LEVELS[level - 1];
+      const nextR = level < 5 ? lift.ratios[level] : null;
+      const nextW = nextR ? (nextR * bw).toFixed(1) : null;
+      return `<div class="rec-row" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>${lift.name}</b><span>${est ? fmtW(est) + " est. 1RM" : "No data"}</span>
+        </div>
+        <div style="display:flex;gap:4px">${STD_LEVELS.map((_, i) =>
+          `<div style="flex:1;height:8px;border-radius:4px;background:${i < level ? "var(--volt)" : "var(--surface2)"}"></div>`).join("")}</div>
+        <div class="muted" style="font-size:13px">${lvlName}${nextW ? " - next: " + fmtW(parseFloat(nextW)) + " (" + STD_LEVELS[level] + ")" : " - top level"}</div>
+      </div>`;
+    }).join("");
+    return `<p class="muted" style="margin-bottom:14px">Estimated 1RM vs bodyweight (${fmtW(bw)}). Based on Epley formula from your best logged set.</p>` + rows;
+  }
   function renderProgress(tab) {
     tab = tab || "overview";
     document.querySelectorAll("#progTabs .chip").forEach(c => c.classList.toggle("on", c.dataset.ptab === tab));
@@ -2227,6 +2328,8 @@
         return `<div class="hist-day"><div class="hd"><b>${dstr}</b><span class="muted">${sets} sets</span></div><ul>` +
           ws.map(w => `<li>${esc(w.programName)}: ${esc(w.dayName)} (${w.exercises.length} exercises)</li>`).join("") + `</ul></div>`;
       }).join("");
+    } else if (tab === "standards") {
+      body.innerHTML = renderStandards();
     } else if (tab === "records") {
       const recs = [];
       EXERCISES.forEach(ex => {
@@ -2361,15 +2464,40 @@
     if (ex.equipment === "barbell" || ex.level === "advanced") return s.restLong;
     return s.restShort;
   }
+  let cueInt = null;
+  function showRestCue() {
+    clearInterval(cueInt);
+    const el = $("restCue");
+    if (!el) return;
+    let cues = FORM_CUES.default;
+    if (currentWorkout && currentWorkout.exercises) {
+      // find first exercise with incomplete sets
+      for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
+        const done = document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).length;
+        const total = (currentWorkout.exercises[xi].sets || []).length || currentWorkout.exercises[xi].sets || 3;
+        if (done < total) {
+          const ex = byId(currentWorkout.exercises[xi].id);
+          if (ex) cues = FORM_CUES[groupOf(ex.primary)] || FORM_CUES.default;
+          break;
+        }
+      }
+    }
+    let i = 0;
+    el.textContent = "Form cue: " + cues[0];
+    cueInt = setInterval(() => { i = (i + 1) % cues.length; el.textContent = "Form cue: " + cues[i]; }, 15000);
+  }
   function startTimer(sec) {
     clearInterval(timerInt);
+    clearInterval(cueInt);
     timerLeft = sec;
     $("timerDisplay").textContent = fmtT(timerLeft);
+    showRestCue();
     timerInt = setInterval(() => {
       timerLeft--;
       $("timerDisplay").textContent = fmtT(Math.max(0, timerLeft));
       if (timerLeft <= 0) {
         clearInterval(timerInt); timerInt = null;
+        clearInterval(cueInt); const rc = $("restCue"); if (rc) rc.textContent = "";
         beep();
         if (getSettings().voiceCues && window.speechSynthesis) {
           speechSynthesis.speak(new SpeechSynthesisUtterance("Rest over. Next set."));
@@ -2494,8 +2622,21 @@
       }, 1000);
       return;
     }
-    if (e.target.closest("#timerStop")) { clearInterval(timerInt); timerInt = null; return; }
+    if (e.target.closest("#timerStop")) { clearInterval(timerInt); timerInt = null; clearInterval(cueInt); const rc = $("restCue"); if (rc) rc.textContent = ""; return; }
   });
+  function showPRCelebration(prs) {
+    const veil = document.createElement("div");
+    veil.className = "pr-veil";
+    veil.innerHTML = `<div class="pr-card">
+      <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : "🏆"}</div>
+      <h2>New PR${prs.length > 1 ? "s" : ""}!</h2>
+      ${prs.map(p => `<p><b>${esc(p.name)}</b><br><span>${p.weight > 0 ? fmtW(p.weight) + " × " + p.reps : p.reps + " reps"}</span></p>`).join("")}
+      <button class="btn btn-primary" id="prClose">Keep going</button>
+    </div>`;
+    veil.addEventListener("click", e => { if (e.target === veil || e.target.closest("#prClose")) veil.remove(); });
+    document.body.appendChild(veil);
+    setTimeout(() => veil.remove(), 8000);
+  }
   $("woFinish").addEventListener("click", () => {
     const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
     const key = raw[1] + ":" + raw[2];
@@ -2514,6 +2655,17 @@
       if (sets.length) entry.exercises.push({ id: x.id, sets });
     });
     if (!entry.exercises.length) { alert("Mark at least one set as done to log this workout."); return; }
+    const newPRs = [];
+    entry.exercises.forEach(x => {
+      const ex = byId(x.id);
+      const prev = exercisePR(x.id);
+      x.sets.forEach(s => {
+        const w = s.weight || 0;
+        if (!prev || w > prev.weight || (w === prev.weight && s.reps > prev.reps)) {
+          if (!newPRs.some(p => p.id === x.id)) newPRs.push({ id: x.id, name: ex ? ex.name : x.id, weight: w, reps: s.reps });
+        }
+      });
+    });
     const log = getLog(); log.push(entry); saveLog(log);
     checkBadges();
     window._lastEntry = entry;
@@ -2521,6 +2673,7 @@
     done[key].push(today); saveDone();
     $("woDone").classList.remove("hidden");
     $("woFinish").classList.add("hidden");
+    if (newPRs.length) showPRCelebration(newPRs);
     clearInterval(timerInt); timerInt = null;
     // scroll to the summary so the user sees it
     setTimeout(() => {
@@ -2658,6 +2811,26 @@
   });
   $("csvExport").addEventListener("click", exportCSV);
   $("backupData").addEventListener("click", backupData);
+  $("restoreData").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!confirm("Restore from this backup? Current data will be replaced.")) { e.target.value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        let restored = 0;
+        Object.keys(data).forEach(k => {
+          if (k.startsWith("forge-") && typeof data[k] === "string") { localStorage.setItem(k, data[k]); restored++; }
+        });
+        if (!restored) { alert("No FORGE data found in this file."); return; }
+        alert("Backup restored. Reloading.");
+        location.reload();
+      } catch (err) { alert("Could not read this backup file."); }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
   $("resetData").addEventListener("click", () => {
     if (confirm("Delete all favorites, workout history, records and settings? This cannot be undone.")) {
       localStorage.clear();
@@ -2689,6 +2862,22 @@
     }
     const pk = e.target.closest("[data-bpick]");
     if (pk) { openPicker(parseInt(pk.dataset.bpick, 10)); return; }
+    const tSave = e.target.closest("[data-btpl-save]");
+    if (tSave) {
+      const di = parseInt(tSave.dataset.btplSave, 10);
+      const day = builder.days[di];
+      if (!day.exercises.length) { alert("Add exercises to this day first."); return; }
+      const name = prompt("Name this template:", day.name || "Workout template");
+      if (!name) return;
+      const tpl = getTemplates();
+      tpl.push({ id: "tpl-" + Date.now().toString(36), name: name.trim(), date: fmtDate(new Date()),
+        exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps })) });
+      saveTemplates(tpl);
+      alert("Template saved.");
+      return;
+    }
+    const tApply = e.target.closest("[data-btpl-apply]");
+    if (tApply) { openTemplatePicker(parseInt(tApply.dataset.btplApply, 10)); return; }
   });
   $("bDays").addEventListener("input", e => {
     const dn = e.target.closest("[data-bday]");
@@ -2709,6 +2898,23 @@
   $("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); });
   $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
   $("pickerList").addEventListener("click", e => {
+    const tDel = e.target.closest("[data-tpl-del]");
+    if (tDel) {
+      if (!confirm("Delete this template?")) return;
+      saveTemplates(getTemplates().filter(t => t.id !== tDel.dataset.tplDel));
+      openTemplatePicker(templateDay);
+      return;
+    }
+    const tApp = e.target.closest("[data-tpl-apply]");
+    if (tApp && templateDay >= 0) {
+      const t = getTemplates().find(x => x.id === tApp.dataset.tplApply);
+      if (t) {
+        builder.days[templateDay].exercises = t.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps }));
+        renderBuilder();
+      }
+      closePicker();
+      return;
+    }
     const b = e.target.closest("[data-pick]"); if (!b || pickerDay < 0) return;
     const id = b.dataset.pick;
     const day = builder.days[pickerDay];
@@ -2749,5 +2955,9 @@
     if (e.target.closest("#quizAgain")) { quizState = { step: 0, answers: {} }; renderQuizStep(); return; }
     if (e.target.closest("#quizGo")) { closeQuiz(); return; }
   });
+  const syncOffline = () => $("offlineBar").classList.toggle("hidden", navigator.onLine);
+  window.addEventListener("online", syncOffline);
+  window.addEventListener("offline", syncOffline);
+  syncOffline();
   router();
 })();

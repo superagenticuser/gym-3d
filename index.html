@@ -7,9 +7,10 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.19" />
+<link rel="stylesheet" href="styles.css?v=10.20" />
 </head>
 <body>
+<div id="offlineBar" class="hidden" style="position:fixed;top:0;left:0;right:0;z-index:999;background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
 <header class="topbar">
   <a class="brand" href="#/">
     <span class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20 L9 12 L13 15 L20 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -191,6 +192,7 @@
         <button data-timer="120">2:00</button>
         <button id="timerStop">Stop</button>
       </div>
+      <p class="hint" id="restCue" style="min-height:20px;font-size:13.5px;color:var(--volt);font-weight:600"></p>
       <p class="hint timer-hint"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2" />
   <line x1="12" x2="15" y1="14" y2="11" />
   <circle cx="12" cy="14" r="8" /></svg>Rest timer. Tap a duration to start</p>
@@ -227,6 +229,7 @@
       <button class="chip on" data-ptab="overview" data-i18n="tab_overview">Overview</button>
       <button class="chip" data-ptab="history" data-i18n="tab_history">History</button>
       <button class="chip" data-ptab="records" data-i18n="tab_records">Records</button>
+      <button class="chip" data-ptab="standards">Standards</button>
       <button class="chip" data-ptab="volume" data-i18n="tab_volume">Volume</button>
       <button class="chip" data-ptab="body">Body</button>
       <button class="chip" data-ptab="badges">Badges</button>
@@ -364,7 +367,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.19</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.20</p>
   </div>
 </footer>
 
@@ -419,6 +422,7 @@
         <button class="btn btn-ghost btn-sm" id="exportData" data-i18n="set_export">Export data</button>
         <button class="btn btn-ghost btn-sm" id="csvExport">CSV export</button>
         <button class="btn btn-ghost btn-sm" id="backupData">Backup</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">Restore<input type="file" id="restoreData" accept="application/json" style="display:none" /></label>
         <button class="btn btn-ghost btn-sm danger" id="resetData" data-i18n="set_reset">Reset all data</button>
       </div>
       <p class="muted setting-note">Your data never leaves this device. Export anytime.</p>
