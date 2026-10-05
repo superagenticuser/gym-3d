@@ -563,7 +563,7 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .vol-row .bar { flex: 1; height: 14px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
 .vol-row .bar i { display: block; height: 100%; background: var(--volt); border-radius: 999px; }
 .vol-row .vc { min-width: 64px; text-align: right; color: var(--muted); font-size: 13px; }
-.empty-note { color: var(--muted); text-align: center; padding: 40px 20px; }
+.empty-note { color: var(--muted); text-align: center; padding: 40px 20px; max-width: 320px; margin-left: auto; margin-right: auto; }
 
 /* recovery heatmap */
 .heat-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
@@ -682,7 +682,7 @@ body:not(.rm) #reminderBanner:not(.hidden) { animation: reminderPop .45s cubic-b
 .measure-grid .builder-field { margin-bottom: 0; }
 .chart-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 16px 0; }
 .chart-wrap canvas { width: 100%; height: 200px; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 16px 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 16px 0; min-width: 0; }
 .cal-months { display: flex; flex-direction: column; gap: 6px; }
 .cal-month .cal-grid { margin: 0 0 8px 0; }
 .cal-month-label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
