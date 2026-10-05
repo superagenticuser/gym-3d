@@ -3547,7 +3547,11 @@
     const mesoDay = week && p && p.mesocycle && p.mesocycle[week - 1] ? p.mesocycle[week - 1].days[di] : null;
     const d = mesoDay || (p && p.days[di]);
     if (!d) { location.hash = "#/program/" + pid; return; }
+    const sameWorkout = currentWorkout && currentWorkout._pid === pid && currentWorkout._di === di;
+    const savedPairs = sameWorkout ? currentWorkout._pairs : null;
     currentWorkout = JSON.parse(JSON.stringify(d));
+    currentWorkout._pairs = savedPairs || new Set();
+    currentWorkout._pid = pid; currentWorkout._di = di;
     if (week) currentWorkout._week = week;
     let travelSwaps = 0;
     if (window._travelOn) {
@@ -3556,7 +3560,6 @@
         if (sub) { x.id = sub.id; x._swapped = true; travelSwaps++; }
       });
     }
-    if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name + (week ? " · Week " + week + (p.mesocycle && p.mesocycle[week - 1] && p.mesocycle[week - 1].deload ? " (deload)" : "") : "");
     const advHint = `<p class="muted" style="font-size:12px;margin-bottom:12px">Set type: Std = standard, Drop = drop set, R-P = rest-pause, Clu = cluster, Myo = myo-rep.</p>`;
