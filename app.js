@@ -3372,54 +3372,7 @@
       }
     }
   }
-  (function () {
-    var list = $("woList");
-    if (!list) return;
-    var swRow = null, swX = 0, swY = 0, swDX = 0, swId = null, swScroll = 0, swMode = null, swCanSwipe = false;
-    list.addEventListener("pointerdown", function (e) {
-      if (e.target.closest("input,select,button,textarea,a")) return;
-      var row = e.target.closest(".set-row2");
-      if (!row || row.querySelector(".set-done.hit")) return;
-      swRow = row; swX = e.clientX; swY = e.clientY; swDX = 0; swId = e.pointerId;
-      swScroll = row.scrollLeft; swMode = null; swCanSwipe = row.scrollLeft <= 8;
-    });
-    list.addEventListener("pointermove", function (e) {
-      if (!swRow || e.pointerId !== swId) return;
-      var dx = e.clientX - swX, dy = e.clientY - swY;
-      if (swMode === null) {
-        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-        if (Math.abs(dy) > Math.abs(dx) * 1.2) { swMode = "vscroll"; return; }
-        swMode = (dx < 0 || !swCanSwipe) ? "hscroll" : "swipe";
-        if (swMode === "swipe") swRow.classList.add("swiping");
-      }
-      if (swMode === "hscroll") { swRow.scrollLeft = swScroll - dx; return; }
-      if (swMode !== "swipe") return;
-      swDX = Math.max(0, dx);
-      swRow.style.transform = "translateX(" + Math.min(swDX, 110) + "px)";
-      if (swDX > 70) swRow.classList.add("swipe-done"); else swRow.classList.remove("swipe-done");
-    });
-    function swReset(row) {
-      row.classList.remove("swiping", "swipe-done");
-      row.style.transform = "";
-    }
-    function swEnd(e) {
-      if (!swRow || (swId !== null && e.pointerId !== swId)) return;
-      var row = swRow, dx = swDX, mode = swMode;
-      swRow = null; swId = null; swMode = null; swDX = 0;
-      swReset(row);
-      if (mode === "swipe" && dx > 70) {
-        var btn = row.querySelector(".set-done");
-        if (btn) btn.click();
-      }
-    }
-    function swCancel(e) {
-      if (!swRow || (swId !== null && e.pointerId !== swId)) return;
-      swReset(swRow);
-      swRow = null; swId = null; swMode = null; swDX = 0;
-    }
-    list.addEventListener("pointerup", swEnd);
-    list.addEventListener("pointercancel", swCancel);
-  })();
+
   document.addEventListener("click", e => {
     const gt = e.target.closest(".guide-toggle");
     if (gt) {
