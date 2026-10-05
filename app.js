@@ -501,13 +501,6 @@
     document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
     if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
   }
-  const toTop = $("toTop");
-  if (toTop) {
-    window.addEventListener("scroll", () => {
-      toTop.classList.toggle("show", window.scrollY > 600);
-    }, { passive: true });
-    toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  }
   function openSettings() {
     const grid = $("accentGrid");
     const cur = currentAccent().id;
@@ -824,6 +817,13 @@
 
   /* ---------- helpers ---------- */
   const $ = id => document.getElementById(id);
+  const toTop = $("toTop");
+  if (toTop) {
+    window.addEventListener("scroll", () => {
+      toTop.classList.toggle("show", window.scrollY > 600);
+    }, { passive: true });
+    toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
   const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
   const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
