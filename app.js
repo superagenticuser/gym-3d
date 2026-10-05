@@ -2917,9 +2917,7 @@
     if (tab === "coach") { renderCoachTab(body); return; }
     paintOverview(body, log);
     };
-    if (getSettings().reduceMotion) { paint(); return; }
-    body.innerHTML = `<div class="skel" style="height:110px;margin-bottom:12px"></div><div class="skel" style="height:72px;margin-bottom:12px"></div><div class="skel" style="height:190px"></div>`;
-    requestAnimationFrame(() => requestAnimationFrame(paint));
+    paint();
     return;
     function paintOverview(body, log) {
     if (!log.length) {

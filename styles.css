@@ -800,10 +800,6 @@ body:not(.rm) .pr-card > *:nth-child(4) { animation-delay: .24s; }
 .confetti { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; pointer-events: none; }
 body:not(.rm) .confetti { animation: confFall linear forwards; }
 @keyframes confFall { to { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
-/* skeleton shimmer */
-.skel { position: relative; overflow: hidden; background: rgba(255,255,255,.05); border-radius: 12px; }
-body:not(.rm) .skel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.09) 50%, transparent 70%); animation: skelShimmer 1.2s infinite; }
-@keyframes skelShimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 /* streak heatmap */
 .heatmap-scroll { overflow-x: auto; padding: 4px 4px 8px; }
 .heatmap { display: grid; grid-template-rows: auto repeat(7, 13px); grid-auto-flow: column; gap: 4px; width: max-content; }
