@@ -1230,9 +1230,9 @@
   function saveBuilder() {
     builder.name = $("bName").value.trim();
     builder.tagline = $("bTagline").value.trim() || "Custom program";
-    if (!builder.name) { alert("Give your program a name."); return; }
+    if (!builder.name) { appAlert("Give your program a name."); return; }
     const days = builder.days.filter(d => d.exercises.length > 0);
-    if (!days.length) { alert("Add at least one exercise to a day."); return; }
+    if (!days.length) { appAlert("Add at least one exercise to a day."); return; }
     const id = "custom-" + Date.now().toString(36);
     const prog = {
       id, name: builder.name, tagline: builder.tagline, custom: true,
@@ -1437,7 +1437,7 @@
   }
   function toggleVoiceLog() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { alert("Voice not supported in this browser."); return; }
+    if (!SR) { appAlert("Voice not supported in this browser."); return; }
     if (voiceRec) { voiceRec.stop(); voiceRec = null; setVoiceBtn(false); return; }
     voiceRec = new SR();
     voiceRec.lang = "en-US";
@@ -2562,7 +2562,7 @@
       const w = parseFloat($("mWeight").value), wa = parseFloat($("mWaist").value);
       const c = parseFloat($("mChest").value), a = parseFloat($("mArms").value);
       if (w) entry.weight = w; if (wa) entry.waist = wa; if (c) entry.chest = c; if (a) entry.arms = a;
-      if (!entry.weight && !entry.waist && !entry.chest && !entry.arms) { alert("Enter at least one measurement."); return; }
+      if (!entry.weight && !entry.waist && !entry.chest && !entry.arms) { appAlert("Enter at least one measurement."); return; }
       const all = getMeasures(); all.push(entry); saveMeasures(all);
       renderBodyTab(body);
     });
@@ -2661,7 +2661,7 @@
         canvas.width = img.width * scale; canvas.height = img.height * scale;
         canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        if (dataUrl.length > 1500000) { alert("Photo too large, try a smaller one."); return; }
+        if (dataUrl.length > 1500000) { appAlert("Photo too large, try a smaller one."); return; }
         const photos = getPhotos();
         photos.push({ date: fmtDate(new Date()), ts: Date.now(), src: dataUrl });
         savePhotos(photos);
@@ -2937,8 +2937,8 @@
     $("pgICS").onclick = () => exportProgramICS(p.id);
     if (p.custom) {
       $("pgActions").innerHTML += ` <button class="btn btn-ghost danger" id="pgDelete">${t("b_delete")}</button>`;
-      $("pgDelete").onclick = () => {
-        if (confirm(`Delete "${p.name}"? This cannot be undone.`)) {
+      $("pgDelete").onclick = async () => {
+        if (await appConfirm(`Delete "${p.name}"? This cannot be undone.`, { okText: "Delete", danger: true })) {
           if (getActiveProg() === p.id) setActiveProg(null);
           deleteCustomProgram(p.id);
           location.hash = "#/programs";
@@ -3298,7 +3298,7 @@
         if (noteEl) saveExNote(x.id, noteEl.value.trim());
       }
     });
-    if (!entry.exercises.length) { alert("Mark at least one set as done to log this workout."); return; }
+    if (!entry.exercises.length) { appAlert("Mark at least one set as done to log this workout."); return; }
     const newPRs = [];
     entry.exercises.forEach(x => {
       const ex = byId(x.id);
@@ -3349,8 +3349,8 @@
     const text = lines.join("\n");
     if (navigator.share) { try { await navigator.share({ title: "FORGE workout", text }); } catch (e) {} }
     else {
-      try { await navigator.clipboard.writeText(text); alert("Workout summary copied to clipboard."); }
-      catch (e) { alert("Sharing is not available on this device."); }
+      try { await navigator.clipboard.writeText(text); appAlert("Workout summary copied to clipboard."); }
+      catch (e) { appAlert("Sharing is not available on this device."); }
     }
   });
   $("shareCard").addEventListener("click", () => {
@@ -3488,10 +3488,10 @@
   });
   $("csvExport").addEventListener("click", exportCSV);
   $("backupData").addEventListener("click", backupData);
-  $("restoreData").addEventListener("change", e => {
+  $("restoreData").addEventListener("change", async e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!confirm("Restore from this backup? Current data will be replaced.")) { e.target.value = ""; return; }
+    if (!(await appConfirm("Restore from this backup? Current data will be replaced.", { okText: "Restore", danger: true }))) { e.target.value = ""; return; }
     const reader = new FileReader();
     reader.onload = ev => {
       try {
@@ -3500,16 +3500,16 @@
         Object.keys(data).forEach(k => {
           if (k.startsWith("forge-") && typeof data[k] === "string") { localStorage.setItem(k, data[k]); restored++; }
         });
-        if (!restored) { alert("No FORGE data found in this file."); return; }
-        alert("Backup restored. Reloading.");
+        if (!restored) { appAlert("No FORGE data found in this file."); return; }
+        appAlert("Backup restored. Reloading.");
         location.reload();
-      } catch (err) { alert("Could not read this backup file."); }
+      } catch (err) { appAlert("Could not read this backup file."); }
       e.target.value = "";
     };
     reader.readAsText(file);
   });
-  $("resetData").addEventListener("click", () => {
-    if (confirm("Delete all favorites, workout history, records and settings? This cannot be undone.")) {
+  $("resetData").addEventListener("click", async () => {
+    if (await appConfirm("Delete all favorites, workout history, records and settings? This cannot be undone.", { okText: "Delete everything", danger: true })) {
       localStorage.clear();
       location.reload();
     }
@@ -3543,14 +3543,14 @@
     if (tSave) {
       const di = parseInt(tSave.dataset.btplSave, 10);
       const day = builder.days[di];
-      if (!day.exercises.length) { alert("Add exercises to this day first."); return; }
+      if (!day.exercises.length) { appAlert("Add exercises to this day first."); return; }
       const name = prompt("Name this template:", day.name || "Workout template");
       if (!name) return;
       const tpl = getTemplates();
       tpl.push({ id: "tpl-" + Date.now().toString(36), name: name.trim(), date: fmtDate(new Date()),
         exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) });
       saveTemplates(tpl);
-      alert("Template saved.");
+      appAlert("Template saved.");
       return;
     }
     const tApply = e.target.closest("[data-btpl-apply]");
@@ -3565,7 +3565,7 @@
         else missing++;
       });
       renderBuilder();
-      alert(filled ? `Filled ${filled} exercise${filled > 1 ? "s" : ""} at 75% of estimated 1RM.` + (missing ? ` ${missing} had no logged data.` : "") : "No logged data yet. Log workouts to estimate your 1RMs.");
+      appAlert(filled ? `Filled ${filled} exercise${filled > 1 ? "s" : ""} at 75% of estimated 1RM.` + (missing ? ` ${missing} had no logged data.` : "") : "No logged data yet. Log workouts to estimate your 1RMs.");
       return;
     }
   });
@@ -3594,10 +3594,10 @@
   $("pickerClose").addEventListener("click", closePicker);
   $("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); });
   $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
-  $("pickerList").addEventListener("click", e => {
+  $("pickerList").addEventListener("click", async e => {
     const tDel = e.target.closest("[data-tpl-del]");
     if (tDel) {
-      if (!confirm("Delete this template?")) return;
+      if (!(await appConfirm("Delete this template?", { okText: "Delete", danger: true }))) return;
       saveTemplates(getTemplates().filter(t => t.id !== tDel.dataset.tplDel));
       openTemplatePicker(templateDay);
       return;
@@ -3641,6 +3641,35 @@
   $("plateBar").addEventListener("input", calcPlates);
   $("plateTarget").addEventListener("input", calcPlates);
   $("coachBtn").addEventListener("click", generateCoachProgram);
+  /* ---------- in-app dialogs (replace native alert/confirm) ---------- */
+  let _dlgResolve = null;
+  function _showDlg(o) {
+    return new Promise(res => {
+      _dlgResolve = res;
+      $("dlgTitle").textContent = o.title || "FORGE";
+      $("dlgMsg").textContent = o.msg;
+      const ok = $("dlgOk");
+      ok.textContent = o.okText || "OK";
+      ok.className = "btn btn-sm " + (o.danger ? "btn-danger-solid" : "btn-primary");
+      $("dlgCancel").classList.toggle("hidden", !o.cancelText);
+      if (o.cancelText) $("dlgCancel").textContent = o.cancelText;
+      $("dlgVeil").classList.remove("hidden");
+    });
+  }
+  function _closeDlg(val) {
+    $("dlgVeil").classList.add("hidden");
+    if (_dlgResolve) { const r = _dlgResolve; _dlgResolve = null; r(val); }
+  }
+  function appAlert(msg, title) { return _showDlg({ msg, title: title || "FORGE", okText: "OK" }); }
+  function appConfirm(msg, o) {
+    o = o || {};
+    return _showDlg({ msg, title: o.title || "Are you sure?", okText: o.okText || "Confirm", cancelText: "Cancel", danger: o.danger });
+  }
+  $("dlgOk").addEventListener("click", () => _closeDlg(true));
+  $("dlgCancel").addEventListener("click", () => _closeDlg(false));
+  $("dlgVeil").addEventListener("click", e => { if (e.target.id === "dlgVeil") _closeDlg(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false); });
+
   initCheckin();
   $("checkinBtn").addEventListener("click", openCheckin);
   applyA11y(); applyAdvanced();
