@@ -699,10 +699,12 @@ body.high-contrast { --ink: #ffffff; --muted: #c8d0e0; --line: #3a4358; }
 /* calendar tab (progress view) */
 .cal-view .cal-grid { gap: 6px; margin: 0 0 12px 0; }
 .cal-view .cal-day {
-  aspect-ratio: 1.25; min-height: 46px;
+  aspect-ratio: 1; min-height: 0;
   font-size: 15px; font-weight: 600; color: var(--ink);
   cursor: pointer; border: 2px solid transparent;
 }
+.cal-view .cal-grid { min-width: 0; }
+.cal-blank { aspect-ratio: 1; min-height: 0; }
 .cal-view .cal-day.l1 { background: color-mix(in srgb, var(--volt) 25%, transparent); }
 .cal-view .cal-day.l2 { background: color-mix(in srgb, var(--volt) 50%, transparent); }
 .cal-view .cal-day.l3 { background: color-mix(in srgb, var(--volt) 78%, transparent); }
@@ -712,6 +714,10 @@ body.high-contrast { --ink: #ffffff; --muted: #c8d0e0; --line: #3a4358; }
 .cal-view .cal-day.rest { cursor: default; }
 .cal-view .cal-day.sel { outline: 2px solid var(--volt); outline-offset: 2px; }
 .cal-wd { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; padding: 4px 0; }
+.cal-wo { margin: 14px 0; }
+.cal-wo-title { margin: 0 0 6px; }
+.cal-ex { margin: 4px 0; font-size: 14px; }
+.cal-ex-name { font-weight: 600; }
 .cal-blank { aspect-ratio: 1.25; min-height: 46px; }
 .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
 .badge-card {
