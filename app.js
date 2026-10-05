@@ -847,7 +847,7 @@
       const now = new Date(), hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
       if (_rs && !trainedToday && hm >= _rs) {
         _rb.classList.remove("hidden");
-        _rb.innerHTML = `<b>${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} Time to train!</b> <span class="muted">Your reminder was set for ${_rs}.</span> <a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
+        _rb.innerHTML = `<div class="reminder-top">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""}<b>Time to train!</b></div><p class="muted">Your reminder was set for ${_rs}.</p><a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
       } else _rb.classList.add("hidden");
     }
     $("statEx").textContent = EXERCISES.length;

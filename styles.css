@@ -665,6 +665,13 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
   background: var(--surface); border: 1px solid var(--volt); border-radius: 12px;
   padding: 14px 16px; margin-top: 16px; font-size: 15px;
 }
+#reminderBanner { padding: 16px 18px; }
+#reminderBanner .reminder-top { display: flex; align-items: center; gap: 8px; font-size: 17px; margin-bottom: 6px; }
+#reminderBanner .reminder-top svg { width: 20px; height: 20px; color: var(--volt); flex-shrink: 0; }
+#reminderBanner p { margin: 0 0 14px; }
+body:not(.rm) #reminderBanner:not(.hidden) { animation: reminderPop .45s cubic-bezier(.2,1.4,.4,1), reminderGlow 2.4s ease-in-out .5s infinite; }
+@keyframes reminderPop { from { transform: translateY(-10px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes reminderGlow { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--volt) 0%, transparent); } 50% { box-shadow: 0 0 18px 2px color-mix(in srgb, var(--volt) 35%, transparent); } }
 .measure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
 .measure-grid .builder-field { margin-bottom: 0; }
 .chart-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 16px 0; }
