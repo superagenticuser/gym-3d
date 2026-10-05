@@ -404,6 +404,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .modal-x .ic { width: 16px; height: 16px; }
 .modal-x:hover { color: var(--ink); }
 .setting-label { font-weight: 700; font-size: 14px; margin: 14px 0 10px; }
+.modal-body > .setting-label:not(:first-child) { border-top: 1px solid var(--line); padding-top: 20px; margin-top: 22px; }
 .field-label { font-weight: 700; font-size: 14px; margin: 0 0 8px; display: block; }
 .field-group { margin-bottom: 16px; }
 .field-group:last-child { margin-bottom: 0; }
