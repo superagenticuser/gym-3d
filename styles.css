@@ -165,8 +165,8 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .btn-block { width: 100%; margin-top: 22px; text-align: center; }
 
 /* ---------- workout mode ---------- */
-.timer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; text-align: center; margin: 18px 0 24px; position: sticky; top: 66px; z-index: 20; }
-.timer-display { font-size: 52px; font-weight: 800; color: var(--volt); font-variant-numeric: tabular-nums; }
+.timer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; text-align: center; margin: 14px 0 20px; position: sticky; top: 66px; z-index: 20; }
+.timer-display { font-size: 34px; font-weight: 800; color: var(--volt); font-variant-numeric: tabular-nums; }
 .timer-btns { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
 .timer-btns button { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 15px; cursor: pointer; min-height: 44px; }
 .timer-btns button:active { background: var(--volt); color: #0b0d12; }
@@ -197,7 +197,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
   .stage.tall { height: 480px; }
   .detail-info h2 { font-size: 26px; }
   .timer { top: 58px; padding: 16px; }
-  .timer-display { font-size: 42px; }
+  .timer-display { font-size: 30px; }
   .selects { flex-direction: column; }
   .selects select { width: 100%; }
   .day-head { align-items: flex-start; }
@@ -748,8 +748,8 @@ body:not(.rm) .seg:active, body:not(.rm) .chip:active { transform: scale(.94); }
 body:not(.rm) .modal { animation: modalIn .22s ease; }
 @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } }
 /* timer ring */
-.timer-ring-wrap { position: relative; width: 132px; height: 132px; margin: 0 auto 8px; }
-.timer-ring { width: 132px; height: 132px; transform: rotate(-90deg); }
+.timer-ring-wrap { position: relative; width: 88px; height: 88px; margin: 0 auto 6px; }
+.timer-ring { width: 88px; height: 88px; transform: rotate(-90deg); }
 .timer-ring circle { fill: none; stroke-width: 9; }
 .timer-ring .tr-bg { stroke: rgba(255,255,255,.08); }
 .timer-ring .tr-fg { stroke: var(--volt); stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
@@ -801,7 +801,7 @@ input[type="range"].slider::-moz-range-thumb { width: 24px; height: 24px; border
 .water-fill { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #38e1ff, #1d9fc4); transition: height .6s ease; }
 body.rm .water-fill { transition: none; }
 /* swipe rows */
-.set-row2 { touch-action: pan-y; position: relative; }
+.set-row2 { touch-action: pan-x pan-y; position: relative; }
 body:not(.rm) .set-row2.swiping { transition: none; }
 body:not(.rm) .set-row2:not(.swiping) { transition: transform .2s ease, background .2s ease; }
 .set-row2.swipe-done { background: rgba(163,230,53,.08); }
