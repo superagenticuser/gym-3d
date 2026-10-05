@@ -868,7 +868,14 @@
   function renderBody(selected) {
     const v = createBodyViewer($("body3d"), {
       autoRotate: !getSettings().reduceMotion, dist: 6.1,
-      onMuscleClick: mid => selectMuscle(groupOf(mid))
+      onMuscleClick: mid => {
+        const g = groupOf(mid);
+        selectMuscle(g);
+        const backSide = ["back", "lats", "traps", "lower-back", "rear-delt", "triceps", "glutes", "hamstrings", "calves"].includes(mid);
+        v.setView(backSide ? "back" : "front");
+        $("bFront").classList.toggle("on", !backSide);
+        $("bBack").classList.toggle("on", backSide);
+      }
     });
     viewers.push(v);
     const setV = front => {
@@ -903,11 +910,17 @@
     const lastTr = muscleLastTrained();
     const ld = lastTr[groupId];
     const ago = ld ? daysAgo(ld) : null;
-    const recLabel = ago === null ? "Not trained yet" : ago === 0 ? "Trained today" : ago === 1 ? "Trained yesterday" : `Trained ${ago} days ago`;
-    const recState = ago === null ? "muted" : ago <= 1 ? "Recovering" : ago <= 3 ? "Recovered" : "Ready";
-    const recColor = ago === null ? "var(--muted)" : ago <= 1 ? "#f59e0b" : "var(--volt)";
+    let recHTML;
+    if (ago === null) {
+      recHTML = `<span class="muted">Not trained yet</span>`;
+    } else {
+      const recLabel = ago === 0 ? "Trained today" : ago === 1 ? "Trained yesterday" : `Trained ${ago} days ago`;
+      const recState = ago <= 1 ? "Recovering" : ago <= 3 ? "Recovered" : "Ready";
+      const recColor = ago <= 1 ? "#f59e0b" : "var(--volt)";
+      recHTML = `<span style="color:${recColor};font-weight:700">${recState}</span> <span class="muted">- ${recLabel}</span>`;
+    }
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
-      <p style="margin-top:8px;font-size:14px"><span style="color:${recColor};font-weight:700">${recState}</span> <span class="muted">- ${recLabel}</span></p>`;
+      <p style="margin-top:8px;font-size:14px">${recHTML}</p>`;
     const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
     $("bodyExercises").innerHTML = list.length
       ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
