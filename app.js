@@ -3084,17 +3084,20 @@
     if (!d) { location.hash = "#/program/" + pid; return; }
     currentWorkout = JSON.parse(JSON.stringify(d));
     if (week) currentWorkout._week = week;
+    let travelSwaps = 0;
     if (window._travelOn) {
       currentWorkout.exercises.forEach(x => {
         const sub = travelSub(x.id);
-        if (sub) { x.id = sub.id; x._swapped = true; }
+        if (sub) { x.id = sub.id; x._swapped = true; travelSwaps++; }
       });
     }
     if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name + (week ? " · Week " + week + (p.mesocycle && p.mesocycle[week - 1] && p.mesocycle[week - 1].deload ? " (deload)" : "") : "");
     const advHint = `<p class="muted" style="font-size:12px;margin-bottom:12px">Set type: Std = standard, Drop = drop set, R-P = rest-pause, Clu = cluster.</p>`;
-    const travelHint = window._travelOn ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: exercises are swapped to bodyweight / dumbbell / band alternatives.</p>` : "";
+    const travelHint = window._travelOn ? (travelSwaps > 0
+      ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: ${travelSwaps} exercise${travelSwaps > 1 ? "s" : ""} swapped to bodyweight / dumbbell / band alternatives.</p>`
+      : `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: all exercises are already travel-friendly, nothing to swap.</p>`) : "";
     $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + d.exercises.map((x, xi) => {
       const ex = byId(x.id);
       const isBW = ex.equipment === "bodyweight";
