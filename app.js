@@ -227,16 +227,16 @@
       const foreLow = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.052, 0.18, 18), matFor("forearms"));
       foreLow.position.set(s * 0.005, -0.38, 0.005);
       foreLow.userData.muscle = "forearms"; muscleMeshes.push(foreLow); foreG.add(foreLow);
-      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.095, 0.038), neutralMat);
-      palm.position.set(s * 0.01, -0.51, 0.008); foreG.add(palm);
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.098, 0.124, 0.049), neutralMat);
+      palm.position.set(s * 0.013, -0.52, 0.010); foreG.add(palm);
       for (let f = 0; f < 4; f++) {
-        const fg = new THREE.Mesh(new THREE.CapsuleGeometry(0.014, 0.055, 4, 10), neutralMat);
-        fg.position.set(s * (0.01 - 0.027 + f * 0.018), -0.585, 0.012);
+        const fg = new THREE.Mesh(new THREE.CapsuleGeometry(0.018, 0.072, 4, 10), neutralMat);
+        fg.position.set(s * (0.013 - 0.035 + f * 0.023), -0.615, 0.014);
         fg.rotation.x = 0.35;
         foreG.add(fg);
       }
-      const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.014, 0.045, 4, 10), neutralMat);
-      thumb.position.set(s * 0.048, -0.52, 0.02);
+      const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.018, 0.058, 4, 10), neutralMat);
+      thumb.position.set(s * 0.062, -0.535, 0.024);
       thumb.rotation.z = s * -0.5; thumb.rotation.x = 0.3;
       foreG.add(thumb);
       foreG.rotation.x = -0.14;
