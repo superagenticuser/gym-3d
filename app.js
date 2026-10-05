@@ -2503,8 +2503,17 @@
       const label = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + (n ? `: ${n} workout${n > 1 ? "s" : ""}` : ": rest day");
       html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}" title="${label}"></div>`;
     });
-    return html + `</div>
-      <p class="muted" style="font-size:12px;margin-top:6px">Last ${weeks} weeks · darker = more training days</p>`;
+    html += `</div>`;
+    let months = `<div class="heatmap-months" aria-hidden="true">`;
+    let prevM = -1;
+    for (let w = 0; w < days.length; w += 7) {
+      const m = days[w].getMonth();
+      months += `<span>${m !== prevM ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
+      prevM = m;
+    }
+    months += `</div>`;
+    const legend = `<div class="heatmap-legend"><span>Less</span><div class="hm-day"></div><div class="hm-day l1"></div><div class="hm-day l2"></div><div class="hm-day l3"></div><div class="hm-day l4"></div><span>More</span></div>`;
+    return `<div class="heatmap-scroll">${months}${html}</div>${legend}`;
   }
   const BADGES = [
     { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
@@ -2940,7 +2949,7 @@
               x.sets.map(s => `<li>${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.added ? " +" + fmtW(s.added) : ""}${s.rpe ? " · RPE " + s.rpe : ""}${s.failed ? " · <b style='color:#f87171'>failed</b>" : ""}${s.type && s.type !== "std" ? " · " + (TYPE_NAMES[s.type] || s.type) : ""}</li>`).join("") +
               `</ul></li>`;
           }).join("") + `</ul>`).join("");
-        return `<div class="hist-day"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
+        return `<div class="hist-day"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
       }).join("");
       body.querySelectorAll(".hist-toggle").forEach(tg => tg.addEventListener("click", () => {
         const el = $("hist-" + tg.dataset.hd); if (el) el.classList.toggle("hidden");
