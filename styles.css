@@ -461,15 +461,13 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .btn.danger { color: #ff7a7a; border-color: #5c2a2a; }
 
 /* workout set rows */
-.set-row2 .set-extra, .set-row2 .set-line2 { display: contents; }
+
 .set-row2 { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .set-row2:last-child { border-bottom: none; }
 @media (max-width: 480px) {
-  .set-row2 { gap: 8px; flex-wrap: wrap; row-gap: 8px; }
+  .set-row2 { gap: 10px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .set-row2::-webkit-scrollbar { display: none; }
   .set-row2 > * { flex-shrink: 0; }
-  .set-row2 .set-line2 { display: flex; gap: 8px; flex-basis: 100%; align-items: center; flex-wrap: wrap; row-gap: 8px; }
-  .set-row2 .set-extra { display: contents; }
-  .set-row2 .set-bw { display: none; }
   .set-reps { flex-shrink: 0; }
 }
 .set-done {
@@ -752,7 +750,7 @@ body:not(.rm) .modal { animation: modalIn .22s ease; }
 @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } }
 /* timer ring */
 .timer-ring-wrap { position: relative; width: 132px; height: 132px; margin: 0 auto 8px; }
-.timer-ring { width: 132px; height: 132px; transform: rotate(-90deg); }
+.timer-ring { width: 132px; height: 132px; transform: rotate(-90deg); overflow: visible; }
 .timer-ring circle { fill: none; stroke-width: 9; }
 .timer-ring .tr-bg { stroke: rgba(255,255,255,.08); }
 .timer-ring .tr-fg { stroke: var(--volt); stroke-linecap: round; transition: stroke-dashoffset .9s linear; }

@@ -3278,18 +3278,14 @@
           <button class="set-fail" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} as failed" title="Failed set (missed reps)">${window.FORGE_ICON("x")}</button>
           <span class="set-num">Set ${si + 1}</span>
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
-          <span class="set-line2">
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
-          <span class="set-extra">
           <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type: Standard, Drop set, Rest-pause, Cluster" style="width:66px;padding:6px 4px;font-size:12px">
             <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option>
           </select>
           <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
             <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}"${lastRpe && lastRpe.rpe === r ? " selected" : ""}>${r}</option>`).join("")}
           </select>
-          </span>
-          </span>
         </div>`;
       }).join("");
       const pairs = currentWorkout._pairs;
@@ -3351,26 +3347,26 @@
   (function () {
     var list = $("woList");
     if (!list) return;
-    var swRow = null, swX = 0, swY = 0, swDX = 0, swId = null, swScroll = 0, swMode = null;
+    var swRow = null, swX = 0, swY = 0, swDX = 0, swId = null, swScroll = 0, swMode = null, swCanSwipe = false;
     list.addEventListener("pointerdown", function (e) {
       if (e.target.closest("input,select,button,textarea,a")) return;
       var row = e.target.closest(".set-row2");
       if (!row || row.querySelector(".set-done.hit")) return;
       swRow = row; swX = e.clientX; swY = e.clientY; swDX = 0; swId = e.pointerId;
-      swScroll = row.scrollLeft; swMode = null;
+      swScroll = row.scrollLeft; swMode = null; swCanSwipe = row.scrollLeft <= 8;
     });
     list.addEventListener("pointermove", function (e) {
       if (!swRow || e.pointerId !== swId) return;
-      if (swMode === "scroll") return;
-      if (Math.abs(swRow.scrollLeft - swScroll) > 8) { swMode = "scroll"; return; }
       var dx = e.clientX - swX, dy = e.clientY - swY;
       if (swMode === null) {
-        if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
-        swMode = (dx > 0 && dx > Math.abs(dy) * 1.5) ? "swipe" : "scroll";
-        if (swMode === "scroll") return;
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        if (Math.abs(dy) > Math.abs(dx) * 1.2) { swMode = "vscroll"; return; }
+        swMode = (dx < 0 || !swCanSwipe) ? "hscroll" : "swipe";
+        if (swMode === "swipe") swRow.classList.add("swiping");
       }
+      if (swMode === "hscroll") { swRow.scrollLeft = swScroll - dx; return; }
+      if (swMode !== "swipe") return;
       swDX = Math.max(0, dx);
-      swRow.classList.add("swiping");
       swRow.style.transform = "translateX(" + Math.min(swDX, 110) + "px)";
       if (swDX > 70) swRow.classList.add("swipe-done"); else swRow.classList.remove("swipe-done");
     });
