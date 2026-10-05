@@ -4077,6 +4077,7 @@
   });
   $("progTabs").addEventListener("click", e => {
     const c = e.target.closest("[data-ptab]"); if (!c) return;
+    c.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     renderProgress(c.dataset.ptab);
   });
   // builder events
