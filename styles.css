@@ -730,7 +730,7 @@ body.high-contrast { --ink: #ffffff; --muted: #c8d0e0; --line: #3a4358; }
 #woDone { scroll-margin-top: 300px; }
 
 body.no-adv #travelBtn, body.no-adv .tempo-toggle, body.no-adv .tempo-box,
-body.no-adv select.set-type { display: none; }
+body.no-adv select.set-type, body.no-adv .adv-hint { display: none; }
 #dlgVeil { z-index: 1000; }
 .dlg { width: min(360px, 100%); }
 .dlg-msg { font-size: 15px; line-height: 1.5; color: var(--ink); margin: 4px 0 18px; }
