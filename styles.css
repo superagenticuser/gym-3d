@@ -389,6 +389,8 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 }
 .modal {
   width: min(420px, 100%);
+  max-width: calc(100vw - 36px);
+  margin-left: auto; margin-right: auto;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 18px; padding: 22px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
@@ -611,6 +613,12 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
   border-radius: 8px; padding: 7px 4px; font-size: 13px; text-align: center;
 }
 .bex-row input:focus { outline: none; border-color: var(--volt); }
+.bex-row .bex-fields { display: contents; }
+@media (max-width: 480px) {
+  .bex-row { flex-wrap: wrap; row-gap: 10px; }
+  .bex-row .bex-fields { display: flex; align-items: center; gap: 8px; flex-basis: 100%; order: 4; }
+  .bex-row .icon-btn { order: 3; margin-left: auto; }
+}
 .bex-row .lbl { font-size: 12px; color: var(--muted); }
 /* exercise picker */
 .picker-item {
@@ -619,7 +627,8 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
   padding: 12px 14px; margin-bottom: 8px; cursor: pointer; color: var(--ink);
 }
 .picker-item:hover { border-color: var(--volt); }
-.picker-item b { flex: 1; font-size: 14px; }
+.picker-item b { flex: 1; min-width: 0; font-size: 14px; }
+.picker-item .tag, .picker-item .added { flex-shrink: 0; }
 .picker-item .added { color: var(--volt); font-size: 13px; font-weight: 700; }
 /* swaps */
 .swap-card {

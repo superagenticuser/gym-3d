@@ -1235,9 +1235,11 @@
           return `<div class="bex-row">
             <span class="drag-handle" data-bdrag="${di}:${xi}" title="Drag to reorder" aria-label="Drag to reorder">&#8942;&#8942;</span>
             <b>${esc(ex ? ex.name : x.id)}</b>
+            <span class="bex-fields">
             <input type="number" min="1" max="20" value="${x.sets}" data-bset="${di}:${xi}" aria-label="Sets" /><span class="lbl">sets</span>
             <input type="text" value="${esc(x.reps)}" data-brep="${di}:${xi}" maxlength="12" aria-label="Reps" style="width:64px" /><span class="lbl">reps</span>
             <input type="number" min="0" step="any" value="${x.weight != null ? fromKg(x.weight) : ""}" data-bwt="${di}:${xi}" aria-label="Target weight" style="width:76px" placeholder="-" /><span class="lbl">${unitLabel()}</span>
+            </span>
             <button class="icon-btn" data-bdel-ex="${di}:${xi}" aria-label="Remove exercise">${window.FORGE_ICON("x")}</button>
           </div>`;
         }).join("")}
