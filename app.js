@@ -452,7 +452,7 @@
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
     tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
-    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast);
+    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced);
     const _rt = $("reminderTime"); if (_rt) _rt.value = s.reminder || "";
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
@@ -536,7 +536,7 @@
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "" };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -1064,7 +1064,7 @@
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
       <p style="margin-top:8px;font-size:14px">${recHTML}</p>
       ${soreLabel ? `<p style="font-size:14px;margin-top:4px">${soreLabel}</p>` : ""}
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" data-sore="sore" data-g="${groupId}">Feeling sore</button>
         <button class="btn btn-ghost btn-sm" data-sore="injured" data-g="${groupId}">Injured</button>
         ${soreState ? `<button class="btn btn-ghost btn-sm" data-sore="clear" data-g="${groupId}">Clear</button>` : ""}
@@ -2926,9 +2926,9 @@
     const isActive = getActiveProg() === p.id;
     const ni = nextDayIdx(p);
     $("pgActions").innerHTML = isActive
-      ? `<a class="btn btn-primary" href="#/workout/${p.id}/${ni}">Continue: ${esc(p.days[ni].name)}</a>
-         <button class="btn btn-ghost" id="pgStop">Stop program</button>`
-      : `<button class="btn btn-primary" id="pgStart">Start this program</button>`;
+      ? `<a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${ni}">Continue: ${esc(p.days[ni].name)}</a>
+         <button class="btn btn-ghost btn-sm" id="pgStop">Stop program</button>`
+      : `<button class="btn btn-primary btn-sm" id="pgStart">Start this program</button>`;
     const st = $("pgStart");
     if (st) st.onclick = () => { setActiveProg(p.id); renderProgram(p.id); };
     const sp = $("pgStop");
@@ -3108,7 +3108,7 @@
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
-          <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type" style="width:66px;padding:6px 4px;font-size:12px">
+          <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type: Standard, Drop set, Rest-pause, Cluster" style="width:66px;padding:6px 4px;font-size:12px">
             <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option>
           </select>
           <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
@@ -3135,6 +3135,7 @@
           <button class="btn btn-ghost btn-sm tempo-toggle" data-tempo="${xi}">Tempo coach</button>
         </div>
         <div class="tempo-box hidden" id="tempo-${xi}">
+          <p class="muted" style="font-size:12px;margin:0 0 8px">Paces each rep: slow lowering, a pause, then lifting.</p>
           ${(() => { const tp = getTempo(x.id); return `
           <label>Eccentric <input type="number" class="tempo-in" data-t="0" min="1" max="10" value="${tp[0]}"></label>
           <label>Pause <input type="number" class="tempo-in" data-t="1" min="0" max="10" value="${tp[1]}"></label>
@@ -3460,11 +3461,14 @@
   });
   $("reminderTime").addEventListener("change", e => { const s = getSettings(); s.reminder = e.target.value || ""; saveSettings(s); });
   $("reminderClear").addEventListener("click", () => { const s = getSettings(); s.reminder = ""; saveSettings(s); $("reminderTime").value = ""; });
-  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"]].forEach(([id, key]) => {
+  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"], ["tglAdvanced", "advanced"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
-      const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y();
+      const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y(); applyAdvanced();
     });
   });
+  function applyAdvanced() {
+    document.body.classList.toggle("no-adv", !getSettings().advanced);
+  }
   $("goalSeg").addEventListener("click", e => {
     const b = e.target.closest("[data-goal]");
     if (b) { const s = getSettings(); s.goal = b.dataset.goal; saveSettings(s); syncSettingsUI(); }
@@ -3639,7 +3643,7 @@
   $("coachBtn").addEventListener("click", generateCoachProgram);
   initCheckin();
   $("checkinBtn").addEventListener("click", openCheckin);
-  applyA11y();
+  applyA11y(); applyAdvanced();
   $("formCheckBtn").addEventListener("click", openFormCheck);
   $("formClose").addEventListener("click", stopFormCheck);
   $("formVeil").addEventListener("click", e => { if (e.target.id === "formVeil") stopFormCheck(); });

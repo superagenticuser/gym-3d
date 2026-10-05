@@ -160,6 +160,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .day-head h3 { font-size: 20px; }
 .done-mark { color: var(--volt); font-size: 14px; font-weight: 700; margin-left: 8px; }
 .btn-sm { padding: 0 22px; font-size: 14px; height: 40px; }
+.btn-primary.btn-sm { height: 37px; } /* compensate irradiation illusion: bright volt reads larger than dark ghost at equal height */
 .btn .ic { display: block; }
 .btn-block { width: 100%; margin-top: 22px; text-align: center; }
 
@@ -527,6 +528,7 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 /* progress view */
 .tab-row { display: flex; gap: 8px; margin: 16px 0 20px; flex-wrap: wrap; }
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+#progressBody h3 { margin-bottom: 12px; }
 .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
 .stat-card b { font-size: 26px; display: block; color: var(--volt); }
 .stat-card span { color: var(--muted); font-size: 13px; }
@@ -725,3 +727,6 @@ body.high-contrast { --ink: #ffffff; --muted: #c8d0e0; --line: #3a4358; }
 @keyframes prBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 #woDone { scroll-margin-top: 300px; }
+
+body.no-adv #travelBtn, body.no-adv .tempo-toggle, body.no-adv .tempo-box,
+body.no-adv select.set-type { display: none; }
