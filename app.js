@@ -3024,7 +3024,7 @@
         <img src="${p.src}" alt="Progress photo ${p.date}" />
         <div class="photo-date">${p.date}</div>
         <button class="photo-del" data-pdel="${i}" aria-label="Delete photo">×</button>
-      </div>`).join("") || `<div class="empty-note"><p><b>No photos yet.</b></p><p>Take a progress photo to start tracking.</p></div>`;
+      </div>`).join("") || `<div class="empty-note" style="grid-column:1/-1"><p><b>No photos yet.</b></p><p>Take a progress photo to start tracking.</p></div>`;
     grid.querySelectorAll("[data-pdel]").forEach(b => {
       b.addEventListener("click", ev => {
         ev.stopPropagation();
