@@ -165,8 +165,8 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .btn-block { width: 100%; margin-top: 22px; text-align: center; }
 
 /* ---------- workout mode ---------- */
-.timer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; text-align: center; margin: 14px 0 20px; position: sticky; top: 66px; z-index: 20; }
-.timer-display { font-size: 34px; font-weight: 800; color: var(--volt); font-variant-numeric: tabular-nums; }
+.timer { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; text-align: center; margin: 18px 0 24px; position: sticky; top: 66px; z-index: 20; }
+.timer-display { font-size: 52px; font-weight: 800; color: var(--volt); font-variant-numeric: tabular-nums; }
 .timer-btns { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
 .timer-btns button { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 15px; cursor: pointer; min-height: 44px; }
 .timer-btns button:active { background: var(--volt); color: #0b0d12; }
@@ -197,7 +197,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
   .stage.tall { height: 480px; }
   .detail-info h2 { font-size: 26px; }
   .timer { top: 58px; padding: 16px; }
-  .timer-display { font-size: 30px; }
+  .timer-display { font-size: 42px; }
   .selects { flex-direction: column; }
   .selects select { width: 100%; }
   .day-head { align-items: flex-start; }
@@ -461,12 +461,15 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .btn.danger { color: #ff7a7a; border-color: #5c2a2a; }
 
 /* workout set rows */
+.set-row2 .set-extra, .set-row2 .set-line2 { display: contents; }
 .set-row2 { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .set-row2:last-child { border-bottom: none; }
 @media (max-width: 480px) {
-  .set-row2 { gap: 10px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .set-row2::-webkit-scrollbar { display: none; }
+  .set-row2 { gap: 8px; flex-wrap: wrap; row-gap: 8px; }
   .set-row2 > * { flex-shrink: 0; }
+  .set-row2 .set-line2 { display: flex; gap: 8px; flex-basis: 100%; align-items: center; flex-wrap: wrap; row-gap: 8px; }
+  .set-row2 .set-extra { display: contents; }
+  .set-row2 .set-bw { display: none; }
   .set-reps { flex-shrink: 0; }
 }
 .set-done {
@@ -748,12 +751,22 @@ body:not(.rm) .seg:active, body:not(.rm) .chip:active { transform: scale(.94); }
 body:not(.rm) .modal { animation: modalIn .22s ease; }
 @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } }
 /* timer ring */
-.timer-ring-wrap { position: relative; width: 88px; height: 88px; margin: 0 auto 6px; }
-.timer-ring { width: 88px; height: 88px; transform: rotate(-90deg); }
+.timer-ring-wrap { position: relative; width: 132px; height: 132px; margin: 0 auto 8px; }
+.timer-ring { width: 132px; height: 132px; transform: rotate(-90deg); }
 .timer-ring circle { fill: none; stroke-width: 9; }
 .timer-ring .tr-bg { stroke: rgba(255,255,255,.08); }
 .timer-ring .tr-fg { stroke: var(--volt); stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
 .timer-ring-wrap .timer-display { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+/* mini sticky timer: shrinks when stuck to the top while scrolling */
+body:not(.rm) .timer, body:not(.rm) .timer-ring-wrap, body:not(.rm) .timer-ring,
+body:not(.rm) .timer-display, body:not(.rm) .timer-btns, body:not(.rm) .timer-btns button { transition: all .28s ease; }
+.timer.mini { padding: 8px 10px; margin: 10px 0 14px; }
+.timer.mini .timer-ring-wrap { width: 54px; height: 54px; margin: 0 auto 4px; }
+.timer.mini .timer-ring { width: 54px; height: 54px; }
+.timer.mini .timer-display { font-size: 19px; }
+.timer.mini .timer-btns { margin-top: 6px; gap: 6px; }
+.timer.mini .timer-btns button { padding: 6px 10px; font-size: 13px; min-height: 34px; }
+.timer.mini .timer-hint, .timer.mini #restCue, .timer.mini #plateBtn, .timer.mini #voiceBtn { display: none; }
 /* xp bar */
 .xpbar { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 10px; }
 .xpbar > div { height: 100%; width: 0; border-radius: 999px; background: var(--volt); transition: width 1s ease; }
@@ -801,7 +814,7 @@ input[type="range"].slider::-moz-range-thumb { width: 24px; height: 24px; border
 .water-fill { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #38e1ff, #1d9fc4); transition: height .6s ease; }
 body.rm .water-fill { transition: none; }
 /* swipe rows */
-.set-row2 { touch-action: pan-x pan-y; position: relative; }
+.set-row2 { touch-action: pan-y; position: relative; }
 body:not(.rm) .set-row2.swiping { transition: none; }
 body:not(.rm) .set-row2:not(.swiping) { transition: transform .2s ease, background .2s ease; }
 .set-row2.swipe-done { background: rgba(163,230,53,.08); }
