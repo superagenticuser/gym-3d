@@ -2495,25 +2495,24 @@
     // align to week columns starting Monday
     while (days[0].getDay() !== 1) days.shift();
     let html = `<div class="heatmap" role="img" aria-label="Workout activity, last ${weeks} weeks">`;
-    days.forEach(d => {
-      const key = fmtDate(d);
-      const n = counts[key] || 0;
-      const lvl = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4;
-      const isToday = key === fmtDate(today);
-      const label = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + (n ? `: ${n} workout${n > 1 ? "s" : ""}` : ": rest day");
-      html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}" title="${label}"></div>`;
-    });
-    html += `</div>`;
-    let months = `<div class="heatmap-months" aria-hidden="true">`;
     let prevM = -1;
     for (let w = 0; w < days.length; w += 7) {
       const m = days[w].getMonth();
-      months += `<span>${m !== prevM ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
+      html += `<span class="hm-month" aria-hidden="true">${m !== prevM ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
       prevM = m;
+      for (let d = 0; d < 7 && w + d < days.length; d++) {
+        const dt = days[w + d];
+        const key = fmtDate(dt);
+        const n = counts[key] || 0;
+        const lvl = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4;
+        const isToday = key === fmtDate(today);
+        const label = dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + (n ? `: ${n} workout${n > 1 ? "s" : ""}` : ": rest day");
+        html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}" title="${label}"></div>`;
+      }
     }
-    months += `</div>`;
+    html += `</div>`;
     const legend = `<div class="heatmap-legend"><span>Less</span><div class="hm-day"></div><div class="hm-day l1"></div><div class="hm-day l2"></div><div class="hm-day l3"></div><div class="hm-day l4"></div><span>More</span></div>`;
-    return `<div class="heatmap-scroll">${months}${html}</div>${legend}`;
+    return `<div class="heatmap-scroll">${html}</div>${legend}`;
   }
   const BADGES = [
     { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
