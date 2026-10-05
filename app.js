@@ -132,6 +132,7 @@
       [0.148, 2.94], [0.094, 3.00], [0.070, 3.07]
     ].map(p => new THREE.Vector2(p[0], p[1]));
     const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 36), neutralMat);
+    torsoCore.scale.set(1.12, 1, 1.0);
     body.add(torsoCore);
     // traps: full sweep from neck to shoulders, thicker
     for (const s of [-1, 1]) {
@@ -141,17 +142,17 @@
     }
     // pecs: defined with upper/lower separation, sternum gap
     for (const s of [-1, 1]) {
-      const pecUpper = ball(0.135, "chest", s * 0.125, 2.74, 0.148);
-      pecUpper.scale.set(1.25, 0.65, 0.52);
+      const pecUpper = ball(0.145, "chest", s * 0.125, 2.74, 0.156);
+      pecUpper.scale.set(1.25, 0.68, 0.52);
       pecUpper.rotation.z = s * -0.15;
-      const pecLower = ball(0.125, "chest", s * 0.135, 2.63, 0.142);
-      pecLower.scale.set(1.30, 0.60, 0.48);
+      const pecLower = ball(0.135, "chest", s * 0.135, 2.63, 0.150);
+      pecLower.scale.set(1.30, 0.62, 0.48);
       pecLower.rotation.z = s * -0.10;
     }
     // abs: 6-pack with defined separations
     for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
-      const ab = ball(0.072, "abs", s * 0.068, 2.48 - r * 0.125, 0.150);
-      ab.scale.set(1.20, 0.90, 0.55);
+      const ab = ball(0.080, "abs", s * 0.068, 2.48 - r * 0.112, 0.158);
+      ab.scale.set(1.20, 0.92, 0.55);
     }
     // linea alba (center line) subtle
     // serratus anterior: finger-like projections on sides
@@ -192,7 +193,7 @@
       glMed.scale.set(0.9, 1.1, 0.8);
     }
     // shoulder blend
-    for (const s of [-1, 1]) ball(0.115, null, s * 0.27, 2.82, 0);
+    for (const s of [-1, 1]) ball(0.128, null, s * 0.27, 2.82, 0);
 
     /* ---- arms: defined delts, bicep peak, tricep horseshoe ---- */
     for (const s of [-1, 1]) {
@@ -205,6 +206,9 @@
       deltS.scale.set(0.95, 1.20, 0.95);
       const deltR = ball(0.120, "rear-delt", 0, 0.03, -0.102, g);
       deltR.scale.set(1, 1.05, 0.9);
+      // upper-arm flesh core: continuous flow under the muscles (not clickable)
+      const armCore = new THREE.Mesh(new THREE.CapsuleGeometry(0.100, 0.50, 6, 18), neutralMat);
+      armCore.position.set(s * 0.038, -0.28, 0); g.add(armCore);
       // biceps: long head + short head with peak
       capMesh(0.108, V3(s * 0.028, -0.08, 0.055), V3(s * 0.042, -0.42, 0.060), "biceps", g);
       const peak = ball(0.105, "biceps", s * 0.036, -0.22, 0.062, g);
