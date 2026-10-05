@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.71" />
+<link rel="stylesheet" href="styles.css?v=10.72" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -357,7 +357,7 @@
       <p class="setting-label" style="margin-top:12px">Energy (1-5) <b id="ciEnergyOut" style="color:var(--volt)"></b></p>
       <input type="range" class="slider" id="ciEnergy" min="1" max="5" step="1" value="3" aria-label="Energy level" />
       <p class="setting-label" style="margin-top:12px">HRV (ms, morning reading)</p>
-      <input type="number" id="ciHrv" min="0" max="300" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+      <input type="number" id="ciHrv" min="0" max="300" class="field-input" style="width:120px" />
       <p class="setting-label" style="margin-top:12px">Water (ml)</p>
       <div style="display:flex;gap:12px;align-items:center">
         <div class="water-glass" aria-hidden="true"><div class="water-fill" id="waterFill" style="height:0%"></div></div>
@@ -368,7 +368,7 @@
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
-        <input type="number" id="ciWaterSet" min="0" placeholder="Set total" style="width:110px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px" />
+        <input type="number" id="ciWaterSet" min="0" placeholder="Set total" class="field-input" style="width:110px" />
         <button class="btn btn-ghost btn-sm" id="waterSet">Set</button>
         <span class="ring-wrap" aria-hidden="true">
           <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="waterRing" cx="23" cy="23" r="19" stroke="#38e1ff" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
@@ -378,9 +378,11 @@
       </div>
       <p class="setting-label" style="margin-top:12px">Protein (g)</p>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input type="number" id="ciProtein" min="0" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+        <input type="number" id="ciProtein" min="0" class="field-input" style="width:120px" />
         <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
         <button class="btn btn-ghost btn-sm" id="proteinClear">Clear</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
         <span class="ring-wrap" aria-hidden="true">
           <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="proteinRing" cx="23" cy="23" r="19" stroke="#c8ff00" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
           <span class="ring-label" id="proteinRingLabel"></span>
@@ -390,7 +392,7 @@
       <p class="setting-label" style="margin-top:12px">Supplements</p>
       <div id="suppList"></div>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <input type="text" id="suppName" placeholder="Add supplement…" maxlength="40" style="flex:1;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px" />
+        <input type="text" id="suppName" placeholder="Add supplement…" maxlength="40" class="field-input" style="flex:1" />
         <button class="btn btn-ghost btn-sm" id="suppAdd">Add</button>
       </div>
       <button class="btn btn-primary btn-sm" id="checkinSave" style="margin-top:16px">Save check-in</button>
@@ -415,7 +417,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.71</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.72</p>
   </div>
 </footer>
 
