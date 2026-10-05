@@ -388,10 +388,17 @@
     });
     ro.observe(container);
 
+    function setPain(ids) {
+      reset();
+      (ids || []).forEach(id => {
+        if (mats[id]) { mats[id].emissive.setHex(0xff2222); mats[id].emissiveIntensity = 0.9; }
+      });
+    }
     return {
       highlight,
       setAccent,
       setHeat,
+      setPain,
       setView(v) { targetRotY = (v === "back") ? Math.PI : 0; rotY = targetRotY; },
       dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
     };
@@ -446,6 +453,7 @@
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
     tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
     tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast);
+    const _rt = $("reminderTime"); if (_rt) _rt.value = s.reminder || "";
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
       `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
@@ -468,6 +476,7 @@
       body_hint: "Drag to rotate · scroll to zoom · click a muscle",
       fav_title: "Your favorites", fav_empty: "Nothing saved yet. Tap the heart on any exercise.",
       progress_title: "Progress", tab_overview: "Overview", tab_history: "History", tab_records: "Records", tab_volume: "Volume",
+      tab_year: "Year", tab_board: "Leaderboard", body_pain: "Pain",
       set_title: "Settings", set_accent: "Accent color", set_accent_note: "Applies across the app, including the 3D body ring.",
       set_units: "Units", set_myeq: "My equipment", set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
       set_lang: "Language", set_workout: "Workout", set_sound: "Rest timer sound", set_motion: "Reduce motion",
@@ -493,6 +502,7 @@
       body_hint: "Glisser pour pivoter · défiler pour zoomer · cliquer un muscle",
       fav_title: "Mes favoris", fav_empty: "Rien enregistré. Touchez le cœur sur un exercice.",
       progress_title: "Progrès", tab_overview: "Aperçu", tab_history: "Historique", tab_records: "Records", tab_volume: "Volume",
+      tab_year: "Année", tab_board: "Classement", body_pain: "Douleur",
       set_title: "Réglages", set_accent: "Couleur d'accent", set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
       set_units: "Unités", set_myeq: "Mon équipement", set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
       set_lang: "Langue", set_workout: "Séance", set_sound: "Son du minuteur", set_motion: "Réduire les animations",
@@ -526,7 +536,7 @@
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "" };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -582,6 +592,14 @@
     n.setHours(12, 0, 0, 0);
     return Math.max(0, Math.round((n - d) / 864e5));
   }
+  function getPain() {
+    try { return JSON.parse(localStorage.getItem("forge-pain") || "{}"); } catch (e) { return {}; }
+  }
+  function savePain(p) { try { localStorage.setItem("forge-pain", JSON.stringify(p)); } catch (e) {} }
+  function getSoreness() {
+    try { return JSON.parse(localStorage.getItem("forge-sore") || "{}"); } catch (e) { return {}; }
+  }
+  function saveSoreness(s) { try { localStorage.setItem("forge-sore", JSON.stringify(s)); } catch (e) {} }
   function muscleHeat() {
     const last = {};
     getLog().forEach(w => {
@@ -654,6 +672,21 @@
     };
     step();
   }
+  function latestBodyweightKg() {
+    const m = getMeasures();
+    for (let i = m.length - 1; i >= 0; i--) if (m[i].weight) return toKg(m[i].weight);
+    return 0;
+  }
+  function setVolumeKg(exId, s) {
+    const ex = byId(exId);
+    if (ex && ex.equipment === "Bodyweight") {
+      return (latestBodyweightKg() + (s.added || 0)) * (s.reps || 0);
+    }
+    return (s.weight || 0) * (s.reps || 0);
+  }
+  function totalVolumeKg(log) {
+    return (log || getLog()).reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((d, s) => d + setVolumeKg(x.id, s), 0), 0), 0);
+  }
   function volumeByMuscle(days) {
     const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
     const vol = {};
@@ -667,13 +700,39 @@
     });
     return vol;
   }
+  function weeklyStreak(log) {
+    const weeks = new Set((log || getLog()).map(w => {
+      const d = new Date((w.date || "") + "T12:00:00");
+      const monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return fmtDate(monday);
+    }));
+    let streak = 0;
+    const d = new Date(); d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    if (!weeks.has(fmtDate(d))) d.setDate(d.getDate() - 7);
+    while (weeks.has(fmtDate(d))) { streak++; d.setDate(d.getDate() - 7); }
+    return streak;
+  }
   function workoutStreak() {
     const days = [...new Set(getLog().map(w => w.date))].sort();
     if (!days.length) return 0;
-    let streak = 0;
+    const xp = getXP();
+    const month = fmtDate(new Date()).slice(0, 7);
+    if (xp.freezeMonth !== month) { xp.freeze = 1; xp.freezeMonth = month; xp.frozen = []; saveXP(xp); }
+    xp.frozen = xp.frozen || [];
+    let streak = 0, changed = false;
     const d = new Date(); d.setHours(12, 0, 0, 0);
     if (!days.includes(fmtDate(d))) d.setDate(d.getDate() - 1);
-    while (days.includes(fmtDate(d))) { streak++; d.setDate(d.getDate() - 1); }
+    while (true) {
+      const key = fmtDate(d);
+      if (days.includes(key) || xp.frozen.includes(key)) { streak++; }
+      else if ((xp.freeze || 0) > 0 && streak > 0) {
+        xp.freeze--; xp.frozen.push(key); streak++; changed = true;
+      }
+      else break;
+      d.setDate(d.getDate() - 1);
+    }
+    if (changed) saveXP(xp);
     return streak;
   }
 
@@ -749,6 +808,17 @@
 
   // HOME
   function renderHome() {
+    const _rs = getSettings().reminder;
+    const _rb = $("reminderBanner");
+    if (_rb) {
+      const today = fmtDate(new Date());
+      const trainedToday = getLog().some(w => w.date === today);
+      const now = new Date(), hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      if (_rs && !trainedToday && hm >= _rs) {
+        _rb.classList.remove("hidden");
+        _rb.innerHTML = `<b>${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} Time to train!</b> <span class="muted">Your reminder was set for ${_rs}.</span> <a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
+      } else _rb.classList.add("hidden");
+    }
     $("statEx").textContent = EXERCISES.length;
     $("footEx").textContent = EXERCISES.length;
     const counts = {};
@@ -848,6 +918,44 @@
     $("dOnerm").innerHTML = best1rm > 0
       ? `<div class="onerm-box"><b>Estimated 1RM:</b> ${fmtW(best1rm)} <span class="muted">based on your logged sets</span></div>`
       : "";
+    // per-lift progression chart
+    const _hist = exerciseHistory(ex.id);
+    if (_hist.length >= 2) {
+      $("dProg").innerHTML = `<h3 style="margin-top:18px">Your progression</h3><div class="chart-wrap" style="margin:0 0 12px"><canvas id="dProgCanvas"></canvas></div>`;
+      const cv = $("dProgCanvas");
+      const dpr = window.devicePixelRatio || 1;
+      const wrap = cv.parentElement;
+      const cw = wrap.clientWidth - 32, ch = 170;
+      cv.width = cw * dpr; cv.height = ch * dpr;
+      cv.style.width = cw + "px"; cv.style.height = ch + "px";
+      const cx = cv.getContext("2d"); cx.scale(dpr, dpr);
+      const accent = currentAccent().color;
+      const vals = _hist.map(h => h.orm > 0 ? h.orm : h.best);
+      const mn = Math.min(...vals), mx = Math.max(...vals);
+      const pad = Math.max((mx - mn) * 0.3, 1), lo = mn - pad, rg = (mx - mn + pad * 2) || 1;
+      const pL = 44, pR = 10, pT = 10, pB = 22;
+      const X = i => pL + (i / (vals.length - 1)) * (cw - pL - pR);
+      const Y = v => pT + (1 - (v - lo) / rg) * (ch - pT - pB);
+      cx.font = "11px sans-serif"; cx.textAlign = "right";
+      for (let g = 0; g <= 2; g++) {
+        const gv = lo + rg * g / 2, gy = Y(gv);
+        cx.strokeStyle = "rgba(255,255,255,0.07)"; cx.lineWidth = 1;
+        cx.beginPath(); cx.moveTo(pL, gy); cx.lineTo(cw - pR, gy); cx.stroke();
+        cx.fillStyle = "#8a93a6"; cx.fillText(fromKg(gv).toFixed(1), pL - 6, gy + 4);
+      }
+      cx.beginPath();
+      vals.forEach((v, i) => { i ? cx.lineTo(X(i), Y(v)) : cx.moveTo(X(0), Y(v)); });
+      cx.strokeStyle = accent; cx.lineWidth = 2.5; cx.lineJoin = "round"; cx.stroke();
+      vals.forEach((v, i) => {
+        cx.beginPath(); cx.arc(X(i), Y(v), 3.5, 0, 7); cx.fillStyle = accent; cx.fill();
+      });
+      cx.fillStyle = "#8a93a6";
+      const _fi = i => { try { return new Date(_hist[i].date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch (e) { return ""; } };
+      cx.textAlign = "left"; cx.fillText(_fi(0), pL, ch - 6);
+      cx.textAlign = "right"; cx.fillText(_fi(vals.length - 1), cw - pR, ch - 6);
+    } else {
+      $("dProg").innerHTML = _hist.length ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>` : "";
+    }
     const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
     viewers.push(v);
     if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
@@ -863,6 +971,17 @@
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-goto-muscle]");
     if (g) location.hash = "#/exercises?m=" + g.dataset.gotoMuscle;
+    const sr = e.target.closest("[data-sore]");
+    if (sr) {
+      const grp = sr.dataset.g, val = sr.dataset.sore;
+      const today = fmtDate(new Date());
+      const m = getSoreness();
+      if (val === "clear") { if (m[today]) delete m[today][grp]; }
+      else { m[today] = m[today] || {}; m[today][grp] = val; }
+      saveSoreness(m);
+      selectMuscle(grp);
+      return;
+    }
   });
 
   // BODY MAP
@@ -871,6 +990,13 @@
       autoRotate: !getSettings().reduceMotion, dist: 6.1,
       onMuscleClick: mid => {
         const g = groupOf(mid);
+        if (window._bodyMode === "pain") {
+          const pain = getPain();
+          if (pain[g]) delete pain[g]; else pain[g] = Date.now();
+          savePain(pain);
+          paintPain();
+          return;
+        }
         selectMuscle(g);
         const backSide = ["back", "lats", "traps", "lower-back", "rear-delt", "triceps", "glutes", "hamstrings", "calves"].includes(mid);
         v.setView(backSide ? "back" : "front");
@@ -883,12 +1009,21 @@
       v.setView(front ? "front" : "back");
       $("bFront").classList.toggle("on", front); $("bBack").classList.toggle("on", !front);
     };
+    const paintPain = () => {
+      const marked = Object.keys(getPain());
+      v.setPain(marked.flatMap(g => expandMuscles(g)));
+      const n = marked.length;
+      $("painCount").textContent = n ? n + " marked" : "Tap a muscle to mark pain";
+    };
     const syncMode = () => {
       const mode = window._bodyMode || "muscles";
       $("bMuscles").classList.toggle("on", mode === "muscles");
       $("bRecovery").classList.toggle("on", mode === "recovery");
       $("bFatigue").classList.toggle("on", mode === "fatigue");
-      $("heatLegend").classList.toggle("hidden", mode === "muscles");
+      $("bPain").classList.toggle("on", mode === "pain");
+      $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "pain");
+      $("painHint").classList.toggle("hidden", mode !== "pain");
+      if (mode === "pain") paintPain();
     };
     window._syncBodyMode = syncMode;
     window._bodyMode = "muscles";
@@ -897,6 +1032,7 @@
     $("bMuscles").onclick = () => { window._bodyMode = "muscles"; syncMode(); selectMuscle(window._lastMuscle || "chest"); };
     $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
     $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
+    $("bPain").onclick = () => { window._bodyMode = "pain"; syncMode(); };
     window._bodyViewer = v;
     selectMuscle(selected || "chest");
   }
@@ -920,8 +1056,19 @@
       const recColor = ago <= 1 ? "#f59e0b" : "var(--volt)";
       recHTML = `<span style="color:${recColor};font-weight:700">${recState}</span> <span class="muted">- ${recLabel}</span>`;
     }
+    const today = fmtDate(new Date());
+    const soreMap = getSoreness();
+    const soreState = (soreMap[today] && soreMap[today][groupId]) || null;
+    const soreLabel = soreState === "sore" ? `<span style="color:#f59e0b;font-weight:700">Sore today</span>`
+      : soreState === "injured" ? `<span style="color:#f87171;font-weight:700">Injured - take it easy</span>` : "";
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
-      <p style="margin-top:8px;font-size:14px">${recHTML}</p>`;
+      <p style="margin-top:8px;font-size:14px">${recHTML}</p>
+      ${soreLabel ? `<p style="font-size:14px;margin-top:4px">${soreLabel}</p>` : ""}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" data-sore="sore" data-g="${groupId}">Feeling sore</button>
+        <button class="btn btn-ghost btn-sm" data-sore="injured" data-g="${groupId}">Injured</button>
+        ${soreState ? `<button class="btn btn-ghost btn-sm" data-sore="clear" data-g="${groupId}">Clear</button>` : ""}
+      </div>`;
     const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
     $("bodyExercises").innerHTML = list.length
       ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
@@ -1030,6 +1177,7 @@
             <b>${esc(ex ? ex.name : x.id)}</b>
             <input type="number" min="1" max="20" value="${x.sets}" data-bset="${di}:${xi}" aria-label="Sets" /><span class="lbl">sets</span>
             <input type="text" value="${esc(x.reps)}" data-brep="${di}:${xi}" maxlength="12" aria-label="Reps" style="width:64px" /><span class="lbl">reps</span>
+            <input type="number" min="0" step="any" value="${x.weight != null ? fromKg(x.weight) : ""}" data-bwt="${di}:${xi}" aria-label="Target weight" style="width:76px" placeholder="-" /><span class="lbl">${unitLabel()}</span>
             <button class="icon-btn" data-bdel-ex="${di}:${xi}" aria-label="Remove exercise">${window.FORGE_ICON("x")}</button>
           </div>`;
         }).join("")}
@@ -1037,6 +1185,7 @@
           <button class="btn btn-ghost btn-sm" data-bpick="${di}">Add exercises</button>
           <button class="btn btn-ghost btn-sm" data-btpl-save="${di}">Save as template</button>
           <button class="btn btn-ghost btn-sm" data-btpl-apply="${di}">From template</button>
+          <button class="btn btn-ghost btn-sm" data-b1rm="${di}" title="Fill target weights at 75% of your estimated 1RM">Autofill 75% 1RM</button>
         </div>
       </div>`).join("");
   }
@@ -1088,7 +1237,7 @@
     const prog = {
       id, name: builder.name, tagline: builder.tagline, custom: true,
       level: "custom", daysPerWeek: days.length, weeks: 4, equipment: "Mixed",
-      days: days.map(d => ({ name: d.name.trim() || "Day", exercises: d.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps })) }))
+      days: days.map(d => ({ name: d.name.trim() || "Day", exercises: d.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) }))
     };
     const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
     location.hash = "#/program/" + id;
@@ -1477,9 +1626,15 @@
           <button class="btn btn-ghost btn-sm" id="wodBtn" style="width:100%">WOD timer</button>
           <p class="muted" style="font-size:12px;margin-top:6px">AMRAP, Tabata, and EMOM timers with audio cues.</p>
         </div>
+        <div style="flex:1;min-width:200px">
+          <button class="btn btn-ghost btn-sm" id="meetBtn" style="width:100%">Virtual meet</button>
+          <p class="muted" style="font-size:12px;margin-top:6px">Mock powerlifting meet: attempts, total and DOTS score.</p>
+        </div>
       </div>
       <div id="coachTool" style="margin-top:16px"></div>
     `;
+    const _meetBtn = $("meetBtn");
+    if (_meetBtn) _meetBtn.addEventListener("click", renderMeetTool);
     $("coachAsk").addEventListener("click", answerCoach);
     $("coachQ").addEventListener("keydown", e => { if (e.key === "Enter") answerCoach(); });
     $("mesoBtn").addEventListener("click", () => {
@@ -1632,6 +1787,7 @@
     const existing = getCheckin(today);
     if (existing) {
       $("ciSleep").value = existing.sleep || "";
+      $("ciHrv").value = existing.hrv || "";
       ciEnergyVal = existing.energy || 3;
     }
     document.querySelectorAll("#ciEnergy .seg").forEach(b => b.classList.toggle("on", parseInt(b.dataset.e) === ciEnergyVal));
@@ -1643,6 +1799,7 @@
     $("waterToday").textContent = `${getWater(today)} ml today`;
     $("proteinToday").textContent = `${getProtein(today)}g / ${proteinTarget()}g`;
     renderCheckinHistory();
+    renderSuppList();
   }
   function renderCheckinHistory() {
     const hist = getCheckinHistory(7);
@@ -1655,17 +1812,50 @@
       if (h.checkin) {
         if (h.checkin.sleep) parts.push(`😴 ${h.checkin.sleep}h`);
         if (h.checkin.energy) parts.push(`⚡ ${h.checkin.energy}/5`);
+        if (h.checkin.hrv) parts.push(`❤️ ${h.checkin.hrv}ms`);
       }
       if (h.water) parts.push(`💧 ${h.water}ml`);
       if (h.protein) parts.push(`🥩 ${h.protein}g`);
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
-        <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "-"}</div></div>
-        ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" style="padding:6px 12px;font-size:12px">Clear</button>` : ""}
+      const ci = h.checkin || {};
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--line)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "-"}</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" data-ciedit="${h.date}" style="padding:6px 12px;font-size:12px">Edit</button>
+            ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" style="padding:6px 12px;font-size:12px">Clear</button>` : ""}
+          </div>
+        </div>
+        <div class="ci-edit hidden" id="ciedit-${h.date}" style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <label class="muted" style="font-size:12px">Sleep (h)<br><input type="number" class="ci-e-sleep" min="0" max="14" step="0.5" value="${ci.sleep || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+            <label class="muted" style="font-size:12px">Energy (1-5)<br><input type="number" class="ci-e-energy" min="1" max="5" value="${ci.energy || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+            <label class="muted" style="font-size:12px">HRV (ms)<br><input type="number" class="ci-e-hrv" min="0" max="300" value="${ci.hrv || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+            <label class="muted" style="font-size:12px">Water (ml)<br><input type="number" class="ci-e-water" min="0" value="${h.water || 0}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+            <label class="muted" style="font-size:12px">Protein (g)<br><input type="number" class="ci-e-protein" min="0" value="${h.protein || 0}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+          </div>
+          <button class="btn btn-primary btn-sm" data-cisave="${h.date}" style="margin-top:10px">Save</button>
+        </div>
       </div>`;
     }).join("");
     el.querySelectorAll("[data-clearday]").forEach(b => b.addEventListener("click", () => {
       const day = b.dataset.clearday;
       setWater(day, 0); setProtein(day, 0);
+      updateTrackerLabels();
+    }));
+    el.querySelectorAll("[data-ciedit]").forEach(b => b.addEventListener("click", () => {
+      const box = $("ciedit-" + b.dataset.ciedit);
+      if (box) box.classList.toggle("hidden");
+    }));
+    el.querySelectorAll("[data-cisave]").forEach(b => b.addEventListener("click", () => {
+      const day = b.dataset.cisave;
+      const box = $("ciedit-" + day);
+      const q = sel => { const i = box.querySelector(sel); return i ? parseFloat(i.value) : NaN; };
+      const sleep = q(".ci-e-sleep"), energy = q(".ci-e-energy"), hrv = q(".ci-e-hrv");
+      const water = q(".ci-e-water"), protein = q(".ci-e-protein");
+      const prev = getCheckin(day) || {};
+      saveCheckin(day, { sleep: isNaN(sleep) ? (prev.sleep || null) : sleep, energy: isNaN(energy) ? (prev.energy || null) : Math.max(1, Math.min(5, energy)), hrv: isNaN(hrv) ? (prev.hrv || null) : hrv, ts: Date.now() });
+      if (!isNaN(water)) setWater(day, water);
+      if (!isNaN(protein)) setProtein(day, protein);
       updateTrackerLabels();
     }));
   }
@@ -1687,8 +1877,37 @@
       setProtein(fmtDate(new Date()), 0); updateTrackerLabels();
     });
     $("checkinSave").addEventListener("click", () => {
-      saveCheckin(fmtDate(new Date()), { sleep: parseFloat($("ciSleep").value) || null, energy: ciEnergyVal, ts: Date.now() });
+      saveCheckin(fmtDate(new Date()), { sleep: parseFloat($("ciSleep").value) || null, energy: ciEnergyVal, hrv: parseFloat($("ciHrv").value) || null, ts: Date.now() });
       $("checkinVeil").classList.add("hidden");
+    });
+    $("suppAdd").addEventListener("click", () => {
+      const v = $("suppName").value.trim();
+      if (!v) return;
+      const list = getSupplements();
+      list.push({ id: "supp-" + Date.now().toString(36), name: v });
+      saveSupplements(list);
+      $("suppName").value = "";
+      renderSuppList();
+    });
+    $("suppList").addEventListener("click", e => {
+      const tg = e.target.closest("[data-supp]");
+      if (tg) {
+        const today = fmtDate(new Date());
+        let taken = getSuppLog(today);
+        taken = taken.includes(tg.dataset.supp) ? taken.filter(id => id !== tg.dataset.supp) : taken.concat(tg.dataset.supp);
+        saveSuppLog(today, taken);
+        renderSuppList();
+        return;
+      }
+      const del = e.target.closest("[data-suppdel]");
+      if (del) {
+        saveSupplements(getSupplements().filter(s => s.id !== del.dataset.suppdel));
+        renderSuppList();
+      }
+    });
+    $("waterSet").addEventListener("click", () => {
+      const v = parseFloat($("ciWaterSet").value);
+      if (!isNaN(v) && v >= 0) { setWater(fmtDate(new Date()), v); $("ciWaterSet").value = ""; updateTrackerLabels(); }
     });
   }
 
@@ -1806,12 +2025,19 @@
     try { localStorage.setItem("forge-note-" + exId, note); } catch (e) {}
   }
   // Tempo coach
+  function getTempo(exId) {
+    try { return JSON.parse(localStorage.getItem("forge-tempo") || "{}")[exId] || [3, 1, 2]; }
+    catch (e) { return [3, 1, 2]; }
+  }
+  function saveTempo(exId, arr) {
+    try { const m = JSON.parse(localStorage.getItem("forge-tempo") || "{}"); m[exId] = arr; localStorage.setItem("forge-tempo", JSON.stringify(m)); } catch (e) {}
+  }
   let tempoTimer = null;
-  function startTempo(ecc, pause, con) {
+  function startTempo(ecc, pause, con, elId) {
     stopTempo();
-    const phases = [["Lower", ecc * 1000], ["Hold", pause * 1000], ["Lift", con * 1000]];
+    const phases = [["Lower", Math.max(1, ecc) * 1000], ["Hold", Math.max(0, pause) * 1000], ["Lift", Math.max(1, con) * 1000]];
     let pi = 0;
-    const el = $("tempoDisplay");
+    const el = $(elId || "tempoDisplay");
     const tick = () => {
       if (pi >= phases.length) pi = 0;
       const [name, dur] = phases[pi];
@@ -1855,6 +2081,26 @@
   }
   function saveSupplements(list) {
     try { localStorage.setItem("forge-supp", JSON.stringify(list)); } catch (e) {}
+  }
+  function getSuppLog(dateKey) {
+    try { return JSON.parse(localStorage.getItem("forge-supp-log") || "{}")[dateKey] || []; }
+    catch (e) { return []; }
+  }
+  function saveSuppLog(dateKey, ids) {
+    try { const m = JSON.parse(localStorage.getItem("forge-supp-log") || "{}"); m[dateKey] = ids; localStorage.setItem("forge-supp-log", JSON.stringify(m)); } catch (e) {}
+  }
+  function renderSuppList() {
+    const list = getSupplements();
+    const el = $("suppList");
+    if (!el) return;
+    const today = fmtDate(new Date());
+    const taken = getSuppLog(today);
+    el.innerHTML = list.length ? list.map(s => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">
+        <button class="set-done ${taken.includes(s.id) ? "hit" : ""}" data-supp="${s.id}" aria-label="Mark ${esc(s.name)} taken" style="width:34px;height:34px">${window.FORGE_ICON("check")}</button>
+        <span style="flex:1;font-size:14px">${esc(s.name)}</span>
+        <button class="icon-btn" data-suppdel="${s.id}" aria-label="Remove supplement">${window.FORGE_ICON("x")}</button>
+      </div>`).join("") : `<p class="muted" style="font-size:13px">No supplements yet. Add your daily stack below.</p>`;
   }
   function getWater(dateKey) {
     try { return JSON.parse(localStorage.getItem("forge-water") || "{}")[dateKey] || 0; }
@@ -1945,6 +2191,19 @@
     });
     return limit ? hist.slice(-limit) : hist;
   }
+  function oneRM(exId) {
+    const log = getLog();
+    let best = 0;
+    log.forEach(w => {
+      (w.exercises || []).forEach(x => {
+        if (x.id === exId) {
+          const e = oneRMFromSets(x.sets || []);
+          if (e > best) best = e;
+        }
+      });
+    });
+    return best;
+  }
   function oneRMFromSets(sets) {
     let best = 0;
     sets.forEach(s => {
@@ -1964,6 +2223,61 @@
       push, pull, ratio: pull > 0 ? push / pull : 0,
       quad, ham, legRatio: ham > 0 ? quad / ham : 0
     };
+  }
+  function dotsFromTotal(totalKg, bwKg) {
+    if (!totalKg || !bwKg) return null;
+    const x = Math.min(Math.max(bwKg, 40), 200);
+    const coef = 0.000001093 * Math.pow(x, 4) - 0.0007391293 * Math.pow(x, 3) + 0.19147565 * Math.pow(x, 2) - 22.41233541 * x + 1143.86505292;
+    return Math.round(totalKg * 500 / coef * 10) / 10;
+  }
+  function renderMeetTool() {
+    const bw = latestBodyweightKg();
+    const lifts = ["Squat", "Bench", "Deadlift"];
+    $("coachTool").innerHTML = `
+      <div class="onerm-box">
+        <b>Virtual meet simulator</b>
+        <p class="muted" style="margin:8px 0">Enter up to 3 attempts per lift (${unitLabel()}). Your heaviest successful attempt counts.</p>
+        ${lifts.map((l, li) => `
+          <div style="display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap">
+            <b style="min-width:80px">${l}</b>
+            ${[1, 2, 3].map(a => `<input type="number" min="0" step="any" class="meet-in" data-l="${li}" placeholder="Att ${a}" style="width:90px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px">`).join("")}
+          </div>`).join("")}
+        <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+          <b style="min-width:80px">Bodyweight</b>
+          <input type="number" min="0" step="any" id="meetBw" value="${bw ? fromKg(bw) : ""}" placeholder="${unitLabel()}" style="width:110px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px">
+        </div>
+        <button class="btn btn-primary btn-sm" id="meetCalc" style="margin-top:8px">Calculate total</button>
+        <div id="meetResult" style="margin-top:12px"></div>
+      </div>`;
+    $("meetCalc").addEventListener("click", () => {
+      const best = [0, 1, 2].map(li => {
+        let m = 0;
+        document.querySelectorAll(`.meet-in[data-l="${li}"]`).forEach(i => { m = Math.max(m, parseFloat(i.value) || 0); });
+        return toKg(m);
+      });
+      const bwKg = toKg(parseFloat($("meetBw").value) || 0);
+      const total = best[0] + best[1] + best[2];
+      if (total <= 0 || bwKg <= 0) {
+        $("meetResult").innerHTML = `<p class="muted">Enter at least one attempt and your bodyweight.</p>`;
+        return;
+      }
+      const dots = dotsFromTotal(total, bwKg);
+      try {
+        const meets = JSON.parse(localStorage.getItem("forge-meets") || "[]");
+        meets.push({ date: fmtDate(new Date()), ts: Date.now(), lifts: best, total, bw: bwKg, dots });
+        localStorage.setItem("forge-meets", JSON.stringify(meets.slice(-20)));
+      } catch (e) {}
+      addXP(75);
+      $("meetResult").innerHTML = `
+        <div class="stat-grid" style="margin:12px 0">
+          <div class="stat-card"><b>${fmtW(best[0])}</b><span>squat</span></div>
+          <div class="stat-card"><b>${fmtW(best[1])}</b><span>bench</span></div>
+          <div class="stat-card"><b>${fmtW(best[2])}</b><span>deadlift</span></div>
+          <div class="stat-card"><b>${fmtW(total)}</b><span>total</span></div>
+          <div class="stat-card"><b>${dots}</b><span>DOTS</span></div>
+        </div>
+        <p class="muted" style="font-size:13px">Meet logged. +75 XP earned.</p>`;
+    });
   }
   function dotsScore() {
     // DOTS formula (men), simplified polynomial
@@ -2017,10 +2331,11 @@
     try { return JSON.parse(localStorage.getItem("forge-xp") || '{"xp":0,"freeze":1}'); }
     catch (e) { return { xp: 0, freeze: 1 }; }
   }
+  function saveXP(d) { try { localStorage.setItem("forge-xp", JSON.stringify(d)); } catch (e) {} }
   function addXP(amount) {
     const d = getXP();
     d.xp += amount;
-    try { localStorage.setItem("forge-xp", JSON.stringify(d)); } catch (e) {}
+    saveXP(d);
     return d;
   }
   function xpLevel(xp) {
@@ -2044,9 +2359,12 @@
   }
   function backupData() {
     const data = {};
-    ["forge-log", "forge-favs", "forge-settings", "forge-measurements", "forge-photos", "forge-badges", "forge-xp", "forge-custom-programs"].forEach(k => {
-      try { data[k] = localStorage.getItem(k); } catch (e) {}
-    });
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("forge-")) data[k] = localStorage.getItem(k);
+      }
+    } catch (e) {}
     const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -2096,7 +2414,12 @@
     { id: "fifty", icon: "dumbbell", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
     { id: "streak7", icon: "zap", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
     { id: "streak30", icon: "star", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
-    { id: "vol10k", icon: "dumbbell", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0) >= 10000) },
+    { id: "vol10k", icon: "dumbbell", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0) >= 10000) },
+    { id: "hundred", icon: "trophy", name: "Century", desc: "Log 100 workouts", check: log => log.length >= 100 },
+    { id: "dl100", icon: "dumbbell", name: "Triple digits", desc: "Deadlift 100 kg", check: log => log.some(w => w.exercises.some(x => { const ex = byId(x.id); return ex && /deadlift/i.test(ex.name) && x.sets.some(s => (s.weight || 0) >= 100); })) },
+    { id: "vol100k", icon: "flame", name: "100-ton club", desc: "100,000 kg lifetime volume", check: log => totalVolumeKg(log) >= 100000 },
+    { id: "xp5k", icon: "zap", name: "Rising star", desc: "Earn 5,000 XP", check: () => getXP().xp >= 5000 },
+    { id: "earlybird", icon: "star", name: "Consistent", desc: "Train 4 weeks in a row", check: log => weeklyStreak(log) >= 4 },
     { id: "allmuscles", icon: "map", name: "Full body", desc: "Train all 17 muscle groups", check: log => {
       const groups = new Set();
       log.forEach(w => w.exercises.forEach(x => { const ex = byId(x.id); if (ex) groups.add(ex.primary); }));
@@ -2124,6 +2447,75 @@
       }
     });
     localStorage.setItem("forge-badges", JSON.stringify(earned));
+  }
+  function renderYearTab(body) {
+    const yr = new Date().getFullYear();
+    const ylog = getLog().filter(w => (w.date || "").indexOf(String(yr)) === 0);
+    if (!ylog.length) {
+      body.innerHTML = `<div class="empty-note"><p><b>No workouts in ${yr} yet.</b></p><p>Your annual review will build itself as you train.</p></div>`;
+      return;
+    }
+    const vol = totalVolumeKg(ylog);
+    const sets = ylog.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
+    const days = [...new Set(ylog.map(w => w.date))].sort();
+    let best = 1, run = 1;
+    for (let i = 1; i < days.length; i++) {
+      const prev = new Date(days[i - 1] + "T12:00:00"), cur = new Date(days[i] + "T12:00:00");
+      if ((cur - prev) / 86400000 === 1) { run++; best = Math.max(best, run); } else run = 1;
+    }
+    const liftBest = {};
+    ylog.forEach(w => w.exercises.forEach(x => {
+      const e = oneRMFromSets(x.sets || []);
+      if (e > (liftBest[x.id] || 0)) liftBest[x.id] = e;
+    }));
+    const top = Object.keys(liftBest).map(id => ({ id, v: liftBest[id] }))
+      .sort((a, b) => b.v - a.v).slice(0, 3);
+    const groups = new Set();
+    ylog.forEach(w => w.exercises.forEach(x => { const ex = byId(x.id); if (ex) groups.add(ex.primary); }));
+    body.innerHTML = `
+      <h3>${yr} in review</h3>
+      <div class="stat-grid">
+        <div class="stat-card"><b>${ylog.length}</b><span>workouts</span></div>
+        <div class="stat-card"><b>${fmtW(vol)}</b><span>volume lifted</span></div>
+        <div class="stat-card"><b>${sets}</b><span>sets</span></div>
+        <div class="stat-card"><b>${days.length}</b><span>active days</span></div>
+        <div class="stat-card"><b>${best}</b><span>best streak</span></div>
+        <div class="stat-card"><b>${groups.size}</b><span>muscle groups</span></div>
+      </div>
+      <h3 style="margin-top:20px">Top lifts this year</h3>
+      ${top.length ? top.map(({ id, v }) => { const ex = byId(id); return `<div class="rec-row">${window.FORGE_ICON("trophy")}<b>${esc(ex ? ex.name : id)}</b><span>est. 1RM ${fmtW(v)}</span></div>`; }).join("") : `<p class="muted">Log weighted sets to rank your lifts.</p>`}`;
+  }
+  function renderBoardTab(body) {
+    const months = {};
+    getLog().forEach(w => {
+      const m = (w.date || "").slice(0, 7);
+      if (!m) return;
+      months[m] = months[m] || { workouts: 0, sets: 0, vol: 0 };
+      months[m].workouts++;
+      w.exercises.forEach(x => {
+        months[m].sets += x.sets.length;
+        x.sets.forEach(s => { months[m].vol += setVolumeKg(x.id, s); });
+      });
+    });
+    let xpLog = [];
+    try { xpLog = JSON.parse(localStorage.getItem("forge-xp-log") || "[]"); } catch (e) {}
+    xpLog.forEach(e => {
+      const m = (e.date || "").slice(0, 7);
+      if (months[m]) months[m].xp = (months[m].xp || 0) + e.xp;
+    });
+    const rows = Object.keys(months).map(m => ({ m, ...months[m], xp: months[m].xp || 0 }))
+      .sort((a, b) => b.xp - a.xp || b.vol - a.vol);
+    if (!rows.length) {
+      body.innerHTML = `<div class="empty-note"><p><b>No months ranked yet.</b></p><p>Log workouts to climb your own leaderboard.</p></div>`;
+      return;
+    }
+    const medals = ["🥇", "🥈", "🥉"];
+    body.innerHTML = `<h3>Your monthly leaderboard</h3><p class="muted" style="font-size:13px;margin-bottom:12px">Your personal best months, ranked by XP.</p>` +
+      rows.map((r, i) => {
+        const d = new Date(r.m + "-15T12:00:00");
+        const label = d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+        return `<div class="rec-row"><span style="font-size:20px">${medals[i] || (i + 1) + "."}</span><b>${label}</b><span>${r.workouts} workouts · ${fmtW(r.vol)} · ${r.xp} XP</span></div>`;
+      }).join("");
   }
   function renderBadgesTab(body) {
     const earned = getBadges();
@@ -2361,6 +2753,8 @@
     const body = $("progressBody");
     if (tab === "body") { renderBodyTab(body); return; }
     if (tab === "badges") { renderBadgesTab(body); return; }
+    if (tab === "year") { renderYearTab(body); return; }
+    if (tab === "board") { renderBoardTab(body); return; }
     if (tab === "challenges") { renderChallengesTab(body); return; }
     if (tab === "insights") { renderInsightsTab(body); return; }
     if (tab === "coach") { renderCoachTab(body); return; }
@@ -2370,28 +2764,40 @@
     }
     if (tab === "overview") {
       const totalSets = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
-      const totalVol = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * s.reps, 0), 0), 0);
+      const totalVol = totalVolumeKg(log);
       body.innerHTML = `<div class="stat-grid">
         <div class="stat-card"><b>${log.length}</b><span>workouts logged</span></div>
         <div class="stat-card"><b>${workoutStreak()}</b><span>day streak</span></div>
         <div class="stat-card"><b>${totalSets}</b><span>total sets</span></div>
         <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
         <div class="stat-card"><b>${recoveryScore()}%</b><span>recovery</span></div>
+        <div class="stat-card"><b>${xpLevel(getXP().xp)}</b><span>level (${getXP().xp.toLocaleString()} XP)</span></div>
+        <div class="stat-card"><b>${getXP().freeze || 0}</b><span>streak freeze${(getXP().freeze || 0) === 1 ? "" : "s"}</span></div>
       </div>
       ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 8 weeks</h3>
       ${streakCalendar(log)}
-      <p class="muted">Volume = weight × reps across every logged set.</p>`;
+      <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>`;
     } else if (tab === "history") {
       const byDate = {};
       log.forEach(w => { (byDate[w.date] = byDate[w.date] || []).push(w); });
-      body.innerHTML = Object.keys(byDate).sort().reverse().map(dt => {
+      const TYPE_NAMES = { std: "Standard", drop: "Drop set", rp: "Rest-pause", cluster: "Cluster" };
+      body.innerHTML = Object.keys(byDate).sort().reverse().map((dt, di) => {
         const ws = byDate[dt];
         const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
         const dstr = new Date(dt + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-        return `<div class="hist-day"><div class="hd"><b>${dstr}</b><span class="muted">${sets} sets</span></div><ul>` +
-          ws.map(w => `<li>${esc(w.programName)}: ${esc(w.dayName)} (${w.exercises.length} exercises)</li>`).join("") + `</ul></div>`;
+        const detail = ws.map(w => `<p style="margin:8px 0 4px"><b>${esc(w.programName)}: ${esc(w.dayName)}</b></p><ul style="margin:0 0 8px">` +
+          w.exercises.map(x => {
+            const ex = byId(x.id);
+            return `<li>${esc(ex ? ex.name : x.id)}<ul class="muted" style="font-size:13px">` +
+              x.sets.map(s => `<li>${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.added ? " +" + fmtW(s.added) : ""}${s.rpe ? " · RPE " + s.rpe : ""}${s.failed ? " · <b style='color:#f87171'>failed</b>" : ""}${s.type && s.type !== "std" ? " · " + (TYPE_NAMES[s.type] || s.type) : ""}</li>`).join("") +
+              `</ul></li>`;
+          }).join("") + `</ul>`).join("");
+        return `<div class="hist-day"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
       }).join("");
+      body.querySelectorAll(".hist-toggle").forEach(tg => tg.addEventListener("click", () => {
+        const el = $("hist-" + tg.dataset.hd); if (el) el.classList.toggle("hidden");
+      }));
     } else if (tab === "standards") {
       body.innerHTML = renderStandards();
     } else if (tab === "records") {
@@ -2416,6 +2822,58 @@
   }
 
   // PROGRAMS
+  const EXPRESS_POOL = [
+    { id: "goblet-squat", sets: 3, reps: "10" }, { id: "push-up", sets: 3, reps: "12" },
+    { id: "dumbbell-romanian-deadlift", sets: 3, reps: "10" }, { id: "chest-supported-dumbbell-row", sets: 3, reps: "10" },
+    { id: "overhead-press", sets: 2, reps: "10" }, { id: "glute-bridge", sets: 2, reps: "15" },
+    { id: "plank", sets: 2, reps: "45s" }, { id: "standing-calf-raise", sets: 2, reps: "15" }
+  ];
+  function startExpress() {
+    const picks = [];
+    const groups = new Set();
+    for (const e of EXPRESS_POOL) {
+      const ex = byId(e.id);
+      if (!ex || picks.some(p => p.id === e.id)) continue;
+      if (groups.has(ex.primary) && picks.length >= 5) continue;
+      groups.add(ex.primary);
+      picks.push({ id: e.id, sets: e.sets, reps: e.reps });
+      if (picks.length >= 6) break;
+    }
+    const prog = { id: "express-" + Date.now().toString(36), name: "20-Minute Express", tagline: "Full-body condensed session",
+      custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: "Mixed", express: true,
+      days: [{ name: "Express session", exercises: picks }] };
+    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    location.hash = "#/workout/" + prog.id + "/0";
+  }
+  // Travel mode: swap exercises to minimal-equipment alternatives
+  const TRAVEL_EQ = ["Bodyweight", "Dumbbell", "Band"];
+  function travelSub(exId) {
+    const ex = byId(exId);
+    if (!ex || TRAVEL_EQ.includes(ex.equipment)) return null;
+    const cands = EXERCISES.filter(e => e.id !== exId && e.primary === ex.primary && TRAVEL_EQ.includes(e.equipment));
+    if (!cands.length) return null;
+    cands.sort((a, b) => (a.level === "beginner" ? 0 : 1) - (b.level === "beginner" ? 0 : 1));
+    return cands[0];
+  }
+  const DUNGEON_TITLES = ["Goblin ambush", "Skeleton crypt", "Dragon's lair", "Orc war camp", "Dark dungeon", "Troll bridge"];
+  function startDungeon() {
+    const groups = [...new Set(EXERCISES.map(e => e.primary))];
+    for (let i = groups.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[groups[i], groups[j]] = [groups[j], groups[i]]; }
+    const picks = [];
+    for (const g of groups) {
+      if (picks.length >= 5) break;
+      const cands = EXERCISES.filter(e => e.primary === g);
+      if (!cands.length) continue;
+      const ex = cands[Math.floor(Math.random() * cands.length)];
+      picks.push({ id: ex.id, sets: 3, reps: "8-12" });
+    }
+    const title = DUNGEON_TITLES[Math.floor(Math.random() * DUNGEON_TITLES.length)];
+    const prog = { id: "dungeon-" + Date.now().toString(36), name: "Dungeon: " + title, tagline: "Random encounter. Finish it for +100 bonus XP.",
+      custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: "Mixed", dungeon: true,
+      days: [{ name: "The encounter", exercises: picks }] };
+    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    location.hash = "#/workout/" + prog.id + "/0";
+  }
   function renderPrograms() {
     const activeId = getActiveProg();
     const active = activeId && progById(activeId);
@@ -2475,6 +2933,8 @@
     if (st) st.onclick = () => { setActiveProg(p.id); renderProgram(p.id); };
     const sp = $("pgStop");
     if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
+    $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a 4-week calendar file">Export to calendar</button>`;
+    $("pgICS").onclick = () => exportProgramICS(p.id);
     if (p.custom) {
       $("pgActions").innerHTML += ` <button class="btn btn-ghost danger" id="pgDelete">${t("b_delete")}</button>`;
       $("pgDelete").onclick = () => {
@@ -2493,7 +2953,7 @@
             <div class="day-card">
               <div class="day-head">
                 <h3>${esc(d.name)}</h3>
-                ${!w.deload || w.week === 1 ? `<a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>` : ""}
+                <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}?week=${w.week}">Start workout</a>
               </div>
               <div class="day-exercises">
                 ${d.exercises.map(x => {
@@ -2520,7 +2980,40 @@
       </div>`;
     }).join("");
   }
+  function exportProgramICS(pid) {
+    const p = progById(pid);
+    if (!p) return;
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FORGE//Workout//EN"];
+    const start = new Date(); start.setDate(start.getDate() + 1);
+    for (let wk = 0; wk < 4; wk++) {
+      p.days.forEach((d, di) => {
+        const dt = new Date(start); dt.setDate(dt.getDate() + wk * 7 + di);
+        const ds = fmtDate(dt).replace(/-/g, "");
+        lines.push("BEGIN:VEVENT", "UID:forge-" + pid + "-" + wk + "-" + di + "@forge",
+          "DTSTART:" + ds + "T180000", "DURATION:PT1H",
+          "SUMMARY:FORGE " + d.name.replace(/[,;\\]/g, ""),
+          "DESCRIPTION:" + d.exercises.map(x => { const ex = byId(x.id); return (ex ? ex.name : x.id) + " " + x.sets + "x" + x.reps; }).join(", ").replace(/[,;\\]/g, ""),
+          "END:VEVENT");
+      });
+    }
+    lines.push("END:VCALENDAR");
+    const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "forge-" + pid + ".ics";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
   let timerInt = null, timerLeft = 0, currentWorkout = null;
+  function currentExerciseId() {
+    if (!currentWorkout || !currentWorkout.exercises) return null;
+    for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
+      const total = currentWorkout.exercises[xi].sets || 0;
+      const doneCt = document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).length;
+      if (doneCt < total) return currentWorkout.exercises[xi].id;
+    }
+    return currentWorkout.exercises.length ? currentWorkout.exercises[0].id : null;
+  }
   function getRestSeconds(ex) {
     const s = getSettings();
     if (!ex) return s.restShort;
@@ -2583,30 +3076,43 @@
       o.start(); o.stop(ctx.currentTime + 0.65);
     } catch (e) { /* audio unavailable */ }
   }
-  function renderWorkout(pid, di) {
+  function renderWorkout(pid, di, week) {
     clearInterval(timerInt); timerInt = null; timerLeft = 0;
     const p = progById(pid);
-    const d = p && p.days[di];
+    const mesoDay = week && p && p.mesocycle && p.mesocycle[week - 1] ? p.mesocycle[week - 1].days[di] : null;
+    const d = mesoDay || (p && p.days[di]);
     if (!d) { location.hash = "#/program/" + pid; return; }
-    currentWorkout = d;
+    currentWorkout = JSON.parse(JSON.stringify(d));
+    if (week) currentWorkout._week = week;
+    if (window._travelOn) {
+      currentWorkout.exercises.forEach(x => {
+        const sub = travelSub(x.id);
+        if (sub) { x.id = sub.id; x._swapped = true; }
+      });
+    }
     if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
-    $("woSub").textContent = p.name;
+    $("woSub").textContent = p.name + (week ? " · Week " + week + (p.mesocycle && p.mesocycle[week - 1] && p.mesocycle[week - 1].deload ? " (deload)" : "") : "");
     $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + d.exercises.map((x, xi) => {
       const ex = byId(x.id);
       const isBW = ex.equipment === "Bodyweight";
-      const lw = lastWeightKg(x.id);
+      const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
       const repsNum = parseInt(x.reps) || 8;
+      const lastRpe = getRPE(x.id);
       const rows = Array.from({ length: x.sets }, (_, si) => {
         const wVal = lw != null ? fromKg(lw) : "";
         return `<div class="set-row2">
           <button class="set-done" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} done">${window.FORGE_ICON("check")}</button>
+          <button class="set-fail" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} as failed" title="Failed set (missed reps)">${window.FORGE_ICON("x")}</button>
           <span class="set-num">Set ${si + 1}</span>
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
+          <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type" style="width:66px;padding:6px 4px;font-size:12px">
+            <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option>
+          </select>
           <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
-            <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}">${r}</option>`).join("")}
+            <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}"${lastRpe && lastRpe.rpe === r ? " selected" : ""}>${r}</option>`).join("")}
           </select>
         </div>`;
       }).join("");
@@ -2619,11 +3125,24 @@
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
           ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
+          ${x._swapped ? `<span class="tag volt-tag">travel swap</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
         ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0;display:flex;align-items:center;gap:6px">${window.FORGE_ICON ? window.FORGE_ICON("lightbulb") : ""} Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
-        ${note ? `<p class="muted" style="font-size:13px;margin:4px 0;font-style:italic">📝 ${esc(note)}</p>` : ""}
-        <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
+        <input class="ex-note-input" data-x="${xi}" placeholder="Note for next time…" value="${esc(note)}" aria-label="Exercise note">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
+          <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
+          <button class="btn btn-ghost btn-sm tempo-toggle" data-tempo="${xi}">Tempo coach</button>
+        </div>
+        <div class="tempo-box hidden" id="tempo-${xi}">
+          ${(() => { const tp = getTempo(x.id); return `
+          <label>Eccentric <input type="number" class="tempo-in" data-t="0" min="1" max="10" value="${tp[0]}"></label>
+          <label>Pause <input type="number" class="tempo-in" data-t="1" min="0" max="10" value="${tp[1]}"></label>
+          <label>Concentric <input type="number" class="tempo-in" data-t="2" min="1" max="10" value="${tp[2]}"></label>`; })()}
+          <button class="btn btn-primary btn-sm tempo-start" data-x="${xi}">Start</button>
+          <button class="btn btn-ghost btn-sm tempo-stop">Stop</button>
+          <span class="tempo-display" id="tempo-d-${xi}">Ready</span>
+        </div>
         ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
           ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
@@ -2635,6 +3154,22 @@
     $("timerDisplay").textContent = "0:00";
     $("woDone").classList.add("hidden");
     $("woFinish").classList.remove("hidden");
+    window._woPid = pid; window._woDi = di; window._woWeek = week || null;
+    // energy-based scaling: low check-in energy suggests a shorter session
+    if (!window._scaleDone) {
+      const _ci = getCheckin(fmtDate(new Date()));
+      if (_ci && _ci.energy != null && _ci.energy <= 2 && d.exercises.length > 1) {
+        const banner = document.createElement("div");
+        banner.className = "onerm-box"; banner.id = "scaleBanner";
+        banner.style.borderColor = "#f59e0b"; banner.style.marginBottom = "12px";
+        banner.innerHTML = `<b>Low energy today (${_ci.energy}/5).</b> <span class="muted">Want a shorter session? We can drop the last exercise.</span>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" data-scale="shorten">Shorten session</button>
+            <button class="btn btn-ghost btn-sm" data-scale="keep">Keep as planned</button>
+          </div>`;
+        $("woList").prepend(banner);
+      }
+    }
   }
   document.addEventListener("click", e => {
     const gt = e.target.closest(".guide-toggle");
@@ -2644,6 +3179,8 @@
       gt.classList.toggle("open", !open);
       return;
     }
+    const sf = e.target.closest(".set-fail");
+    if (sf) { sf.classList.toggle("hit"); return; }
     const sd = e.target.closest(".set-done");
     if (sd) {
       const wasHit = sd.classList.contains("hit");
@@ -2654,7 +3191,7 @@
         const ex = woEx && byId(woEx.id);
         // superset pairs get short rest
         const isPair = currentWorkout && currentWorkout._pairs && (currentWorkout._pairs.has(xi) || currentWorkout._pairs.has(xi - 1));
-        startTimer(isPair ? 30 : getRestSeconds(ex));
+        startTimer(isPair ? 30 : (getRestFor(woEx.id) || getRestSeconds(ex)));
         if (getSettings().voiceCues && window.speechSynthesis) {
           const setNum = parseInt(sd.dataset.s, 10) + 1;
           const total = woEx ? woEx.sets : 0;
@@ -2670,12 +3207,37 @@
       if (currentWorkout._pairs.has(xi)) currentWorkout._pairs.delete(xi);
       else currentWorkout._pairs.add(xi);
       const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
-      renderWorkout(raw[1], parseInt(raw[2], 10));
+      const _wq = new URLSearchParams((location.hash.split("?")[1] || "").split("/")[0]);
+      renderWorkout(raw[1], parseInt(raw[2], 10), parseInt(_wq.get("week") || "0", 10) || null);
+      return;
+    }
+    const tt = e.target.closest(".tempo-toggle");
+    if (tt) { const box = $("tempo-" + tt.dataset.tempo); if (box) box.classList.toggle("hidden"); stopTempo(); return; }
+    const ts = e.target.closest(".tempo-start");
+    if (ts) {
+      const xi = ts.dataset.x, box = $("tempo-" + xi);
+      const vals = [0, 1, 2].map(i => Math.max(0, parseInt(box.querySelector(`.tempo-in[data-t="${i}"]`).value) || 0));
+      const exId = currentWorkout && currentWorkout.exercises[parseInt(xi, 10)] ? currentWorkout.exercises[parseInt(xi, 10)].id : null;
+      if (exId) saveTempo(exId, vals);
+      startTempo(vals[0], vals[1], vals[2], "tempo-d-" + xi);
+      return;
+    }
+    if (e.target.closest(".tempo-stop")) { stopTempo(); return; }
+    const sc = e.target.closest("[data-scale]");
+    if (sc) {
+      window._scaleDone = true;
+      if (sc.dataset.scale === "shorten" && currentWorkout && currentWorkout.exercises.length > 1) {
+        currentWorkout.exercises.pop();
+        renderWorkout(window._woPid, window._woDi, window._woWeek);
+      } else {
+        const b = $("scaleBanner"); if (b) b.remove();
+      }
       return;
     }
     const tp = e.target.closest("[data-timer]");
     if (tp) {
       const sec = parseInt(tp.dataset.timer, 10);
+      const _cid = currentExerciseId(); if (_cid) saveRestFor(_cid, sec);
       clearInterval(timerInt);
       timerLeft = sec;
       $("timerDisplay").textContent = fmtT(timerLeft);
@@ -2707,16 +3269,33 @@
     const today = fmtDate(new Date());
     const p = progById(raw[1]);
     const d = p && p.days[parseInt(raw[2], 10)];
-    const entry = { date: today, ts: Date.now(), programId: raw[1], programName: p ? p.name : "", dayName: d ? d.name : "", exercises: [] };
+    const wq = new URLSearchParams((location.hash.split("?")[1] || "").split("/")[0]);
+    const entry = { date: today, ts: Date.now(), programId: raw[1], programName: p ? p.name : "", dayName: d ? d.name : "", week: wq.get("week") ? parseInt(wq.get("week"), 10) : null, exercises: [] };
     if (d) d.exercises.forEach((x, xi) => {
       const sets = [];
       document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).forEach(btn => {
         const si = btn.dataset.s;
         const repsEl = document.querySelector(`input[data-f="reps"][data-x="${xi}"][data-s="${si}"]`);
         const wEl = document.querySelector(`input[data-f="weight"][data-x="${xi}"][data-s="${si}"]`);
-        sets.push({ reps: Math.max(1, parseInt(repsEl && repsEl.value) || 0), weight: wEl ? toKg(parseFloat(wEl.value) || 0) : 0 });
+        const aEl = document.querySelector(`input[data-f="added"][data-x="${xi}"][data-s="${si}"]`);
+        const rpeEl = document.querySelector(`select.set-rpe[data-x="${xi}"][data-s="${si}"]`);
+        const typeEl = document.querySelector(`select.set-type[data-x="${xi}"][data-s="${si}"]`);
+        const failed = !!document.querySelector(`.set-fail[data-x="${xi}"][data-s="${si}"].hit`);
+        const rpe = rpeEl && rpeEl.value ? parseInt(rpeEl.value, 10) : null;
+        sets.push({
+          reps: Math.max(1, parseInt(repsEl && repsEl.value) || 0),
+          weight: wEl ? toKg(parseFloat(wEl.value) || 0) : 0,
+          added: aEl ? toKg(parseFloat(aEl.value) || 0) : 0,
+          rpe, failed, type: typeEl ? typeEl.value : "std"
+        });
       });
-      if (sets.length) entry.exercises.push({ id: x.id, sets });
+      if (sets.length) {
+        entry.exercises.push({ id: x.id, sets });
+        const lastRpe = sets.map(s => s.rpe).filter(r => r != null).pop();
+        if (lastRpe != null) saveRPE(x.id, lastRpe);
+        const noteEl = document.querySelector(`.ex-note-input[data-x="${xi}"]`);
+        if (noteEl) saveExNote(x.id, noteEl.value.trim());
+      }
     });
     if (!entry.exercises.length) { alert("Mark at least one set as done to log this workout."); return; }
     const newPRs = [];
@@ -2731,6 +3310,18 @@
       });
     });
     const log = getLog(); log.push(entry); saveLog(log);
+    // XP: 2 per set, 50 per PR, 25 streak bonus, 100 dungeon bonus
+    let xpGain = entry.exercises.reduce((a, x) => a + x.sets.length * 2, 0) + newPRs.length * 50;
+    if (workoutStreak() >= 7) xpGain += 25;
+    if (p && p.dungeon) xpGain += 100;
+    addXP(xpGain);
+    try {
+      const xl = JSON.parse(localStorage.getItem("forge-xp-log") || "[]");
+      xl.push({ date: today, xp: xpGain });
+      localStorage.setItem("forge-xp-log", JSON.stringify(xl));
+    } catch (e) {}
+    const _xpLine = $("woXpLine");
+    if (_xpLine) _xpLine.innerHTML = `Earned <b style="color:var(--volt)">+${xpGain} XP</b>${p && p.dungeon ? " including the dungeon bonus" : ""} · Level ${xpLevel(getXP().xp)}`;
     checkBadges();
     window._lastEntry = entry;
     done[key] = done[key] || [];
@@ -2744,6 +3335,22 @@
       const el = $("woDone");
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
+  });
+  $("shareTextBtn").addEventListener("click", async () => {
+    const entry = window._lastEntry;
+    if (!entry) return;
+    const lines = [`FORGE workout - ${entry.date}`, `${entry.programName}: ${entry.dayName}`, ""];
+    entry.exercises.forEach(x => {
+      const ex = byId(x.id);
+      lines.push(`${ex ? ex.name : x.id}`);
+      x.sets.forEach(s => lines.push(`  ${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.rpe ? " RPE " + s.rpe : ""}${s.failed ? " (failed)" : ""}`));
+    });
+    const text = lines.join("\n");
+    if (navigator.share) { try { await navigator.share({ title: "FORGE workout", text }); } catch (e) {} }
+    else {
+      try { await navigator.clipboard.writeText(text); alert("Workout summary copied to clipboard."); }
+      catch (e) { alert("Sharing is not available on this device."); }
+    }
   });
   $("shareCard").addEventListener("click", () => {
     if (!window._lastEntry) return;
@@ -2788,7 +3395,7 @@
     else if (parts[0] === "favorites") { show("favorites"); renderFavorites(); }
     else if (parts[0] === "programs") { show("programs"); renderPrograms(); }
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
-    else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); renderWorkout(parts[1], parseInt(parts[2], 10)); }
+    else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); window._scaleDone = false; window._travelOn = false; const _tb = $("travelBtn"); if (_tb) { _tb.classList.remove("on"); _tb.textContent = "Travel mode"; } renderWorkout(parts[1], parseInt(parts[2], 10), parseInt(params.get("week") || "0", 10) || null); }
     else if (parts[0] === "progress") { show("progress"); renderProgress("overview"); }
     else if (parts[0] === "builder") { show("builder"); newBuilder(); }
     else { show("home"); renderHome(); }
@@ -2851,6 +3458,8 @@
     s.myEquipment = s.myEquipment.includes(q) ? s.myEquipment.filter(x => x !== q) : [...s.myEquipment, q];
     saveSettings(s); syncSettingsUI();
   });
+  $("reminderTime").addEventListener("change", e => { const s = getSettings(); s.reminder = e.target.value || ""; saveSettings(s); });
+  $("reminderClear").addEventListener("click", () => { const s = getSettings(); s.reminder = ""; saveSettings(s); $("reminderTime").value = ""; });
   [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
       const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y();
@@ -2935,17 +3544,37 @@
       if (!name) return;
       const tpl = getTemplates();
       tpl.push({ id: "tpl-" + Date.now().toString(36), name: name.trim(), date: fmtDate(new Date()),
-        exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps })) });
+        exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) });
       saveTemplates(tpl);
       alert("Template saved.");
       return;
     }
     const tApply = e.target.closest("[data-btpl-apply]");
     if (tApply) { openTemplatePicker(parseInt(tApply.dataset.btplApply, 10)); return; }
+    const b1 = e.target.closest("[data-b1rm]");
+    if (b1) {
+      const di = parseInt(b1.dataset.b1rm, 10);
+      let filled = 0, missing = 0;
+      builder.days[di].exercises.forEach(x => {
+        const orm = oneRM(x.id);
+        if (orm > 0) { x.weight = Math.round(orm * 0.75 * 4) / 4; filled++; }
+        else missing++;
+      });
+      renderBuilder();
+      alert(filled ? `Filled ${filled} exercise${filled > 1 ? "s" : ""} at 75% of estimated 1RM.` + (missing ? ` ${missing} had no logged data.` : "") : "No logged data yet. Log workouts to estimate your 1RMs.");
+      return;
+    }
   });
   $("bDays").addEventListener("input", e => {
     const dn = e.target.closest("[data-bday]");
     if (dn) { builder.days[parseInt(dn.dataset.bday, 10)].name = dn.value; return; }
+    const bw = e.target.closest("[data-bwt]");
+    if (bw) {
+      const [di, xi] = bw.dataset.bwt.split(":").map(Number);
+      const v = parseFloat(bw.value);
+      builder.days[di].exercises[xi].weight = v > 0 ? toKg(v) : null;
+      return;
+    }
     const st = e.target.closest("[data-bset]");
     if (st) {
       const [di, xi] = st.dataset.bset.split(":").map(Number);
@@ -2986,6 +3615,20 @@
       day.exercises.push({ id, sets: 3, reps: "10" });
       renderBuilder(); renderPicker($("pickerSearch").value);
     }
+  });
+  $("travelBtn").addEventListener("click", () => {
+    window._travelOn = !window._travelOn;
+    $("travelBtn").classList.toggle("on", !!window._travelOn);
+    $("travelBtn").textContent = window._travelOn ? "Travel mode: on" : "Travel mode";
+    if (window._woPid) renderWorkout(window._woPid, window._woDi, window._woWeek);
+  });
+  const _exBtn = $("expressBtn");
+  if (_exBtn) _exBtn.addEventListener("click", startExpress);
+  const _duBtn = $("dungeonBtn");
+  if (_duBtn) _duBtn.addEventListener("click", startDungeon);
+  $("gymModeBtn").addEventListener("click", () => {
+    const on = document.body.classList.toggle("gym-mode");
+    $("gymModeBtn").textContent = on ? "Exit gym mode" : "Gym mode";
   });
   $("plateBtn").addEventListener("click", openPlates);
   $("voiceBtn").addEventListener("click", toggleVoiceLog);
