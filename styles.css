@@ -770,7 +770,7 @@ body:not(.rm) .timer-display, body:not(.rm) .timer-btns, body:not(.rm) .timer-bt
 .timer.mini { padding: 8px 10px; margin: 10px 0 14px; }
 .timer.mini .timer-ring-wrap { width: 58px; height: 58px; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; }
 .timer.mini .timer-ring { width: 50px; height: 50px; display: block; }
-.timer.mini .timer-display { font-size: 19px; }
+.timer.mini .timer-display { font-size: 16px; }
 .timer.mini .timer-btns { margin-top: 6px; gap: 6px; }
 .timer.mini .timer-btns button { padding: 6px 10px; font-size: 13px; min-height: 34px; }
 .timer.mini .timer-hint, .timer.mini #restCue, .timer.mini #plateBtn, .timer.mini #voiceBtn { display: none; }
