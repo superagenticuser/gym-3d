@@ -3130,7 +3130,7 @@
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
           ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
-          ${x._swapped ? `<span class="tag volt-tag">travel swap</span>` : ""}
+          ${x._swapped ? `<span class="tag volt-tag">Travel swap</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
         ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0;display:flex;align-items:center;gap:6px">${window.FORGE_ICON ? window.FORGE_ICON("lightbulb") : ""} Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
