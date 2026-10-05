@@ -3098,7 +3098,7 @@
     const travelHint = window._travelOn ? (travelSwaps > 0
       ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: ${travelSwaps} exercise${travelSwaps > 1 ? "s" : ""} swapped to bodyweight / dumbbell / band alternatives.</p>`
       : `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: all exercises are already travel-friendly, nothing to swap.</p>`) : "";
-    $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + d.exercises.map((x, xi) => {
+    $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + currentWorkout.exercises.map((x, xi) => {
       const ex = byId(x.id);
       const isBW = ex.equipment === "bodyweight";
       const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
