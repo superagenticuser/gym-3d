@@ -1027,7 +1027,6 @@
     const veil = document.createElement("div");
     veil.className = "sheet-veil";
     veil.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
-      <div class="sheet-grab"></div>
       <div class="sheet-head">
         <h3 style="margin:0">${esc(info.name)}</h3>
         <button class="modal-x sheet-close" aria-label="Close">×</button>
