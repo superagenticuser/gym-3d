@@ -3150,6 +3150,28 @@
     const ring = $("timerRing");
     if (ring) ring.style.strokeDashoffset = String(timerTotal > 0 ? TIMER_CIRC * (1 - Math.max(0, timerLeft) / timerTotal) : 0);
   }
+  (function () {
+    var timerEl = null, miniQueued = false, miniOn = false;
+    function timerVisible() {
+      if (!timerEl) timerEl = document.querySelector(".timer");
+      return timerEl && timerEl.offsetParent !== null;
+    }
+    function updateMini() {
+      miniQueued = false;
+      if (!timerVisible()) { if (miniOn && timerEl) { miniOn = false; timerEl.classList.remove("mini"); } return; }
+      var top = timerEl.getBoundingClientRect().top;
+      if (!miniOn && top <= 67) { miniOn = true; timerEl.classList.add("mini"); }
+      else if (miniOn && top > 92) { miniOn = false; timerEl.classList.remove("mini"); }
+    }
+    function queueMini() {
+      if (miniQueued) return;
+      miniQueued = true;
+      requestAnimationFrame(updateMini);
+    }
+    window.addEventListener("scroll", queueMini, { passive: true });
+    window.addEventListener("resize", queueMini);
+    window._refreshTimerMini = queueMini;
+  })();
   function currentExerciseId() {
     if (!currentWorkout || !currentWorkout.exercises) return null;
     for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
@@ -3256,14 +3278,18 @@
           <button class="set-fail" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} as failed" title="Failed set (missed reps)">${window.FORGE_ICON("x")}</button>
           <span class="set-num">Set ${si + 1}</span>
           <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
+          <span class="set-line2">
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
+          <span class="set-extra">
           <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type: Standard, Drop set, Rest-pause, Cluster" style="width:66px;padding:6px 4px;font-size:12px">
             <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option>
           </select>
           <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
             <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}"${lastRpe && lastRpe.rpe === r ? " selected" : ""}>${r}</option>`).join("")}
           </select>
+          </span>
+          </span>
         </div>`;
       }).join("");
       const pairs = currentWorkout._pairs;
@@ -3641,6 +3667,7 @@
     else if (parts[0] === "progress") { show("progress"); renderProgress("overview"); }
     else if (parts[0] === "builder") { show("builder"); newBuilder(); }
     else { show("home"); renderHome(); }
+    if (window._refreshTimerMini) setTimeout(window._refreshTimerMini, 60);
   }
   $("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); });
   $("muscleChips").addEventListener("click", e => {
