@@ -679,7 +679,7 @@
   }
   function setVolumeKg(exId, s) {
     const ex = byId(exId);
-    if (ex && ex.equipment === "Bodyweight") {
+    if (ex && ex.equipment === "bodyweight") {
       return (latestBodyweightKg() + (s.added || 0)) * (s.reps || 0);
     }
     return (s.weight || 0) * (s.reps || 0);
@@ -2846,7 +2846,7 @@
     location.hash = "#/workout/" + prog.id + "/0";
   }
   // Travel mode: swap exercises to minimal-equipment alternatives
-  const TRAVEL_EQ = ["Bodyweight", "Dumbbell", "Band"];
+  const TRAVEL_EQ = ["bodyweight", "dumbbell", "band"];
   function travelSub(exId) {
     const ex = byId(exId);
     if (!ex || TRAVEL_EQ.includes(ex.equipment)) return null;
@@ -3097,7 +3097,7 @@
     const travelHint = window._travelOn ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: exercises are swapped to bodyweight / dumbbell / band alternatives.</p>` : "";
     $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + d.exercises.map((x, xi) => {
       const ex = byId(x.id);
-      const isBW = ex.equipment === "Bodyweight";
+      const isBW = ex.equipment === "bodyweight";
       const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
       const repsNum = parseInt(x.reps) || 8;
       const lastRpe = getRPE(x.id);
