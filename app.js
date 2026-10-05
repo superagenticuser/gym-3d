@@ -22,6 +22,43 @@
     "full-body":{ name: "Full Body",    desc: "Compound conditioning. Multiple muscles, maximum output." },
     cardio:     { name: "Cardio",       desc: "Engine building. Heart, lungs and work capacity." }
   };
+
+  /* ---------- custom exercises (user-created, stored locally) ---------- */
+  function getCustomExercises() {
+    try {
+      const v = JSON.parse(localStorage.getItem("forge-custom-exercises") || "[]");
+      return Array.isArray(v) ? v : [];
+    } catch (e) { return []; }
+  }
+  function saveCustomExercises(list) {
+    try { localStorage.setItem("forge-custom-exercises", JSON.stringify(list)); } catch (e) {}
+  }
+  EXERCISES.push(...getCustomExercises());
+  function openCustomModal() {
+    $("customName").value = "";
+    $("customSecondary").querySelectorAll("input:checked").forEach(c => { c.checked = false; });
+    $("customVeil").classList.remove("hidden");
+    setTimeout(() => $("customName").focus(), 60);
+  }
+  function closeCustomModal() { $("customVeil").classList.add("hidden"); }
+  function saveCustomExercise() {
+    const name = $("customName").value.trim();
+    if (!name) { appAlert("Give your exercise a name first."); return; }
+    const primary = $("customPrimary").value;
+    const secondary = Array.from($("customSecondary").querySelectorAll("input:checked")).map(c => c.value).filter(v => v !== primary);
+    const ex = {
+      id: "custom-" + Date.now().toString(36),
+      name, primary, secondary,
+      equipment: $("customEquipment").value,
+      level: $("customLevel").value,
+      custom: true, steps: [], pattern: "custom"
+    };
+    const list = getCustomExercises();
+    list.push(ex); saveCustomExercises(list);
+    EXERCISES.push(ex);
+    closeCustomModal();
+    initExercises(); renderExercises();
+  }
   const MANNEQUIN_IDS = ["chest","back","lats","traps","lower-back","front-delt","side-delt","rear-delt",
     "biceps","triceps","forearms","abs","obliques","glutes","quads","hamstrings","calves"];
   const DELT_TO_GROUP = { "front-delt": "shoulders", "side-delt": "shoulders", "rear-delt": "shoulders" };
@@ -910,10 +947,14 @@
     if (!ex) { location.hash = "#/exercises"; return; }
     $("dName").textContent = ex.name;
     $("dBadges").innerHTML =
+      (ex.custom ? `<span class="tag volt-tag">Custom</span>` : "") +
       `<span class="tag volt-tag">${MUSCLE_INFO[ex.primary].name}</span>
        <span class="tag">${eqName[ex.equipment]}</span>
        <span class="tag">${cap1(ex.level)}</span>`;
+    $("dDelete").dataset.id = ex.id;
+    $("dDelete").classList.toggle("hidden", !ex.custom);
     syncDetailFav(ex);
+    $("dPyramid").dataset.id = ex.id;
     $("dSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
     const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
     $("dSteps").innerHTML += `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
@@ -1358,47 +1399,86 @@
     "default": ["Breathe steadily", "Control the weight both ways", "Stop if form breaks down"]
   };
 
-  // SHARE CARD
+  // SHARE CARD (Feature 7): renders a 1080x1350 portrait workout card to an offscreen canvas
   function generateShareCard(entry) {
-    const canvas = $("shareCanvas");
-    const ctx = canvas.getContext("2d");
-    const W = 1080, H = 1080;
-    // background
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#0b0e13"); grad.addColorStop(1, "#1a1f2a");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-    // accent bar
-    ctx.fillStyle = "#a3e635"; ctx.fillRect(0, 0, W, 12);
-    // title
-    ctx.fillStyle = "#fff"; ctx.font = "bold 72px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("FORGE", W/2, 140);
-    ctx.font = "36px sans-serif"; ctx.fillStyle = "#888";
-    ctx.fillText(entry.dayName || "Workout", W/2, 200);
-    ctx.fillText(entry.date, W/2, 250);
-    // stats
-    const totalSets = entry.exercises.reduce((a, x) => a + x.sets.length, 0);
-    const totalVol = entry.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.weight * s.reps, 0), 0);
-    ctx.fillStyle = "#fff"; ctx.font = "bold 96px sans-serif";
-    ctx.fillText(entry.exercises.length, W/2 - 200, 450);
-    ctx.fillText(totalSets, W/2 + 200, 450);
-    ctx.font = "32px sans-serif"; ctx.fillStyle = "#888";
-    ctx.fillText("exercises", W/2 - 200, 500);
-    ctx.fillText("sets", W/2 + 200, 500);
-    ctx.fillStyle = "#a3e635"; ctx.font = "bold 80px sans-serif";
-    ctx.fillText(fmtW(totalVol), W/2, 650);
-    ctx.font = "32px sans-serif"; ctx.fillStyle = "#888";
-    ctx.fillText("total volume", W/2, 700);
-    // exercises list
-    ctx.textAlign = "left"; ctx.font = "28px sans-serif"; ctx.fillStyle = "#ccc";
-    let y = 800;
-    entry.exercises.slice(0, 6).forEach(x => {
-      const ex = byId(x.id);
-      if (ex && y < 1000) {
-        ctx.fillText(`• ${ex.name}: ${x.sets.length} sets`, 120, y);
-        y += 45;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080; canvas.height = 1350;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      const W = 1080, H = 1350;
+      const volt = "#d4ff3f", ink = "#f2f4f8", muted = "#9aa3b5";
+      // background
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, "#0b0d12"); grad.addColorStop(1, "#161b26");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+      // volt accent bar
+      ctx.fillStyle = volt; ctx.fillRect(0, 0, W, 10);
+      ctx.textAlign = "center";
+      // brand
+      ctx.fillStyle = volt;
+      ctx.font = "800 92px system-ui, -apple-system, sans-serif";
+      try { ctx.letterSpacing = "14px"; } catch (e) {}
+      ctx.fillText("FORGE", W / 2, 150);
+      try { ctx.letterSpacing = "0px"; } catch (e) {}
+      // date, e.g. "Mon, Oct 5, 2026"
+      const parts = (entry.date || "").split("-");
+      let dateStr = entry.date || "";
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        dateStr = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
       }
-    });
-    return canvas.toDataURL("image/png");
+      ctx.fillStyle = muted; ctx.font = "500 40px system-ui, sans-serif";
+      ctx.fillText(dateStr, W / 2, 225);
+      // program + day
+      const sub = [entry.programName, entry.dayName].filter(Boolean).join(" - ");
+      const subShown = sub.length > 34 ? sub.slice(0, 33) + "…" : (sub || "Workout");
+      ctx.fillStyle = ink; ctx.font = "700 52px system-ui, sans-serif";
+      ctx.fillText(subShown, W / 2, 300);
+      // divider
+      ctx.strokeStyle = "#232936"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(W - 140, 360); ctx.stroke();
+      // stats row
+      const totalSets = entry.exercises.reduce((a, x) => a + x.sets.length, 0);
+      const totalVol = entry.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0);
+      const stats = [
+        [String(entry.exercises.length), "exercises"],
+        [String(totalSets), "sets"],
+        [fmtW(totalVol), "total volume"]
+      ];
+      const colX = [W / 2 - 340, W / 2, W / 2 + 340];
+      stats.forEach((st, i) => {
+        ctx.fillStyle = ink; ctx.font = "800 76px system-ui, sans-serif";
+        ctx.fillText(st[0], colX[i], 480);
+        ctx.fillStyle = muted; ctx.font = "500 32px system-ui, sans-serif";
+        ctx.fillText(st[1], colX[i], 535);
+      });
+      // top 4 exercises by volume
+      ctx.fillStyle = volt; ctx.font = "700 36px system-ui, sans-serif";
+      ctx.fillText("TOP LIFTS", W / 2, 650);
+      const ranked = entry.exercises.map(x => ({
+        x,
+        vol: x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0),
+        reps: x.sets.reduce((b, s) => b + (s.reps || 0), 0)
+      })).sort((a, b) => b.vol - a.vol).slice(0, 4);
+      ctx.textAlign = "left";
+      let y = 730;
+      ranked.forEach(r => {
+        const ex = byId(r.x.id);
+        const name = ex ? ex.name : r.x.id;
+        const shown = name.length > 30 ? name.slice(0, 29) + "…" : name;
+        ctx.fillStyle = ink; ctx.font = "600 40px system-ui, sans-serif";
+        ctx.fillText(shown, 110, y);
+        ctx.fillStyle = muted; ctx.font = "500 34px system-ui, sans-serif";
+        ctx.fillText(r.x.sets.length + " sets - " + r.reps + " reps - " + fmtW(r.vol), 110, y + 52);
+        y += 130;
+      });
+      // footer
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#5b6472"; ctx.font = "500 32px system-ui, sans-serif";
+      ctx.fillText("Trained with FORGE", W / 2, H - 70);
+      return canvas;
+    } catch (e) { return null; }
   }
 
   // AI FORM CHECK (MoveNet pose estimation, on-device)
@@ -1666,7 +1746,49 @@
       ${corr.length ? `<h3 style="margin-top:20px">Correlations</h3>` + corr.map(c => `<p>💡 ${c}</p>`).join("") : ""}
       <h3 style="margin-top:20px">Total volume lifted</h3>
       <p style="font-size:28px;font-weight:800;color:var(--volt)">${Math.round(totalVolumeAll()).toLocaleString()} kg</p>
+      ${rpeTrendSection()}
     `;
+  }
+  function rpeTrendSection() {
+    const log = getLog();
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // this week's Monday
+    const weeks = [];
+    for (let i = 11; i >= 0; i--) {
+      const start = new Date(monday); start.setDate(monday.getDate() - i * 7);
+      const end = new Date(start); end.setDate(start.getDate() + 7);
+      const sKey = fmtDate(start), eKey = fmtDate(end);
+      let sum = 0, n = 0;
+      log.forEach(w => {
+        if (w.date >= sKey && w.date < eKey) w.exercises.forEach(x => x.sets.forEach(s => { if (s.rpe != null) { sum += s.rpe; n++; } }));
+      });
+      weeks.push({ label: start.toLocaleDateString(undefined, { month: "short", day: "numeric" }), avg: n ? sum / n : null });
+    }
+    if (!weeks.some(w => w.avg != null)) {
+      return `<h3 style="margin-top:20px">RPE trend</h3><div class="empty-note"><p><b>No RPE data yet.</b></p><p>Log RPE on your sets and the trend will appear here.</p></div>`;
+    }
+    const W = 600, H = 220, padL = 34, padR = 12, padT = 12, padB = 28;
+    const iw = W - padL - padR, ih = H - padT - padB;
+    const yOf = v => padT + ih - (v - 6) / 4 * ih;
+    const xOf = i => padL + i / (weeks.length - 1) * iw;
+    let grid = "";
+    for (let v = 6; v <= 10; v++) {
+      grid += `<line x1="${padL}" y1="${yOf(v)}" x2="${W - padR}" y2="${yOf(v)}" stroke="var(--line)" stroke-width="1"/><text x="${padL - 6}" y="${yOf(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;
+    }
+    let xl = "";
+    weeks.forEach((w, i) => {
+      if (i % 4 === 0 || i === weeks.length - 1) xl += `<text x="${xOf(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${esc(w.label)}</text>`;
+    });
+    const pts = weeks.map((w, i) => w.avg == null ? null : [xOf(i), yOf(w.avg)]);
+    let path = "", started = false;
+    pts.forEach(p => {
+      if (!p) { started = false; return; }
+      path += (started ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1);
+      started = true;
+    });
+    const dots = pts.map(p => p ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--volt)"/>` : "").join("");
+    return `<h3 style="margin-top:20px">RPE trend</h3><p class="muted" style="font-size:13px;margin-bottom:12px">Average RPE per week, last 12 weeks.</p><div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block" role="img" aria-label="Average RPE per week">${grid}<path d="${path}" fill="none" stroke="var(--volt)" stroke-width="2.5" stroke-linecap="round"/>${dots}${xl}</svg></div>`;
   }
   function renderCoachTab(body) {
     body.innerHTML = `
@@ -2651,6 +2773,73 @@
     catch (e) { return []; }
   }
   function saveMeasures(m) { localStorage.setItem("forge-measures", JSON.stringify(m)); }
+  let _calYear = null, _calMonth = null;
+  function renderCalendarTab(body) {
+    const now = new Date();
+    if (_calYear == null) { _calYear = now.getFullYear(); _calMonth = now.getMonth(); }
+    const yr = _calYear, mo = _calMonth;
+    const counts = {};
+    getLog().forEach(w => { counts[w.date] = (counts[w.date] || 0) + 1; });
+    const title = new Date(yr, mo, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    const first = (new Date(yr, mo, 1).getDay() + 6) % 7; // Monday-first offset
+    const dim = new Date(yr, mo + 1, 0).getDate();
+    const todayKey = fmtDate(now);
+    let cells = "";
+    for (let i = 0; i < first; i++) cells += `<div class="cal-blank"></div>`;
+    for (let d = 1; d <= dim; d++) {
+      const key = yr + "-" + String(mo + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      const n = counts[key] || 0;
+      const lvl = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4;
+      const isToday = key === todayKey, isFuture = key > todayKey;
+      const tip = n ? n + " workout" + (n > 1 ? "s" : "") : "Rest day";
+      cells += `<div class="cal-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}${isFuture ? " future" : ""}${n ? "" : " rest"}" data-calday="${key}" title="${tip}">${d}</div>`;
+    }
+    body.innerHTML = `
+      <div class="cal-view">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" id="calPrev" aria-label="Previous month">&lt;</button>
+          <h3 style="margin:0">${esc(title)}</h3>
+          <button class="btn btn-ghost btn-sm" id="calNext" aria-label="Next month">&gt;</button>
+        </div>
+        <div class="cal-grid">
+          ${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(w => `<div class="cal-wd">${w}</div>`).join("")}
+          ${cells}
+        </div>
+        <div id="calDetail"></div>
+      </div>`;
+    $("calPrev").addEventListener("click", () => {
+      _calMonth--; if (_calMonth < 0) { _calMonth = 11; _calYear--; }
+      renderCalendarTab(body);
+    });
+    $("calNext").addEventListener("click", () => {
+      _calMonth++; if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+      renderCalendarTab(body);
+    });
+    body.querySelectorAll("[data-calday]").forEach(el => el.addEventListener("click", () => {
+      body.querySelectorAll("[data-calday]").forEach(c => c.classList.remove("sel"));
+      el.classList.add("sel");
+      renderCalDetail($("calDetail"), el.dataset.calday);
+    }));
+  }
+  function renderCalDetail(el, key) {
+    if (!el) return;
+    const ws = getLog().filter(w => w.date === key);
+    const dstr = new Date(key + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    if (!ws.length) {
+      el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3><div class="empty-note"><p><b>Rest day.</b></p><p>No workouts logged.</p></div>`;
+      return;
+    }
+    const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
+    const vol = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + setVolumeKg(x.id, s), 0), 0), 0);
+    const detail = ws.map(w => `<p style="margin:12px 0 4px"><b>${esc(w.programName)}${w.dayName ? ": " + esc(w.dayName) : ""}</b></p><ul style="margin:0 0 8px">` +
+      w.exercises.map(x => {
+        const ex = byId(x.id);
+        return `<li>${esc(ex ? ex.name : x.id)}<ul class="muted" style="font-size:13px">` +
+          x.sets.map(s => `<li>${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.rpe != null ? " · RPE " + s.rpe : ""}${s.failed ? " · <b style='color:#f87171'>failed</b>" : ""}</li>`).join("") +
+          `</ul></li>`;
+      }).join("") + `</ul>`).join("");
+    el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3><p class="muted">${ws.length} workout${ws.length > 1 ? "s" : ""} · ${sets} sets · ${fmtW(vol)} volume</p>${detail}`;
+  }
   function renderBodyTab(body) {
     const measures = getMeasures();
     const units = getSettings().units;
@@ -2915,6 +3104,7 @@
     if (tab === "challenges") { renderChallengesTab(body); return; }
     if (tab === "insights") { renderInsightsTab(body); return; }
     if (tab === "coach") { renderCoachTab(body); return; }
+    if (tab === "calendar") { renderCalendarTab(body); return; }
     paintOverview(body, log);
     };
     paint();
@@ -2947,7 +3137,7 @@
     } else if (tab === "history") {
       const byDate = {};
       log.forEach(w => { (byDate[w.date] = byDate[w.date] || []).push(w); });
-      const TYPE_NAMES = { std: "Standard", drop: "Drop set", rp: "Rest-pause", cluster: "Cluster" };
+      const TYPE_NAMES = { std: "Standard", drop: "Drop set", rp: "Rest-pause", cluster: "Cluster", myo: "Myo-rep" };
       body.innerHTML = Object.keys(byDate).sort().reverse().map((dt, di) => {
         const ws = byDate[dt];
         const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
@@ -2958,7 +3148,8 @@
             return `<li>${esc(ex ? ex.name : x.id)}<ul class="muted" style="font-size:13px">` +
               x.sets.map(s => `<li>${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.added ? " +" + fmtW(s.added) : ""}${s.rpe ? " · RPE " + s.rpe : ""}${s.failed ? " · <b style='color:#f87171'>failed</b>" : ""}${s.type && s.type !== "std" ? " · " + (TYPE_NAMES[s.type] || s.type) : ""}</li>`).join("") +
               `</ul></li>`;
-          }).join("") + `</ul>`).join("");
+          }).join("") + `</ul>` +
+          (w.notes ? `<p class="muted" style="font-style:italic;margin:8px 0">Note: ${esc(w.notes)}</p>` : "")).join("");
         return `<div class="hist-day"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
       }).join("");
       body.querySelectorAll(".hist-toggle").forEach(tg => tg.addEventListener("click", () => {
@@ -2995,6 +3186,84 @@
     { id: "overhead-press", sets: 2, reps: "10" }, { id: "glute-bridge", sets: 2, reps: "15" },
     { id: "plank", sets: 2, reps: "45s" }, { id: "standing-calf-raise", sets: 2, reps: "15" }
   ];
+  // PYRAMID SET BUILDER
+  function openPyramid(exId) {
+    const ex = byId(exId);
+    if (!ex) return;
+    const isBW = ex.equipment === "bodyweight";
+    const lwKg = lastWeightKg(ex.id);
+    const defTop = lwKg ? fromKg(lwKg) : "";
+    const defBot = lwKg ? Math.round(fromKg(lwKg) * 0.6 * 2) / 2 : "";
+    const old = document.querySelector(".pyr-veil");
+    if (old) old.remove();
+    const veil = document.createElement("div");
+    veil.className = "modal-veil pyr-veil";
+    veil.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:430px">
+      <div class="modal-head"><h3>Pyramid: ${esc(ex.name)}</h3><button class="modal-x" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <p class="muted" style="font-size:13px;margin:0 0 12px">Weights ramp linearly between top and bottom${isBW ? " (added weight)" : ""}.</p>
+        <div class="field-group">
+          <label class="field-label">Top weight (${unitLabel()})<input class="text-input" id="pyrTop" type="number" min="0" step="any" value="${defTop}" placeholder="e.g. 40"></label>
+          <label class="field-label">Bottom weight (${unitLabel()})<input class="text-input" id="pyrBot" type="number" min="0" step="any" value="${defBot}" placeholder="e.g. 25"></label>
+          <label class="field-label">Steps (3-6)<input class="text-input" id="pyrSteps" type="number" min="3" max="6" value="4"></label>
+          <label class="field-label">Reps per step<input class="text-input" id="pyrReps" type="number" min="1" value="8"></label>
+          <label class="field-label">Direction
+            <select class="text-input" id="pyrDir">
+              <option value="desc">Descending (heavy to light)</option>
+              <option value="asc">Ascending (light to heavy)</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="pyrPreviewBtn">Preview</button>
+        <div id="pyrOut" style="margin-top:12px"></div>
+        <button class="btn btn-primary" id="pyrStart" style="margin-top:12px;width:100%">Start workout with these sets</button>
+      </div>
+    </div>`;
+    veil.querySelector(".modal-x").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+    const close = () => veil.remove();
+    veil.addEventListener("click", e => { if (e.target === veil || e.target.closest(".modal-x")) close(); });
+    document.body.appendChild(veil);
+    const topEl = veil.querySelector("#pyrTop"), botEl = veil.querySelector("#pyrBot"),
+          stepsEl = veil.querySelector("#pyrSteps"), repsEl = veil.querySelector("#pyrReps"),
+          dirEl = veil.querySelector("#pyrDir"), outEl = veil.querySelector("#pyrOut");
+    function buildPlan() {
+      const top = parseFloat(topEl.value), bot = parseFloat(botEl.value);
+      let steps = Math.round(parseFloat(stepsEl.value) || 4);
+      steps = Math.min(6, Math.max(3, steps));
+      stepsEl.value = steps;
+      const reps = Math.max(1, Math.round(parseFloat(repsEl.value) || 8));
+      if (!(top > 0) || !(bot > 0)) {
+        outEl.innerHTML = `<p class="muted" style="font-size:13px">Enter top and bottom weights to preview the pyramid.</p>`;
+        return null;
+      }
+      const hi = Math.max(top, bot), lo = Math.min(top, bot), dir = dirEl.value;
+      const wUser = [];
+      for (let i = 0; i < steps; i++) {
+        const t = i / (steps - 1);
+        const raw = dir === "desc" ? hi - (hi - lo) * t : lo + (hi - lo) * t;
+        wUser.push(Math.round(raw * 2) / 2);
+      }
+      const weightsKg = wUser.map(toKg);
+      outEl.innerHTML = `<table style="width:100%;font-size:13px;border-collapse:collapse">
+        <tr style="color:var(--muted);text-align:left"><th style="padding:6px 4px">Step</th><th style="padding:6px 4px">Weight</th><th style="padding:6px 4px">Reps</th></tr>` +
+        wUser.map((w, i) => `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 4px">${i + 1}</td><td style="padding:6px 4px">${fmtW(weightsKg[i])}</td><td style="padding:6px 4px">${reps}</td></tr>`).join("") +
+        `</table>`;
+      return { steps, reps, weightsKg, repsArr: Array(steps).fill(reps) };
+    }
+    veil.querySelector("#pyrPreviewBtn").addEventListener("click", buildPlan);
+    [topEl, botEl, stepsEl, repsEl, dirEl].forEach(el => el.addEventListener("input", buildPlan));
+    buildPlan();
+    veil.querySelector("#pyrStart").addEventListener("click", () => {
+      const plan = buildPlan();
+      if (!plan) { appAlert("Enter valid top and bottom weights first."); return; }
+      const prog = { id: "pyramid-" + Date.now().toString(36), name: ex.name + " Pyramid", tagline: "Pyramid session",
+        custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: ex.equipment || "Mixed",
+        days: [{ name: "Pyramid session", exercises: [{ id: ex.id, sets: plan.steps, reps: String(plan.reps), repsArr: plan.repsArr, weightsArr: plan.weightsKg }] }] };
+      const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+      close();
+      location.hash = "#/workout/" + prog.id + "/0";
+    });
+  }
   function startExpress() {
     const picks = [];
     const groups = new Set();
@@ -3125,7 +3394,7 @@
               <div class="day-exercises">
                 ${d.exercises.map(x => {
                   const ex = byId(x.id);
-                  return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex.name)}</b><span>${x.sets} × ${esc(x.reps)} @ ${fmtW(x.weight)}</span></div>`;
+                  return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)} @ ${fmtW(x.weight)}</span></div>`;
                 }).join("")}
               </div>
             </div>`).join("")}
@@ -3141,7 +3410,7 @@
         <div class="day-exercises">
         ${d.exercises.map(x => {
           const ex = byId(x.id);
-          return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex.name)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
+          return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
         }).join("")}
         </div>
       </div>`;
@@ -3290,27 +3559,32 @@
     if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name + (week ? " · Week " + week + (p.mesocycle && p.mesocycle[week - 1] && p.mesocycle[week - 1].deload ? " (deload)" : "") : "");
-    const advHint = `<p class="muted" style="font-size:12px;margin-bottom:12px">Set type: Std = standard, Drop = drop set, R-P = rest-pause, Clu = cluster.</p>`;
+    const advHint = `<p class="muted" style="font-size:12px;margin-bottom:12px">Set type: Std = standard, Drop = drop set, R-P = rest-pause, Clu = cluster, Myo = myo-rep.</p>`;
     const travelHint = window._travelOn ? (travelSwaps > 0
       ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: ${travelSwaps} exercise${travelSwaps > 1 ? "s" : ""} swapped to bodyweight / dumbbell / band alternatives.</p>`
       : `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: all exercises are already travel-friendly, nothing to swap.</p>`) : "";
     $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + currentWorkout.exercises.map((x, xi) => {
       const ex = byId(x.id);
+      if (!ex) {
+        return `<div class="wo-ex"><div class="wo-ex-head"><b class="muted">Missing exercise</b><span class="tag">no longer available</span></div><p class="muted" style="font-size:13px;margin:4px 0">This exercise was deleted from your library. You can still finish the workout.</p></div>`;
+      }
       const isBW = ex.equipment === "bodyweight";
       const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
       const repsNum = parseInt(x.reps) || 8;
       const lastRpe = getRPE(x.id);
       const rows = Array.from({ length: x.sets }, (_, si) => {
         const wVal = lw != null ? fromKg(lw) : "";
+        const repsVal = (x.repsArr && x.repsArr[si] != null) ? x.repsArr[si] : repsNum;
+        const wValSi = (x.weightsArr && x.weightsArr[si] != null) ? fromKg(x.weightsArr[si]) : wVal;
         return `<div class="set-row2">
           <button class="set-done" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} done">${window.FORGE_ICON("check")}</button>
           <button class="set-fail" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} as failed" title="Failed set (missed reps)">${window.FORGE_ICON("x")}</button>
           <span class="set-num">Set ${si + 1}</span>
-          <span class="set-reps"><input type="number" min="1" value="${repsNum}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
-          ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
-                 : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wVal}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
-          <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type: Standard, Drop set, Rest-pause, Cluster" style="width:66px;padding:6px 4px;font-size:12px">
-            <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option>
+          <span class="set-reps"><input type="number" min="1" value="${repsVal}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
+          ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="${wValSi}" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
+                 : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wValSi}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
+          <select class="set-type" data-x="${xi}" data-s="${si}" aria-label="Set type" title="Set type: Standard, Drop set, Rest-pause, Cluster, Myo-rep" style="width:66px;padding:6px 4px;font-size:12px">
+            <option value="std">Std</option><option value="drop">Drop</option><option value="rp">R-P</option><option value="cluster">Clu</option><option value="myo">Myo</option>
           </select>
           <select class="set-rpe" data-x="${xi}" data-s="${si}" aria-label="RPE: Rate of Perceived Exertion (6=easy, 10=max effort)" title="RPE: how hard was this set? 6=easy, 10=all-out" style="width:62px;padding:6px 4px;font-size:12px">
             <option value="">RPE</option>${[6,7,8,9,10].map(r => `<option value="${r}"${lastRpe && lastRpe.rpe === r ? " selected" : ""}>${r}</option>`).join("")}
@@ -3319,13 +3593,23 @@
       }).join("");
       const pairs = currentWorkout._pairs;
       const isPaired = pairs.has(xi) || pairs.has(xi - 1);
-      const pairLabel = pairs.has(xi) ? "A1" : pairs.has(xi - 1) ? "A2" : "";
+      // linked groups: pairs.has(i) links exercise i to i+1, so consecutive
+      // links form one group; {0,1} means exercises 0,1,2 are a giant set.
+      let gStart = xi, gEnd = xi;
+      while (gStart > 0 && pairs.has(gStart - 1)) gStart--;
+      while (pairs.has(gEnd)) gEnd++;
+      const gSize = gEnd - gStart + 1, gPos = xi - gStart + 1;
+      const pairBadge = gSize === 2
+        ? `<span class="superset-badge">${gPos === 1 ? "A1" : "A2"}</span>`
+        : gSize >= 3
+          ? `<span class="giant-badge" title="Giant set">G${gPos}</span>`
+          : "";
       const sug = suggestWeight(x.id);
       const note = getExNote(x.id);
       return `<div class="wo-ex ${isPaired ? "superset" : ""}">
         <div class="wo-ex-head">
           <b data-ex="${x.id}" class="wo-link">${esc(ex.name)}</b>
-          ${pairLabel ? `<span class="superset-badge">${pairLabel}</span>` : ""}
+          ${pairBadge}
           ${x._swapped ? `<span class="tag volt-tag">Travel swap</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
@@ -3345,7 +3629,7 @@
           <button class="btn btn-ghost btn-sm tempo-stop">Stop</button>
           <span class="tempo-display" id="tempo-d-${xi}">Ready</span>
         </div>
-        ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unpair" : "Pair as superset with next"}</button>` : ""}
+        ${xi < d.exercises.length - 1 ? `<button class="btn btn-ghost btn-sm" data-pair="${xi}" style="margin:6px 0">${pairs.has(xi) ? "Unlink" : "Link with next"}</button>` : ""}
         <ol class="steps wo-steps hidden" id="guide-${xi}">
           ${ex.steps.map(s => `<li>${esc(s)}</li>`).join("")}
         </ol>
@@ -3393,7 +3677,7 @@
         const xi = parseInt(sd.dataset.x, 10);
         const woEx = currentWorkout && currentWorkout.exercises[xi];
         const ex = woEx && byId(woEx.id);
-        // superset pairs get short rest
+        // linked groups (supersets and giant sets) get short rest
         const isPair = currentWorkout && currentWorkout._pairs && (currentWorkout._pairs.has(xi) || currentWorkout._pairs.has(xi - 1));
         startTimer(isPair ? 30 : (getRestFor(woEx.id) || getRestSeconds(ex)));
         if (getSettings().voiceCues && window.speechSynthesis) {
@@ -3533,6 +3817,8 @@
       }
     });
     if (!entry.exercises.length) { appAlert("Mark at least one set as done to log this workout."); return; }
+    const _woNoteEl = $("woNotes");
+    entry.notes = _woNoteEl ? _woNoteEl.value.trim() : "";
     const newPRs = [];
     entry.exercises.forEach(x => {
       const ex = byId(x.id);
@@ -3545,6 +3831,7 @@
       });
     });
     const log = getLog(); log.push(entry); saveLog(log);
+    if (_woNoteEl) _woNoteEl.value = "";
     // XP: 2 per set, 50 per PR, 25 streak bonus, 100 dungeon bonus
     let xpGain = entry.exercises.reduce((a, x) => a + x.sets.length * 2, 0) + newPRs.length * 50;
     if (workoutStreak() >= 7) xpGain += 25;
@@ -3598,13 +3885,35 @@
       catch (e) { appAlert("Sharing is not available on this device."); }
     }
   });
-  $("shareCard").addEventListener("click", () => {
-    if (!window._lastEntry) return;
-    const dataUrl = generateShareCard(window._lastEntry);
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `forge-workout-${window._lastEntry.date}.png`;
-    a.click();
+  $("shareCard").addEventListener("click", async () => {
+    const entry = window._lastEntry;
+    if (!entry) return;
+    const canvas = generateShareCard(entry);
+    if (!canvas) { appAlert("Could not create share image."); return; }
+    const fname = `forge-workout-${entry.date}.png`;
+    // try native share first (mobile + desktop)
+    try {
+      const blob = await new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error("blob")), "image/png"));
+      const file = new File([blob], "forge-workout.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "FORGE workout",
+          text: `${entry.programName || ""}${entry.dayName ? ": " + entry.dayName : ""} - ${entry.date}`
+        });
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // user dismissed the share sheet
+    }
+    // fallback: download the PNG
+    try {
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = fname;
+      document.body.appendChild(a); a.click(); a.remove();
+      appAlert("Image downloaded.");
+    } catch (e) { appAlert("Could not create share image."); }
   });
   $("replayBtn").addEventListener("click", () => {
     if (!window._lastEntry) return;
@@ -3661,6 +3970,10 @@
     const id = $("dFav").dataset.id;
     favs.has(id) ? favs.delete(id) : favs.add(id);
     saveFavs(); syncDetailFav(byId(id));
+  });
+  $("dPyramid").addEventListener("click", () => {
+    const id = $("dPyramid").dataset.id;
+    if (id) openPyramid(id);
   });
 
   window.addEventListener("hashchange", router);
@@ -3941,6 +4254,28 @@
   $("plateBar").addEventListener("input", calcPlates);
   $("plateTarget").addEventListener("input", calcPlates);
   $("coachBtn").addEventListener("click", generateCoachProgram);
+  /* ---------- custom exercises: modal + delete wiring ---------- */
+  $("customPrimary").innerHTML = Object.keys(MUSCLE_INFO).map(id => `<option value="${id}">${MUSCLE_INFO[id].name}</option>`).join("");
+  $("customEquipment").innerHTML = Object.keys(eqName).map(q => `<option value="${q}">${eqName[q]}</option>`).join("");
+  $("customSecondary").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
+    `<label class="check-pill"><input type="checkbox" value="${id}" /> ${MUSCLE_INFO[id].name}</label>`).join("");
+  $("customClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+  $("addCustomBtn").addEventListener("click", openCustomModal);
+  $("customCancel").addEventListener("click", closeCustomModal);
+  $("customClose").addEventListener("click", closeCustomModal);
+  $("customVeil").addEventListener("click", e => { if (e.target.id === "customVeil") closeCustomModal(); });
+  $("customSave").addEventListener("click", saveCustomExercise);
+  $("dDelete").addEventListener("click", async () => {
+    const id = $("dDelete").dataset.id;
+    const ex = byId(id);
+    if (!ex || !ex.custom) return;
+    const ok = await appConfirm(`Delete "${ex.name}"? It will be removed from your library. Programs that use it will show it as missing.`, { title: "Delete exercise", okText: "Delete", danger: true });
+    if (!ok) return;
+    saveCustomExercises(getCustomExercises().filter(c => c.id !== id));
+    const i = EXERCISES.findIndex(e => e.id === id);
+    if (i >= 0) EXERCISES.splice(i, 1);
+    location.hash = "#/exercises";
+  });
   /* ---------- in-app dialogs (replace native alert/confirm/prompt) ---------- */
   let _dlgResolve = null, _dlgMode = null;
   function _showDlg(o) {

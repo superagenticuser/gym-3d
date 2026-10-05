@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.59" />
+<link rel="stylesheet" href="styles.css?v=10.60" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -86,6 +86,7 @@
         </select>
       </div>
     </div>
+    <button class="btn btn-ghost btn-sm" id="addCustomBtn" style="margin-bottom:14px">Add custom exercise</button>
     <div class="cards" id="exerciseGrid"></div>
   </section>
 
@@ -97,7 +98,13 @@
         <div class="badges" id="dBadges"></div>
         <h2 id="dName"></h2>
       </div>
-      <button class="fav-btn btn btn-ghost" id="dFav">Save to favorites</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="dPyramid">Pyramid</button>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <button class="fav-btn btn btn-ghost" id="dFav">Save to favorites</button>
+        <button class="btn btn-danger btn-sm hidden" id="dDelete">Delete exercise</button>
+      </div>
+      </div>
     </div>
     <div class="detail-3d">
       <div id="detail3d" class="stage"></div>
@@ -215,6 +222,10 @@
     </div>
     <button class="btn btn-ghost btn-sm" id="gymModeBtn" style="margin:8px 0">Gym mode</button>
     <div id="woList"></div>
+    <div class="field-group" style="margin:14px 0">
+      <label class="field-label" for="woNotes">Session notes</label>
+      <textarea id="woNotes" class="text-input" rows="3" placeholder="How did it feel? Anything to change next time?" style="resize:vertical"></textarea>
+    </div>
     <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
     <div class="done-banner hidden" id="woDone">
       <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
@@ -223,12 +234,11 @@
       <div class="xpbar" id="woXpBar" style="max-width:320px;margin-left:auto;margin-right:auto"><div id="woXpFill"></div></div>
       <p class="muted" id="woXpNext" style="font-size:12px;margin-top:4px"></p>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" id="shareCard" style="white-space:nowrap">Share summary</button>
+        <button class="btn btn-ghost btn-sm" id="shareCard" style="white-space:nowrap">Share</button>
         <button class="btn btn-ghost btn-sm" id="shareTextBtn" style="white-space:nowrap">Share as text</button>
         <button class="btn btn-ghost btn-sm" id="replayBtn" style="white-space:nowrap">3D replay</button>
         <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs" style="white-space:nowrap">Back to programs</a>
       </div>
-      <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
     </div>
     </div>
   </section>
@@ -256,6 +266,7 @@
       <button class="chip" data-ptab="challenges">Challenges</button>
       <button class="chip" data-ptab="insights">Insights</button>
       <button class="chip" data-ptab="coach">Coach</button>
+      <button class="chip" data-ptab="calendar">Calendar</button>
     </div>
     <div id="progressBody"></div>
   </section>
@@ -402,7 +413,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.59</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.60</p>
   </div>
 </footer>
 
@@ -415,6 +426,41 @@
     <div class="dlg-btns">
       <button class="btn btn-ghost btn-sm" id="dlgCancel">Cancel</button>
       <button class="btn btn-primary btn-sm" id="dlgOk">OK</button>
+    </div>
+  </div>
+</div>
+<div class="modal-veil hidden" id="customVeil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
+    <div class="modal-head"><h3 id="customTitle">Add custom exercise</h3><button class="modal-x" id="customClose" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label" for="customName">Name</label>
+        <input type="text" id="customName" class="text-input" placeholder="e.g. Cable woodchopper" maxlength="60" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="customPrimary">Primary muscle</label>
+        <select id="customPrimary" style="width:100%"></select>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Secondary muscles (optional)</span>
+        <div class="check-grid" id="customSecondary"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="customEquipment">Equipment</label>
+        <select id="customEquipment" style="width:100%"></select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="customLevel">Level</label>
+        <select id="customLevel" style="width:100%">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <button class="btn btn-ghost btn-sm" id="customCancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="customSave">Save exercise</button>
     </div>
   </div>
 </div>
