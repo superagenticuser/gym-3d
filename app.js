@@ -2047,8 +2047,8 @@
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div><b style="font-size:14px">${label}</b><div class="muted" style="font-size:12px">${parts.join(" · ") || "-"}</div></div>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-sm" data-ciedit="${h.date}" style="padding:6px 12px;font-size:12px">Edit</button>
-            ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" style="padding:6px 12px;font-size:12px">Clear</button>` : ""}
+            <button class="btn btn-ghost btn-sm" data-ciedit="${h.date}" >Edit</button>
+            ${(h.water || h.protein) ? `<button class="btn btn-ghost btn-sm" data-clearday="${h.date}" >Clear</button>` : ""}
           </div>
         </div>
         <div class="ci-edit hidden" id="ciedit-${h.date}" style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:12px">
@@ -2924,9 +2924,9 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <h4 style="margin:0">Weight trend</h4>
         <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn btn-ghost btn-sm" data-mspan="10" style="padding:4px 10px;font-size:12px">10</button>
-          <button class="btn btn-ghost btn-sm" data-mspan="30" style="padding:4px 10px;font-size:12px">30</button>
-          <button class="btn btn-ghost btn-sm" data-mspan="0" style="padding:4px 10px;font-size:12px">All</button>
+          <button class="btn btn-ghost btn-sm" data-mspan="10" >10</button>
+          <button class="btn btn-ghost btn-sm" data-mspan="30" >30</button>
+          <button class="btn btn-ghost btn-sm" data-mspan="0" >All</button>
         </div>
         <span style="font-size:13px;color:${changeColor};font-weight:700">${changeTxt} total</span>
       </div>
@@ -3371,7 +3371,7 @@
     $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a 4-week calendar file">Export to calendar</button>`;
     $("pgICS").onclick = () => exportProgramICS(p.id);
     if (p.custom) {
-      $("pgActions").innerHTML += ` <button class="btn btn-ghost danger" id="pgDelete">${t("b_delete")}</button>`;
+      $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">${t("b_delete")}</button>`;
       $("pgDelete").onclick = async () => {
         if (await appConfirm(`Delete "${p.name}"? This cannot be undone.`, { okText: "Delete", danger: true })) {
           if (getActiveProg() === p.id) setActiveProg(null);

@@ -128,7 +128,7 @@ select:focus { outline: none; border-color: var(--volt); }
 .tag-lg { cursor: pointer; font-size: 14px; padding: 8px 16px; }
 .tag-lg:hover { border-color: var(--volt); }
 .muscle-tags .tag.primary { background: color-mix(in srgb, var(--ember) 14%, transparent); border-color: color-mix(in srgb, var(--ember) 50%, transparent); color: #ff8a50; }
-.fav-btn { margin-top: 6px; }
+
 .fav-btn.faved { border-color: var(--volt); color: var(--volt); }
 .mini-cards { display: flex; flex-direction: column; gap: 8px; }
 .mini-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -280,7 +280,6 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   padding: 18px 22px; margin: 18px 0 6px;
 }
 .active-banner b { font-size: 17px; }
-.prog-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* ================= v3: workout form guide ================= */
 .guide-toggle {
@@ -578,7 +577,7 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 }
 
 /* ================= v7: program smarts ================= */
-.prog-actions { display: flex; gap: 10px; margin: 16px 0 20px; flex-wrap: wrap; }
+.prog-actions { display: flex; gap: 10px; margin: 16px 0 20px; flex-wrap: wrap; align-items: center; }
 .quiz-opts { display: grid; gap: 10px; }
 .quiz-opt {
   text-align: left; padding: 14px 16px; border-radius: 12px; cursor: pointer;
