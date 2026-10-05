@@ -445,7 +445,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 
 /* ================= v6: training intelligence ================= */
 /* settings extras */
-.modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; }
 .seg-row { display: flex; gap: 8px; }
 .seg {
   flex: 1; padding: 10px; border-radius: 12px; cursor: pointer;
