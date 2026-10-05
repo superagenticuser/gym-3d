@@ -3093,7 +3093,9 @@
     if (!currentWorkout._pairs) currentWorkout._pairs = new Set();
     $("woTitle").textContent = d.name;
     $("woSub").textContent = p.name + (week ? " · Week " + week + (p.mesocycle && p.mesocycle[week - 1] && p.mesocycle[week - 1].deload ? " (deload)" : "") : "");
-    $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + d.exercises.map((x, xi) => {
+    const advHint = getSettings().advanced ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Set type: Std = standard, Drop = drop set, R-P = rest-pause, Clu = cluster.</p>` : "";
+    const travelHint = window._travelOn ? `<p class="muted" style="font-size:12px;margin-bottom:12px">Travel mode is on: exercises are swapped to bodyweight / dumbbell / band alternatives.</p>` : "";
+    $("woList").innerHTML = `<p class="muted" style="font-size:12px;margin-bottom:12px">RPE = how hard the set felt (6 easy → 10 all-out). Optional but helps the coach adapt.</p>` + advHint + travelHint + d.exercises.map((x, xi) => {
       const ex = byId(x.id);
       const isBW = ex.equipment === "Bodyweight";
       const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
