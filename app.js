@@ -1797,7 +1797,7 @@
       <div class="field-group" style="margin-top:12px">
         <label class="field-label" for="coachQ">Your question</label>
         <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" style="flex:1;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+          <input type="text" id="coachQ" placeholder="e.g. why is my bench stuck?" class="field-input" style="flex:1" />
           <button class="btn btn-primary btn-sm" id="coachAsk">Ask</button>
         </div>
       </div>
@@ -1860,7 +1860,7 @@
         <div class="field-group">
           <label class="field-label" for="wuW">Working weight (${getSettings().units})</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <input type="number" id="wuW" style="width:140px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
+            <input type="number" id="wuW" class="field-input" style="width:140px" />
             <button class="btn btn-primary btn-sm" id="wuGo">Calculate</button>
           </div>
         </div>
@@ -2053,11 +2053,11 @@
         </div>
         <div class="ci-edit hidden" id="ciedit-${h.date}" style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:12px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <label class="muted" style="font-size:12px">Sleep (h)<br><input type="number" class="ci-e-sleep" min="0" max="14" step="0.5" value="${ci.sleep || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
-            <label class="muted" style="font-size:12px">Energy (1-5)<br><input type="number" class="ci-e-energy" min="1" max="5" value="${ci.energy || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
-            <label class="muted" style="font-size:12px">HRV (ms)<br><input type="number" class="ci-e-hrv" min="0" max="300" value="${ci.hrv || ""}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
-            <label class="muted" style="font-size:12px">Water (ml)<br><input type="number" class="ci-e-water" min="0" value="${h.water || 0}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
-            <label class="muted" style="font-size:12px">Protein (g)<br><input type="number" class="ci-e-protein" min="0" value="${h.protein || 0}" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px"></label>
+            <label class="muted" style="font-size:12px">Sleep (h)<br><input type="number" class="ci-e-sleep field-input" min="0" max="14" step="0.5" value="${ci.sleep || ""}" style="width:100%"></label>
+            <label class="muted" style="font-size:12px">Energy (1-5)<br><input type="number" class="ci-e-energy field-input" min="1" max="5" value="${ci.energy || ""}" style="width:100%"></label>
+            <label class="muted" style="font-size:12px">HRV (ms)<br><input type="number" class="ci-e-hrv field-input" min="0" max="300" value="${ci.hrv || ""}" style="width:100%"></label>
+            <label class="muted" style="font-size:12px">Water (ml)<br><input type="number" class="ci-e-water field-input" min="0" value="${h.water || 0}" style="width:100%"></label>
+            <label class="muted" style="font-size:12px">Protein (g)<br><input type="number" class="ci-e-protein field-input" min="0" value="${h.protein || 0}" style="width:100%"></label>
           </div>
           <button class="btn btn-primary btn-sm" data-cisave="${h.date}" style="margin-top:10px">Save</button>
         </div>
@@ -2464,11 +2464,11 @@
         ${lifts.map((l, li) => `
           <div style="display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap">
             <b style="min-width:80px">${l}</b>
-            ${[1, 2, 3].map(a => `<input type="number" min="0" step="any" class="meet-in" data-l="${li}" placeholder="Att ${a}" style="width:90px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px">`).join("")}
+            ${[1, 2, 3].map(a => `<input type="number" min="0" step="any" class="meet-in field-input" data-l="${li}" placeholder="Att ${a}" style="width:90px">`).join("")}
           </div>`).join("")}
         <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
           <b style="min-width:80px">Bodyweight</b>
-          <input type="number" min="0" step="any" id="meetBw" value="${bw ? fromKg(bw) : ""}" placeholder="${unitLabel()}" style="width:110px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px;font-size:14px">
+          <input type="number" min="0" step="any" id="meetBw" value="${bw ? fromKg(bw) : ""}" placeholder="${unitLabel()}" class="field-input" style="width:110px">
         </div>
         <button class="btn btn-primary btn-sm" id="meetCalc" style="margin-top:8px">Calculate total</button>
         <div id="meetResult" style="margin-top:12px"></div>

@@ -414,6 +414,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .modal-body > .setting-label:not(:first-child) { border-top: 1px solid var(--line); padding-top: 20px; margin-top: 22px; }
 .field-label { font-weight: 700; font-size: 14px; margin: 0 0 8px; display: block; }
 .field-input { background: var(--surface); border: 1px solid var(--line); color: var(--ink); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+.field-input:focus { outline: none; border-color: var(--volt); }
 .field-group { margin-bottom: 16px; }
 .field-group:last-child { margin-bottom: 0; }
 .check-grid { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -524,6 +525,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
   width: 52px; background: var(--surface); border: 1px solid var(--line); color: var(--ink);
   border-radius: 8px; padding: 7px 6px; font-size: 14px; text-align: center;
 }
+.tempo-in:focus { outline: none; border-color: var(--volt); }
 .tempo-display { font-weight: 800; font-size: 16px; color: var(--volt); min-width: 70px; }
 /* gym mode: distraction-free, big touch targets */
 body.gym-mode #view-workout .timer, body.gym-mode #view-workout .guide-toggle,
