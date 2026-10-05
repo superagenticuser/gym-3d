@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.38" />
+<link rel="stylesheet" href="styles.css?v=10.39" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -190,7 +190,13 @@
     <p class="kicker" id="woSub"></p>
     <h2 class="section-title" id="woTitle"></h2>
     <div class="timer">
-      <div class="timer-display" id="timerDisplay">0:00</div>
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="tr-bg" cx="60" cy="60" r="52"/>
+          <circle class="tr-fg" id="timerRing" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-display" id="timerDisplay">0:00</div>
+      </div>
       <div class="timer-btns">
         <button data-timer="30">0:30</button>
         <button data-timer="60">1:00</button>
@@ -214,6 +220,8 @@
       <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
       <p class="muted">Logged. Keep the streak going.</p>
       <p class="muted" id="woXpLine" style="margin-top:6px"></p>
+      <div class="xpbar" id="woXpBar" style="max-width:320px;margin-left:auto;margin-right:auto"><div id="woXpFill"></div></div>
+      <p class="muted" id="woXpNext" style="font-size:12px;margin-top:4px"></p>
       <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0;flex-wrap:wrap">
         <button class="btn btn-primary btn-sm" id="shareCard" style="white-space:nowrap">Share summary</button>
         <button class="btn btn-ghost btn-sm" id="shareTextBtn" style="white-space:nowrap">Share as text</button>
@@ -335,23 +343,24 @@
       <button class="modal-x" id="checkinClose" aria-label="Close"></button>
     </div>
     <div class="modal-body">
-      <p class="setting-label">Sleep (hours)</p>
-      <input type="number" id="ciSleep" min="0" max="14" step="0.5" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
-      <p class="setting-label" style="margin-top:12px">Energy (1-5)</p>
-      <div class="seg-row" id="ciEnergy">
-        <button class="seg" data-e="1">1</button><button class="seg" data-e="2">2</button>
-        <button class="seg" data-e="3">3</button><button class="seg" data-e="4">4</button>
-        <button class="seg" data-e="5">5</button>
-      </div>
+      <p class="setting-label">Sleep (hours) <b id="ciSleepOut" style="color:var(--volt)"></b></p>
+      <input type="range" class="slider" id="ciSleep" min="0" max="14" step="0.5" value="7" aria-label="Sleep hours" />
+      <p class="setting-label" style="margin-top:12px">Energy (1-5) <b id="ciEnergyOut" style="color:var(--volt)"></b></p>
+      <input type="range" class="slider" id="ciEnergy" min="1" max="5" step="1" value="3" aria-label="Energy level" />
       <p class="setting-label" style="margin-top:12px">HRV (ms, morning reading)</p>
       <input type="number" id="ciHrv" min="0" max="300" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
       <p class="setting-label" style="margin-top:12px">Water (ml)</p>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="water-glass" aria-hidden="true"><div class="water-fill" id="waterFill" style="height:0%"></div></div>
         <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
         <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
         <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
         <input type="number" id="ciWaterSet" min="0" placeholder="Set total" style="width:110px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px" />
         <button class="btn btn-ghost btn-sm" id="waterSet">Set</button>
+        <span class="ring-wrap" aria-hidden="true">
+          <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="waterRing" cx="23" cy="23" r="19" stroke="#38e1ff" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
+          <span class="ring-label" id="waterRingLabel"></span>
+        </span>
         <span class="muted" id="waterToday"></span>
       </div>
       <p class="setting-label" style="margin-top:12px">Protein (g)</p>
@@ -359,6 +368,10 @@
         <input type="number" id="ciProtein" min="0" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
         <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
         <button class="btn btn-ghost btn-sm" id="proteinClear">Clear</button>
+        <span class="ring-wrap" aria-hidden="true">
+          <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="proteinRing" cx="23" cy="23" r="19" stroke="#c8ff00" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
+          <span class="ring-label" id="proteinRingLabel"></span>
+        </span>
         <span class="muted" id="proteinToday"></span>
       </div>
       <p class="setting-label" style="margin-top:12px">Supplements</p>
@@ -389,7 +402,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.38</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.39</p>
   </div>
 </footer>
 
@@ -440,6 +453,7 @@
       <div class="toggle-row"><span data-i18n="set_sound">Rest timer sound</span><button class="toggle" id="tglSound" role="switch" aria-checked="true"><span class="knob"></span></button></div>
       <div class="toggle-row"><span>Auto-start rest timer</span><button class="toggle" id="tglAutoRest" role="switch" aria-checked="true"><span class="knob"></span></button></div>
       <div class="toggle-row"><span>Voice cues</span><button class="toggle" id="tglVoice" role="switch" aria-checked="false"><span class="knob"></span></button></div>
+      <div class="toggle-row"><span data-i18n="set_haptic">Haptic feedback</span><button class="toggle" id="tglHaptic" role="switch" aria-checked="true"><span class="knob"></span></button></div>
       <div class="toggle-row"><span>Advanced training tools</span><button class="toggle" id="tglAdvanced" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <p class="muted setting-note">Shows travel mode and tempo coach in workouts.</p>
       <div class="toggle-row"><span data-i18n="set_motion">Reduce motion</span><button class="toggle" id="tglMotion" role="switch" aria-checked="false"><span class="knob"></span></button></div>

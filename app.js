@@ -310,7 +310,9 @@
     /* ---- interaction: rotate + pinch zoom + tap ---- */
     let rotY = Math.PI * 0.12, targetRotY = rotY, rotX = 0;
     let dragging = false, px = 0, py = 0, moved = 0, tapOK = false, pinchDist = 0, lastAct = Date.now();
+    let holdTimer = 0, holdFired = false, downX = 0, downY = 0;
     const pointers = new Map();
+    function clearHold() { if (holdTimer) { clearTimeout(holdTimer); holdTimer = 0; } }
     const clampD = d => Math.max(3.6, Math.min(9.5, d));
 
     el.addEventListener("pointerdown", e => {
@@ -322,6 +324,22 @@
         tapOK = false; dragging = false;
       } else {
         dragging = true; px = e.clientX; py = e.clientY; moved = 0; tapOK = true;
+        downX = e.clientX; downY = e.clientY; holdFired = false;
+        clearHold();
+        holdTimer = setTimeout(() => {
+          if (pointers.size !== 1 || moved > 10) return;
+          const r = el.getBoundingClientRect();
+          const ray = new THREE.Raycaster();
+          ray.setFromCamera(new THREE.Vector2(
+            ((downX - r.left) / r.width) * 2 - 1,
+            -((downY - r.top) / r.height) * 2 + 1), camera);
+          const hit = ray.intersectObjects(muscleMeshes, false)[0];
+          if (hit && opts.onMuscleHold) {
+            holdFired = true; tapOK = false;
+            buzz(25);
+            opts.onMuscleHold(hit.object.userData.muscle);
+          }
+        }, 500);
       }
       lastAct = Date.now();
     });
@@ -336,7 +354,7 @@
       } else if (dragging) {
         const dx = e.clientX - px, dy = e.clientY - py;
         moved += Math.abs(dx) + Math.abs(dy);
-        if (moved > 10) tapOK = false;
+        if (moved > 10) { tapOK = false; clearHold(); }
         rotY += dx * 0.008; targetRotY = rotY;
         rotX = Math.max(-0.3, Math.min(0.5, rotX + dy * 0.004));
         px = e.clientX; py = e.clientY;
@@ -344,6 +362,7 @@
       lastAct = Date.now();
     });
     function pointerEnd(e) {
+      clearHold();
       pointers.delete(e.pointerId);
       if (pointers.size < 2) pinchDist = 0;
       if (pointers.size === 0) {
@@ -373,11 +392,18 @@
     (function loop() {
       if (dead) return;
       raf = requestAnimationFrame(loop);
-      if (opts.autoRotate && !dragging && pointers.size === 0 && Date.now() - lastAct > 3000) {
+      const idle = !dragging && pointers.size === 0 && Date.now() - lastAct > 3000;
+      if (opts.autoRotate && idle) {
         rotY += 0.004; targetRotY = rotY;
       }
       rotY += (targetRotY - rotY) * 0.12;
       body.rotation.y = rotY; body.rotation.x = rotX;
+      if (idle && !getSettings().reduceMotion) {
+        const br = Math.sin(Date.now() / 900) * 0.008;
+        body.scale.set(1 + br * 0.4, 1 + br, 1 + br * 0.4);
+      } else {
+        body.scale.set(1, 1, 1);
+      }
       ring.rotation.z += 0.002;
       renderer.render(scene, camera);
     })();
@@ -399,7 +425,12 @@
       setAccent,
       setHeat,
       setPain,
-      setView(v) { targetRotY = (v === "back") ? Math.PI : 0; rotY = targetRotY; },
+      setView(v, instant) {
+        let t = (v === "back") ? Math.PI : 0;
+        t += Math.round((rotY - t) / (Math.PI * 2)) * Math.PI * 2;
+        targetRotY = t;
+        if (instant || getSettings().reduceMotion) rotY = targetRotY;
+      },
       dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
     };
   }
@@ -452,7 +483,7 @@
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
     tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
-    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced);
+    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced); tg("tglHaptic", s.haptics);
     const _rt = $("reminderTime"); if (_rt) _rt.value = s.reminder || "";
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
@@ -480,7 +511,7 @@
       set_title: "Settings", set_accent: "Accent color", set_accent_note: "Applies across the app, including the 3D body ring.",
       set_units: "Units", set_myeq: "My equipment", set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
       set_lang: "Language", set_workout: "Workout", set_sound: "Rest timer sound", set_motion: "Reduce motion",
-      set_demos: "Exercise demos", set_autoplay: "Autoplay", set_speed: "Demo speed", set_data: "Data",
+      set_demos: "Exercise demos", set_autoplay: "Autoplay", set_speed: "Demo speed", set_data: "Data", set_haptic: "Haptic feedback",
       set_export: "Export data", set_reset: "Reset all data",
       builder_title: "Create program", builder_lede: "Build your own training plan from the exercise library.",
       myeq_only: "My equipment only", swap_title: "Swap it", swap_sub: "same muscle, different gear",
@@ -506,7 +537,7 @@
       set_title: "Réglages", set_accent: "Couleur d'accent", set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
       set_units: "Unités", set_myeq: "Mon équipement", set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
       set_lang: "Langue", set_workout: "Séance", set_sound: "Son du minuteur", set_motion: "Réduire les animations",
-      set_demos: "Démos d'exercices", set_autoplay: "Lecture auto", set_speed: "Vitesse des démos", set_data: "Données",
+      set_demos: "Démos d'exercices", set_autoplay: "Lecture auto", set_speed: "Vitesse des démos", set_data: "Données", set_haptic: "Retour haptique",
       set_export: "Exporter", set_reset: "Tout effacer",
       builder_title: "Créer un programme", builder_lede: "Créez votre plan depuis la bibliothèque d'exercices.",
       myeq_only: "Mon équipement uniquement", swap_title: "Remplacer", swap_sub: "même muscle, autre matériel",
@@ -536,7 +567,7 @@
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false, haptics: true };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -953,6 +984,8 @@
       const _fi = i => { try { return new Date(_hist[i].date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch (e) { return ""; } };
       cx.textAlign = "left"; cx.fillText(_fi(0), pL, ch - 6);
       cx.textAlign = "right"; cx.fillText(_fi(vals.length - 1), cw - pR, ch - 6);
+      attachChartTip(cv, vals.map((v, i) => ({ x: X(i), y: Y(v), i })), p =>
+        `${_fi(p.i)}: est. 1RM ${fromKg(vals[p.i]).toFixed(1)} ${unitLabel()}`);
     } else {
       $("dProg").innerHTML = _hist.length ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>` : "";
     }
@@ -985,9 +1018,27 @@
   });
 
   // BODY MAP
+  function openMuscleSheet(mid) {
+    const g = groupOf(mid), info = MUSCLE_INFO[g];
+    if (!info) return;
+    const list = EXERCISES.filter(e => e.primary === g || (e.secondary || []).map(groupOf).includes(g)).slice(0, 6);
+    const old = document.querySelector(".sheet-veil");
+    if (old) old.remove();
+    const veil = document.createElement("div");
+    veil.className = "sheet-veil";
+    veil.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-grab"></div>
+      <h3 style="margin:0 0 2px">${esc(info.name)}</h3>
+      <p class="muted" style="font-size:13px;margin:0 0 12px">Top exercises - tap one to open it</p>
+      ${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("") || `<p class="muted">No exercises yet.</p>`}
+    </div>`;
+    veil.addEventListener("click", e => { if (e.target === veil) veil.remove(); });
+    document.body.appendChild(veil);
+  }
   function renderBody(selected) {
     const v = createBodyViewer($("body3d"), {
       autoRotate: !getSettings().reduceMotion, dist: 6.1,
+      onMuscleHold: mid => openMuscleSheet(mid),
       onMuscleClick: mid => {
         const g = groupOf(mid);
         if (window._bodyMode === "pain") {
@@ -1174,6 +1225,7 @@
         ${d.exercises.map((x, xi) => {
           const ex = byId(x.id);
           return `<div class="bex-row">
+            <span class="drag-handle" data-bdrag="${di}:${xi}" title="Drag to reorder" aria-label="Drag to reorder">&#8942;&#8942;</span>
             <b>${esc(ex ? ex.name : x.id)}</b>
             <input type="number" min="1" max="20" value="${x.sets}" data-bset="${di}:${xi}" aria-label="Sets" /><span class="lbl">sets</span>
             <input type="text" value="${esc(x.reps)}" data-brep="${di}:${xi}" maxlength="12" aria-label="Reps" style="width:64px" /><span class="lbl">reps</span>
@@ -1778,25 +1830,60 @@
     const s = getSettings();
     document.body.classList.toggle("big-text", !!s.bigText);
     document.body.classList.toggle("high-contrast", !!s.highContrast);
+    document.body.classList.toggle("rm", !!s.reduceMotion);
+  }
+  function buzz(p) {
+    if (!getSettings().haptics) return;
+    try { if (navigator.vibrate) navigator.vibrate(p || 15); } catch (e) {}
+  }
+  function countUp(el, final, fmt) {
+    fmt = fmt || (v => Math.round(v).toLocaleString());
+    if (!el) return;
+    if (getSettings().reduceMotion) { el.textContent = fmt(final); return; }
+    const dur = 700, t0 = performance.now();
+    (function tick(t) {
+      const pr = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - pr, 3);
+      el.textContent = fmt(final * e);
+      if (pr < 1) requestAnimationFrame(tick);
+    })(t0);
   }
   // DAILY CHECK-IN UI
   let ciEnergyVal = 3;
+  function syncCiSliders() {
+    const so = $("ciSleepOut"), eo = $("ciEnergyOut");
+    if (so) so.textContent = parseFloat($("ciSleep").value).toFixed(1) + "h";
+    ciEnergyVal = parseInt($("ciEnergy").value, 10);
+    if (eo) eo.textContent = ciEnergyVal + "/5";
+  }
   function openCheckin() {
     $("checkinClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     const today = fmtDate(new Date());
     const existing = getCheckin(today);
     if (existing) {
-      $("ciSleep").value = existing.sleep || "";
+      if (existing.sleep != null) $("ciSleep").value = existing.sleep;
       $("ciHrv").value = existing.hrv || "";
       ciEnergyVal = existing.energy || 3;
     }
-    document.querySelectorAll("#ciEnergy .seg").forEach(b => b.classList.toggle("on", parseInt(b.dataset.e) === ciEnergyVal));
+    $("ciEnergy").value = ciEnergyVal;
+    syncCiSliders();
     updateTrackerLabels();
     $("checkinVeil").classList.remove("hidden");
   }
+  var WATER_TARGET = 2000;
   function updateTrackerLabels() {
     const today = fmtDate(new Date());
-    $("waterToday").textContent = `${getWater(today)} ml today`;
+    const w = getWater(today);
+    $("waterToday").textContent = `${w} ml today`;
+    const wf = $("waterFill");
+    if (wf) wf.style.height = Math.min(100, (w / WATER_TARGET) * 100) + "%";
+    function paintRing(id, lid, frac, txt) {
+      const el = $(id), lb = $(lid);
+      if (el) el.style.strokeDashoffset = (119.4 * (1 - Math.min(1, Math.max(0, frac)))).toFixed(1);
+      if (lb) lb.textContent = txt;
+    }
+    paintRing("waterRing", "waterRingLabel", w / WATER_TARGET, Math.round(Math.min(100, (w / WATER_TARGET) * 100)) + "%");
+    const pNow = getProtein(today), ptNow = proteinTarget();
+    paintRing("proteinRing", "proteinRingLabel", pNow / ptNow, Math.round(Math.min(100, (pNow / ptNow) * 100)) + "%");
     $("proteinToday").textContent = `${getProtein(today)}g / ${proteinTarget()}g`;
     renderCheckinHistory();
     renderSuppList();
@@ -1862,10 +1949,8 @@
   function initCheckin() {
     $("checkinClose").addEventListener("click", () => $("checkinVeil").classList.add("hidden"));
     $("checkinVeil").addEventListener("click", e => { if (e.target.id === "checkinVeil") $("checkinVeil").classList.add("hidden"); });
-    $("ciEnergy").addEventListener("click", e => {
-      const b = e.target.closest("[data-e]");
-      if (b) { ciEnergyVal = parseInt(b.dataset.e); document.querySelectorAll("#ciEnergy .seg").forEach(x => x.classList.toggle("on", x === b)); }
-    });
+    $("ciSleep").addEventListener("input", syncCiSliders);
+    $("ciEnergy").addEventListener("input", syncCiSliders);
     document.querySelectorAll("[data-water]").forEach(b => b.addEventListener("click", () => {
       addWater(fmtDate(new Date()), parseInt(b.dataset.water)); updateTrackerLabels();
     }));
@@ -2388,25 +2473,28 @@
 
   // ACHIEVEMENTS
   function streakCalendar(log) {
-    const dates = new Set(log.map(w => w.date));
+    const counts = {};
+    log.forEach(w => { counts[w.date] = (counts[w.date] || 0) + 1; });
     const today = new Date();
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let html = `<div class="cal-months">`;
-    let lastMonth = -1;
-    for (let i = 55; i >= 0; i--) {
+    const weeks = 16, days = [];
+    for (let i = weeks * 7 - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
-      const key = fmtDate(d);
-      const isToday = i === 0;
-      const m = d.getMonth();
-      if (m !== lastMonth) {
-        if (lastMonth !== -1) html += `</div><div class="cal-month"><div class="cal-month-label">${months[m]}</div><div class="cal-grid">`;
-        else html += `<div class="cal-month"><div class="cal-month-label">${months[m]}</div><div class="cal-grid">`;
-        lastMonth = m;
-      }
-      html += `<div class="cal-day ${dates.has(key) ? "has" : ""} ${isToday ? "today" : ""}" title="${key}">${d.getDate()}</div>`;
+      days.push(d);
     }
-    return html + `</div></div>`;
+    // align to week columns starting Monday
+    while (days[0].getDay() !== 1) days.shift();
+    let html = `<div class="heatmap" role="img" aria-label="Workout activity, last ${weeks} weeks">`;
+    days.forEach(d => {
+      const key = fmtDate(d);
+      const n = counts[key] || 0;
+      const lvl = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4;
+      const isToday = key === fmtDate(today);
+      const label = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + (n ? `: ${n} workout${n > 1 ? "s" : ""}` : ": rest day");
+      html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}" title="${label}"></div>`;
+    });
+    return html + `</div>
+      <p class="muted" style="font-size:12px;margin-top:6px">Last ${weeks} weeks · darker = more training days</p>`;
   }
   const BADGES = [
     { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
@@ -2573,6 +2661,31 @@
       handlePhotoUpload(e);
     });
   }
+  function attachChartTip(canvas, pts, fmt) {
+    const par = canvas.parentElement;
+    par.style.position = "relative";
+    const oldT = par.querySelector(".chart-tip");
+    if (oldT) oldT.remove();
+    const tip = document.createElement("div");
+    tip.className = "chart-tip"; tip.style.display = "none";
+    par.appendChild(tip);
+    canvas.style.cursor = "pointer";
+    function showAt(cx, cy) {
+      const r = canvas.getBoundingClientRect();
+      const px = cx - r.left, py = cy - r.top;
+      let best = null, bd = 1e9;
+      pts.forEach(p => { const d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } });
+      if (best && bd < 32) {
+        tip.textContent = fmt(best);
+        tip.style.left = best.x + "px"; tip.style.top = best.y + "px";
+        tip.style.display = "block";
+      } else tip.style.display = "none";
+    }
+    canvas.addEventListener("pointerdown", e => showAt(e.clientX, e.clientY));
+    canvas.addEventListener("pointermove", e => { if (e.pointerType === "mouse") showAt(e.clientX, e.clientY); });
+    canvas.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+  }
+  let mChartSpan = 0;
   function renderMeasureChart() {
     const measures = getMeasures().filter(m => m.weight);
     if (measures.length < 2) {
@@ -2581,6 +2694,7 @@
     }
     const accent = currentAccent().color;
     const unit = unitLabel();
+    if (mChartSpan > 0 && measures.length > mChartSpan) measures = measures.slice(-mChartSpan);
     const vals = measures.map(m => toKg(m.weight));
     const min = Math.min(...vals), max = Math.max(...vals);
     const pad = Math.max((max - min) * 0.25, 0.5);
@@ -2589,8 +2703,13 @@
     const changeTxt = (change > 0 ? "+" : "") + fromKg(change).toFixed(1) + " " + unit;
     const changeColor = change > 0.05 ? "#f59e0b" : change < -0.05 ? accent : "var(--muted)";
     $("mChart").innerHTML = `<div class="chart-wrap">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <h4 style="margin:0">Weight trend</h4>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-ghost btn-sm" data-mspan="10" style="padding:4px 10px;font-size:12px">10</button>
+          <button class="btn btn-ghost btn-sm" data-mspan="30" style="padding:4px 10px;font-size:12px">30</button>
+          <button class="btn btn-ghost btn-sm" data-mspan="0" style="padding:4px 10px;font-size:12px">All</button>
+        </div>
         <span style="font-size:13px;color:${changeColor};font-weight:700">${changeTxt} total</span>
       </div>
     </div>`;
@@ -2642,7 +2761,13 @@
       ctx.textAlign = i === 0 ? "left" : i === vals.length - 1 ? "right" : "center";
       ctx.fillText(fmtD(measures[i].date), X(i), ch - 8);
     });
+    attachChartTip(canvas, vals.map((v, i) => ({ x: X(i), y: Y(v), i })), p =>
+      `${fmtD(measures[p.i].date)}: ${fromKg(vals[p.i]).toFixed(1)} ${unitLabel()}`);
   }
+  document.addEventListener("click", e => {
+    const zb = e.target.closest("[data-mspan]");
+    if (zb) { mChartSpan = parseInt(zb.dataset.mspan, 10) || 0; renderMeasureChart(); }
+  });
   function getPhotos() {
     try { return JSON.parse(localStorage.getItem("forge-photos") || "[]"); }
     catch (e) { return []; }
@@ -2751,6 +2876,7 @@
     document.querySelectorAll("#progTabs .chip").forEach(c => c.classList.toggle("on", c.dataset.ptab === tab));
     const log = getLog();
     const body = $("progressBody");
+    const paint = () => {
     if (tab === "body") { renderBodyTab(body); return; }
     if (tab === "badges") { renderBadgesTab(body); return; }
     if (tab === "year") { renderYearTab(body); return; }
@@ -2758,6 +2884,13 @@
     if (tab === "challenges") { renderChallengesTab(body); return; }
     if (tab === "insights") { renderInsightsTab(body); return; }
     if (tab === "coach") { renderCoachTab(body); return; }
+    paintOverview(body, log);
+    };
+    if (getSettings().reduceMotion) { paint(); return; }
+    body.innerHTML = `<div class="skel" style="height:110px;margin-bottom:12px"></div><div class="skel" style="height:72px;margin-bottom:12px"></div><div class="skel" style="height:190px"></div>`;
+    requestAnimationFrame(() => requestAnimationFrame(paint));
+    return;
+    function paintOverview(body, log) {
     if (!log.length) {
       body.innerHTML = `<div class="empty-note"><p><b>No workouts logged yet.</b></p><p>Finish a workout and it will show up here with your history, records and volume.</p></div>`;
       return;
@@ -2766,18 +2899,22 @@
       const totalSets = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
       const totalVol = totalVolumeKg(log);
       body.innerHTML = `<div class="stat-grid">
-        <div class="stat-card"><b>${log.length}</b><span>workouts logged</span></div>
-        <div class="stat-card"><b>${workoutStreak()}</b><span>day streak</span></div>
-        <div class="stat-card"><b>${totalSets}</b><span>total sets</span></div>
-        <div class="stat-card"><b>${fmtW(totalVol)}</b><span>total volume</span></div>
-        <div class="stat-card"><b>${recoveryScore()}%</b><span>recovery</span></div>
+        <div class="stat-card"><b data-cu="${log.length}">0</b><span>workouts logged</span></div>
+        <div class="stat-card"><b data-cu="${workoutStreak()}">0</b><span>day streak</span></div>
+        <div class="stat-card"><b data-cu="${totalSets}">0</b><span>total sets</span></div>
+        <div class="stat-card"><b data-cu="${totalVol}" data-cufmt="w">0</b><span>total volume</span></div>
+        <div class="stat-card"><b data-cu="${recoveryScore()}" data-cufmt="pct">0</b><span>recovery</span></div>
         <div class="stat-card"><b>${xpLevel(getXP().xp)}</b><span>level (${getXP().xp.toLocaleString()} XP)</span></div>
         <div class="stat-card"><b>${getXP().freeze || 0}</b><span>streak freeze${(getXP().freeze || 0) === 1 ? "" : "s"}</span></div>
       </div>
       ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
-      <h3 style="margin-top:20px">Last 8 weeks</h3>
+      <h3 style="margin-top:20px">Last 16 weeks</h3>
       ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>`;
+      body.querySelectorAll("[data-cu]").forEach(b => {
+        const v = parseFloat(b.dataset.cu), f = b.dataset.cufmt;
+        countUp(b, v, f === "w" ? (x => fmtW(x)) : f === "pct" ? (x => Math.round(x) + "%") : undefined);
+      });
     } else if (tab === "history") {
       const byDate = {};
       log.forEach(w => { (byDate[w.date] = byDate[w.date] || []).push(w); });
@@ -2819,6 +2956,7 @@
           entries.map(({ g, n }) => `<div class="vol-row"><span class="vn">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span><span class="bar"><i style="width:${Math.round(n / max * 100)}%"></i></span><span class="vc">${n} sets</span></div>`).join("")
         : `<div class="empty-note"><p>Nothing in the last 28 days.</p></div>`;
     }
+  }
   }
 
   // PROGRAMS
@@ -3004,7 +3142,14 @@
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
-  let timerInt = null, timerLeft = 0, currentWorkout = null;
+  let timerInt = null, timerLeft = 0, timerTotal = 0, currentWorkout = null;
+  const TIMER_CIRC = 2 * Math.PI * 52;
+  function paintTimer() {
+    const d = $("timerDisplay");
+    if (d) d.textContent = fmtT(Math.max(0, timerLeft));
+    const ring = $("timerRing");
+    if (ring) ring.style.strokeDashoffset = String(timerTotal > 0 ? TIMER_CIRC * (1 - Math.max(0, timerLeft) / timerTotal) : 0);
+  }
   function currentExerciseId() {
     if (!currentWorkout || !currentWorkout.exercises) return null;
     for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
@@ -3046,16 +3191,16 @@
   function startTimer(sec) {
     clearInterval(timerInt);
     clearInterval(cueInt);
-    timerLeft = sec;
-    $("timerDisplay").textContent = fmtT(timerLeft);
+    timerLeft = sec; timerTotal = sec;
+    paintTimer();
     showRestCue();
     timerInt = setInterval(() => {
       timerLeft--;
-      $("timerDisplay").textContent = fmtT(Math.max(0, timerLeft));
+      paintTimer();
       if (timerLeft <= 0) {
         clearInterval(timerInt); timerInt = null;
         clearInterval(cueInt); const rc = $("restCue"); if (rc) rc.textContent = "";
-        beep();
+        beep(); buzz([40, 40, 40]);
         if (getSettings().voiceCues && window.speechSynthesis) {
           speechSynthesis.speak(new SpeechSynthesisUtterance("Rest over. Next set."));
         }
@@ -3077,7 +3222,7 @@
     } catch (e) { /* audio unavailable */ }
   }
   function renderWorkout(pid, di, week) {
-    clearInterval(timerInt); timerInt = null; timerLeft = 0;
+    clearInterval(timerInt); timerInt = null; timerLeft = 0; timerTotal = 0; paintTimer();
     const p = progById(pid);
     const mesoDay = week && p && p.mesocycle && p.mesocycle[week - 1] ? p.mesocycle[week - 1].days[di] : null;
     const d = mesoDay || (p && p.days[di]);
@@ -3157,7 +3302,7 @@
         <span class="tag volt-tag wo-muscle">${MUSCLE_INFO[ex.primary].name}</span>
       </div>`;
     }).join("");
-    $("timerDisplay").textContent = "0:00";
+    timerLeft = 0; timerTotal = 0; paintTimer();
     $("woDone").classList.add("hidden");
     $("woFinish").classList.remove("hidden");
     window._woPid = pid; window._woDi = di; window._woWeek = week || null;
@@ -3177,6 +3322,37 @@
       }
     }
   }
+  (function () {
+    var list = $("woList");
+    if (!list) return;
+    var swRow = null, swX = 0, swDX = 0, swId = null;
+    list.addEventListener("pointerdown", function (e) {
+      if (e.target.closest("input,select,button,textarea,a")) return;
+      var row = e.target.closest(".set-row2");
+      if (!row || row.querySelector(".set-done.hit")) return;
+      swRow = row; swX = e.clientX; swDX = 0; swId = e.pointerId;
+    });
+    list.addEventListener("pointermove", function (e) {
+      if (!swRow || e.pointerId !== swId) return;
+      swDX = Math.max(0, e.clientX - swX);
+      swRow.classList.add("swiping");
+      swRow.style.transform = "translateX(" + Math.min(swDX, 110) + "px)";
+      if (swDX > 70) swRow.classList.add("swipe-done"); else swRow.classList.remove("swipe-done");
+    });
+    function swEnd(e) {
+      if (!swRow || (swId !== null && e.pointerId !== swId)) return;
+      var row = swRow, dx = swDX;
+      swRow = null; swId = null;
+      row.classList.remove("swiping", "swipe-done");
+      row.style.transform = "";
+      if (dx > 70) {
+        var btn = row.querySelector(".set-done");
+        if (btn) btn.click();
+      }
+    }
+    list.addEventListener("pointerup", swEnd);
+    list.addEventListener("pointercancel", swEnd);
+  })();
   document.addEventListener("click", e => {
     const gt = e.target.closest(".guide-toggle");
     if (gt) {
@@ -3191,6 +3367,7 @@
     if (sd) {
       const wasHit = sd.classList.contains("hit");
       sd.classList.toggle("hit");
+      if (!wasHit) buzz(15);
       if (!wasHit && getSettings().autoRest) {
         const xi = parseInt(sd.dataset.x, 10);
         const woEx = currentWorkout && currentWorkout.exercises[xi];
@@ -3245,17 +3422,47 @@
       const sec = parseInt(tp.dataset.timer, 10);
       const _cid = currentExerciseId(); if (_cid) saveRestFor(_cid, sec);
       clearInterval(timerInt);
-      timerLeft = sec;
-      $("timerDisplay").textContent = fmtT(timerLeft);
+      timerLeft = sec; timerTotal = sec;
+      paintTimer();
       timerInt = setInterval(() => {
         timerLeft--;
-        $("timerDisplay").textContent = fmtT(Math.max(0, timerLeft));
-        if (timerLeft <= 0) { clearInterval(timerInt); timerInt = null; beep(); }
+        paintTimer();
+        if (timerLeft <= 0) { clearInterval(timerInt); timerInt = null; beep(); buzz([40, 40, 40]); }
       }, 1000);
       return;
     }
     if (e.target.closest("#timerStop")) { clearInterval(timerInt); timerInt = null; clearInterval(cueInt); const rc = $("restCue"); if (rc) rc.textContent = ""; return; }
   });
+  function showLevelUp(lvl) {
+    const veil = document.createElement("div");
+    veil.className = "pr-veil";
+    veil.innerHTML = `<div class="pr-card lvl-card">
+      <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : ""}</div>
+      <div class="lvl-num">${lvl}</div>
+      <h2>Level up!</h2>
+      <p class="muted">Your training is compounding.</p>
+      <button class="btn btn-primary" id="lvlClose">Keep going</button>
+    </div>`;
+    veil.addEventListener("click", e => { if (e.target === veil || e.target.closest("#lvlClose")) veil.remove(); });
+    document.body.appendChild(veil);
+    buzz([30, 50, 30, 50, 60]);
+    setTimeout(() => veil.remove(), 6000);
+  }
+  function spawnConfetti(host, n) {
+    if (getSettings().reduceMotion) return;
+    const colors = ["#c8ff00", "#38e1ff", "#ff5d5d", "#ffd166", "#b388ff"];
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement("span");
+      s.className = "confetti";
+      s.style.left = (Math.random() * 100) + "%";
+      s.style.background = colors[i % colors.length];
+      s.style.animationDuration = (1.6 + Math.random() * 1.4).toFixed(2) + "s";
+      s.style.animationDelay = (Math.random() * 0.5).toFixed(2) + "s";
+      s.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)";
+      host.appendChild(s);
+      setTimeout(() => s.remove(), 3600);
+    }
+  }
   function showPRCelebration(prs) {
     const veil = document.createElement("div");
     veil.className = "pr-veil";
@@ -3267,6 +3474,7 @@
     </div>`;
     veil.addEventListener("click", e => { if (e.target === veil || e.target.closest("#prClose")) veil.remove(); });
     document.body.appendChild(veil);
+    spawnConfetti(veil, 42);
     setTimeout(() => veil.remove(), 8000);
   }
   $("woFinish").addEventListener("click", () => {
@@ -3320,6 +3528,7 @@
     let xpGain = entry.exercises.reduce((a, x) => a + x.sets.length * 2, 0) + newPRs.length * 50;
     if (workoutStreak() >= 7) xpGain += 25;
     if (p && p.dungeon) xpGain += 100;
+    const _oldLvl = xpLevel(getXP().xp);
     addXP(xpGain);
     try {
       const xl = JSON.parse(localStorage.getItem("forge-xp-log") || "[]");
@@ -3328,6 +3537,16 @@
     } catch (e) {}
     const _xpLine = $("woXpLine");
     if (_xpLine) _xpLine.innerHTML = `Earned <b style="color:var(--volt)">+${xpGain} XP</b>${p && p.dungeon ? " including the dungeon bonus" : ""} · Level ${xpLevel(getXP().xp)}`;
+    // animated XP bar to next level
+    (function () {
+      const xp = getXP().xp, lvl = xpLevel(xp);
+      const cur = 100 * Math.pow(lvl - 1, 2), nxt = 100 * Math.pow(lvl, 2);
+      const pct = Math.max(0, Math.min(100, ((xp - cur) / (nxt - cur)) * 100));
+      const fill = $("woXpFill"), next = $("woXpNext");
+      if (fill) { fill.style.width = "0%"; requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = pct.toFixed(1) + "%"; })); }
+      if (next) next.textContent = `${Math.round(nxt - xp).toLocaleString()} XP to level ${lvl + 1}`;
+      if (lvl > _oldLvl) setTimeout(() => showLevelUp(lvl), 600);
+    })();
     checkBadges();
     window._lastEntry = entry;
     done[key] = done[key] || [];
@@ -3466,7 +3685,7 @@
   });
   $("reminderTime").addEventListener("change", e => { const s = getSettings(); s.reminder = e.target.value || ""; saveSettings(s); });
   $("reminderClear").addEventListener("click", () => { const s = getSettings(); s.reminder = ""; saveSettings(s); $("reminderTime").value = ""; });
-  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"], ["tglAdvanced", "advanced"]].forEach(([id, key]) => {
+  [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"], ["tglAdvanced", "advanced"], ["tglHaptic", "haptics"]].forEach(([id, key]) => {
     $(id).addEventListener("click", () => {
       const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y(); applyAdvanced();
     });
@@ -3596,6 +3815,59 @@
       builder.days[di].exercises[xi].reps = rp.value;
     }
   });
+  (function () {
+    var wrap = $("bDays");
+    if (!wrap) return;
+    var dragEl = null, dragDi = -1, dragXi = -1, startY = 0, active = false, overEl = null;
+    wrap.addEventListener("pointerdown", function (e) {
+      var h = e.target.closest(".drag-handle");
+      if (!h) return;
+      var row = h.closest(".bex-row");
+      if (!row) return;
+      var parts = h.dataset.bdrag.split(":").map(Number);
+      dragDi = parts[0]; dragXi = parts[1];
+      dragEl = row; startY = e.clientY; active = false; overEl = null;
+    });
+    wrap.addEventListener("pointermove", function (e) {
+      if (!dragEl) return;
+      if (!active && Math.abs(e.clientY - startY) > 10) {
+        active = true;
+        dragEl.classList.add("dragging");
+        try { dragEl.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      if (!active) return;
+      dragEl.style.transform = "translateY(" + (e.clientY - startY) + "px)";
+      dragEl.style.zIndex = "5";
+      wrap.querySelectorAll(".drag-over").forEach(function (r) { r.classList.remove("drag-over"); });
+      overEl = null;
+      var rows = Array.prototype.slice.call(wrap.querySelectorAll(".bex-row")).filter(function (r) { return r !== dragEl; });
+      for (var i = 0; i < rows.length; i++) {
+        var hd = rows[i].querySelector(".drag-handle");
+        if (!hd || parseInt(hd.dataset.bdrag.split(":")[0], 10) !== dragDi) continue;
+        var rect = rows[i].getBoundingClientRect();
+        if (e.clientY > rect.top && e.clientY < rect.bottom) { overEl = rows[i]; rows[i].classList.add("drag-over"); break; }
+      }
+    });
+    function endDrag() {
+      if (!dragEl) return;
+      var wasActive = active, srcDi = dragDi, srcXi = dragXi, tgt = overEl;
+      dragEl.classList.remove("dragging");
+      dragEl.style.transform = ""; dragEl.style.zIndex = "";
+      wrap.querySelectorAll(".drag-over").forEach(function (r) { r.classList.remove("drag-over"); });
+      dragEl = null; active = false; overEl = null;
+      if (wasActive && tgt) {
+        var tXi = parseInt(tgt.querySelector(".drag-handle").dataset.bdrag.split(":")[1], 10);
+        if (tXi !== srcXi && typeof builder !== "undefined" && builder.days[srcDi]) {
+          var arr = builder.days[srcDi].exercises;
+          var mv = arr.splice(srcXi, 1)[0];
+          arr.splice(tXi, 0, mv);
+          renderBuilder();
+        }
+      }
+    }
+    wrap.addEventListener("pointerup", endDrag);
+    wrap.addEventListener("pointercancel", endDrag);
+  })();
   $("pickerClose").addEventListener("click", closePicker);
   $("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); });
   $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
