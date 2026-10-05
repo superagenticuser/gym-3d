@@ -176,10 +176,10 @@
       const latLow = ball(0.095, "lats", s * 0.165, 2.32, -0.115);
       latLow.scale.set(0.55, 1.1, 0.45);
     }
-    // upper back: rhomboids + mid traps
-    const ub = ball(0.150, "back", 0, 2.72, -0.140); ub.scale.set(1.25, 0.72, 0.44);
+    // upper back: rhomboids + mid traps (kept proud of the core so they stay visible)
+    const ub = ball(0.160, "back", 0, 2.72, -0.180); ub.scale.set(1.25, 0.72, 0.50);
     for (const s of [-1, 1]) {
-      const rhomb = ball(0.075, "back", s * 0.085, 2.68, -0.135);
+      const rhomb = ball(0.085, "back", s * 0.085, 2.68, -0.185);
       rhomb.scale.set(0.8, 1.1, 0.5);
       rhomb.rotation.z = s * 0.25;
     }
