@@ -38,6 +38,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 24px 80px; }
 .view { padding-top: 36px; }
 .section-title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
 .section-title .count { color: var(--muted); font-size: 18px; font-weight: 600; }
+.section-title .count::before { content: "\00B7"; margin: 0 8px; }
 .lede { color: var(--muted); font-size: 17px; max-width: 640px; margin: 8px 0 26px; }
 
 /* hero */

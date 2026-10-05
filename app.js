@@ -894,7 +894,7 @@
   }
   function renderExercises() {
     const list = filtered();
-    $("exCount").textContent = `· ${list.length}`;
+    $("exCount").textContent = list.length;
     $("exerciseGrid").innerHTML = list.map(cardHTML).join("") || `<p class="muted">No exercises match. Try clearing filters.</p>`;
   }
 
