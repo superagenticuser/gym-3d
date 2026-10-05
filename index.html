@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.70" />
+<link rel="stylesheet" href="styles.css?v=10.71" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -359,11 +359,15 @@
       <p class="setting-label" style="margin-top:12px">HRV (ms, morning reading)</p>
       <input type="number" id="ciHrv" min="0" max="300" style="width:120px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px" />
       <p class="setting-label" style="margin-top:12px">Water (ml)</p>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;align-items:center">
         <div class="water-glass" aria-hidden="true"><div class="water-fill" id="waterFill" style="height:0%"></div></div>
-        <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
-        <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
-        <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
+          <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
+          <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
         <input type="number" id="ciWaterSet" min="0" placeholder="Set total" style="width:110px;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px" />
         <button class="btn btn-ghost btn-sm" id="waterSet">Set</button>
         <span class="ring-wrap" aria-hidden="true">
@@ -411,7 +415,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.70</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.71</p>
   </div>
 </footer>
 
