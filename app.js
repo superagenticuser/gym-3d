@@ -3091,8 +3091,13 @@
     return `<p class="muted" style="margin-bottom:14px">Estimated 1RM vs bodyweight (${fmtW(bw)}). Based on Epley formula from your best logged set.</p>` + rows;
   }
   function renderProgress(tab) {
-    tab = tab || "overview";
-    document.querySelectorAll("#progTabs .chip").forEach(c => c.classList.toggle("on", c.dataset.ptab === tab));
+    tab = tab || localStorage.getItem("forge-progress-tab") || "overview";
+    try { localStorage.setItem("forge-progress-tab", tab); } catch (e) {}
+    document.querySelectorAll("#progTabs .chip").forEach(c => {
+      const on = c.dataset.ptab === tab;
+      c.classList.toggle("on", on);
+      if (on) c.scrollIntoView({ block: "nearest", inline: "center" });
+    });
     const log = getLog();
     const body = $("progressBody");
     const paint = () => {
@@ -3953,7 +3958,7 @@
     else if (parts[0] === "programs") { show("programs"); renderPrograms(); }
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
     else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); window._scaleDone = false; window._travelOn = false; const _tb = $("travelBtn"); if (_tb) { _tb.classList.remove("on"); _tb.textContent = "Travel mode"; } renderWorkout(parts[1], parseInt(parts[2], 10), parseInt(params.get("week") || "0", 10) || null); }
-    else if (parts[0] === "progress") { show("progress"); renderProgress("overview"); }
+    else if (parts[0] === "progress") { show("progress"); renderProgress(); }
     else if (parts[0] === "builder") { show("builder"); newBuilder(); }
     else { show("home"); renderHome(); }
     if (window._refreshTimerMini) setTimeout(window._refreshTimerMini, 60);
