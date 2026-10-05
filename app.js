@@ -424,6 +424,7 @@
     if (save !== false) localStorage.setItem("forge-accent", a.id);
     viewers.forEach(v => { if (v.setAccent) v.setAccent(a.color); });
     document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
+    if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
   }
   function openSettings() {
     const grid = $("accentGrid");
@@ -2186,23 +2187,69 @@
       $("mChart").innerHTML = `<p class="muted">Log weight twice to see a trend.</p>`;
       return;
     }
-    const canvas = document.createElement("canvas");
-    $("mChart").innerHTML = `<div class="chart-wrap"><h4>Weight trend</h4></div>`;
-    $("mChart").querySelector(".chart-wrap").appendChild(canvas);
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width = 600, h = canvas.height = 200;
-    const vals = measures.map(m => m.weight);
+    const accent = currentAccent().color;
+    const unit = unitLabel();
+    const vals = measures.map(m => toKg(m.weight));
     const min = Math.min(...vals), max = Math.max(...vals);
-    const range = max - min || 1;
-    ctx.strokeStyle = "#a3e635"; ctx.lineWidth = 3; ctx.beginPath();
-    vals.forEach((v, i) => {
-      const x = 30 + (i / (vals.length - 1)) * (w - 60);
-      const y = h - 30 - ((v - min) / range) * (h - 60);
-      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    });
+    const pad = Math.max((max - min) * 0.25, 0.5);
+    const lo = min - pad, hi = max + pad, range = hi - lo || 1;
+    const change = vals[vals.length - 1] - vals[0];
+    const changeTxt = (change > 0 ? "+" : "") + fromKg(change).toFixed(1) + " " + unit;
+    const changeColor = change > 0.05 ? "#f59e0b" : change < -0.05 ? accent : "var(--muted)";
+    $("mChart").innerHTML = `<div class="chart-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+        <h4 style="margin:0">Weight trend</h4>
+        <span style="font-size:13px;color:${changeColor};font-weight:700">${changeTxt} total</span>
+      </div>
+    </div>`;
+    const wrap = $("mChart").querySelector(".chart-wrap");
+    const canvas = document.createElement("canvas");
+    wrap.appendChild(canvas);
+    const dpr = window.devicePixelRatio || 1;
+    const cw = wrap.clientWidth - 32, ch = 210;
+    canvas.width = cw * dpr; canvas.height = ch * dpr;
+    canvas.style.width = cw + "px"; canvas.style.height = ch + "px";
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    const padL = 44, padR = 12, padT = 12, padB = 26;
+    const iw = cw - padL - padR, ih = ch - padT - padB;
+    const X = i => padL + (i / (vals.length - 1)) * iw;
+    const Y = v => padT + (1 - (v - lo) / range) * ih;
+    // gridlines + y labels
+    ctx.font = "11px sans-serif"; ctx.textAlign = "right";
+    for (let g = 0; g <= 3; g++) {
+      const gv = lo + (range * g) / 3, gy = Y(gv);
+      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(cw - padR, gy); ctx.stroke();
+      ctx.fillStyle = "#8a93a6";
+      ctx.fillText(fromKg(gv).toFixed(1), padL - 8, gy + 4);
+    }
+    // area fill
+    const grad = ctx.createLinearGradient(0, padT, 0, ch - padB);
+    grad.addColorStop(0, accent + "55"); grad.addColorStop(1, accent + "00");
+    ctx.beginPath();
+    vals.forEach((v, i) => { i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(0), Y(v)); });
+    ctx.lineTo(X(vals.length - 1), ch - padB); ctx.lineTo(X(0), ch - padB); ctx.closePath();
+    ctx.fillStyle = grad; ctx.fill();
+    // line
+    ctx.beginPath();
+    vals.forEach((v, i) => { i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(0), Y(v)); });
+    ctx.strokeStyle = accent; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round";
     ctx.stroke();
-    ctx.fillStyle = "#888"; ctx.font = "12px sans-serif";
-    ctx.fillText(max.toFixed(1), 5, 20); ctx.fillText(min.toFixed(1), 5, h - 10);
+    // dots
+    vals.forEach((v, i) => {
+      ctx.beginPath(); ctx.arc(X(i), Y(v), i === 0 || i === vals.length - 1 ? 4.5 : 3, 0, 7);
+      ctx.fillStyle = "#0b0d12"; ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = accent; ctx.stroke();
+    });
+    // date labels (edge labels pushed inward so they don't clip)
+    ctx.fillStyle = "#8a93a6";
+    const fmtD = dstr => { try { return new Date(dstr + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch (e) { return ""; } };
+    const idx = [0, Math.floor((vals.length - 1) / 2), vals.length - 1].filter((v, i, a) => a.indexOf(v) === i);
+    idx.forEach(i => {
+      ctx.textAlign = i === 0 ? "left" : i === vals.length - 1 ? "right" : "center";
+      ctx.fillText(fmtD(measures[i].date), X(i), ch - 8);
+    });
   }
   function getPhotos() {
     try { return JSON.parse(localStorage.getItem("forge-photos") || "[]"); }
