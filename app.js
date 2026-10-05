@@ -1268,9 +1268,9 @@
     $("pickerTitle").textContent = "Apply template";
     $("pickerSearch").style.display = "none";
     $("pickerList").innerHTML = tpl.length ? tpl.map(t =>
-      `<div class="picker-item" style="cursor:default">
+      `<div class="picker-item tpl-item" style="cursor:default">
         <b>${esc(t.name)}</b><span class="tag">${t.exercises.length} exercises</span>
-        <div style="display:flex;gap:8px;margin-top:8px">
+        <div class="tpl-actions">
           <button class="btn btn-primary btn-sm" data-tpl-apply="${t.id}">Apply</button>
           <button class="btn btn-ghost btn-sm danger" data-tpl-del="${t.id}">Delete</button>
         </div>
@@ -3781,13 +3781,14 @@
       const di = parseInt(tSave.dataset.btplSave, 10);
       const day = builder.days[di];
       if (!day.exercises.length) { appAlert("Add exercises to this day first."); return; }
-      const name = prompt("Name this template:", day.name || "Workout template");
-      if (!name) return;
-      const tpl = getTemplates();
-      tpl.push({ id: "tpl-" + Date.now().toString(36), name: name.trim(), date: fmtDate(new Date()),
-        exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) });
-      saveTemplates(tpl);
-      appAlert("Template saved.");
+      appPrompt("Name this template:", day.name || "Workout template", "Save as template").then(name => {
+        if (!name) return;
+        const tpl = getTemplates();
+        tpl.push({ id: "tpl-" + Date.now().toString(36), name: name.trim(), date: fmtDate(new Date()),
+          exercises: day.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) });
+        saveTemplates(tpl);
+        appAlert("Template saved.");
+      });
       return;
     }
     const tApply = e.target.closest("[data-btpl-apply]");
@@ -3931,10 +3932,11 @@
   $("plateBar").addEventListener("input", calcPlates);
   $("plateTarget").addEventListener("input", calcPlates);
   $("coachBtn").addEventListener("click", generateCoachProgram);
-  /* ---------- in-app dialogs (replace native alert/confirm) ---------- */
-  let _dlgResolve = null;
+  /* ---------- in-app dialogs (replace native alert/confirm/prompt) ---------- */
+  let _dlgResolve = null, _dlgMode = null;
   function _showDlg(o) {
     return new Promise(res => {
+      _dlgMode = o.mode || "msg";
       _dlgResolve = res;
       $("dlgTitle").textContent = o.title || "FORGE";
       $("dlgMsg").textContent = o.msg;
@@ -3943,11 +3945,21 @@
       ok.className = "btn btn-sm " + (o.danger ? "btn-danger-solid" : "btn-primary");
       $("dlgCancel").classList.toggle("hidden", !o.cancelText);
       if (o.cancelText) $("dlgCancel").textContent = o.cancelText;
+      const inp = $("dlgInput");
+      if (o.mode === "prompt") {
+        inp.value = o.defVal || "";
+        inp.classList.remove("hidden");
+        setTimeout(() => inp.focus(), 60);
+      } else {
+        inp.classList.add("hidden");
+      }
       $("dlgVeil").classList.remove("hidden");
     });
   }
   function _closeDlg(val) {
     $("dlgVeil").classList.add("hidden");
+    $("dlgInput").classList.add("hidden");
+    _dlgMode = null;
     if (_dlgResolve) { const r = _dlgResolve; _dlgResolve = null; r(val); }
   }
   function appAlert(msg, title) { return _showDlg({ msg, title: title || "FORGE", okText: "OK" }); }
@@ -3955,9 +3967,19 @@
     o = o || {};
     return _showDlg({ msg, title: o.title || "Are you sure?", okText: o.okText || "Confirm", cancelText: "Cancel", danger: o.danger });
   }
-  $("dlgOk").addEventListener("click", () => _closeDlg(true));
-  $("dlgCancel").addEventListener("click", () => _closeDlg(false));
-  $("dlgVeil").addEventListener("click", e => { if (e.target.id === "dlgVeil") _closeDlg(false); });
+  function appPrompt(msg, defVal, title) {
+    return _showDlg({ msg, title: title || "FORGE", okText: "OK", cancelText: "Cancel", mode: "prompt", defVal });
+  }
+  $("dlgOk").addEventListener("click", () => {
+    if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);
+    else _closeDlg(true);
+  });
+  $("dlgCancel").addEventListener("click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
+  $("dlgVeil").addEventListener("click", e => { if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false); });
+  $("dlgInput").addEventListener("keydown", e => {
+    if (_dlgMode !== "prompt") return;
+    if (e.key === "Enter") $("dlgOk").click();
+  });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false); });
 
   initCheckin();
