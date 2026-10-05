@@ -629,6 +629,8 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .picker-item:hover { border-color: var(--volt); }
 .picker-item b { flex: 1; min-width: 0; font-size: 14px; }
 .picker-item .tag, .picker-item .added { flex-shrink: 0; }
+.picker-item.tpl-item { flex-wrap: wrap; }
+.picker-item .tpl-actions { display: flex; gap: 8px; flex-basis: 100%; }
 .picker-item .added { color: var(--volt); font-size: 13px; font-weight: 700; }
 /* swaps */
 .swap-card {
