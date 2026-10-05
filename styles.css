@@ -826,3 +826,4 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 @keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } }
 .sheet-grab { width: 44px; height: 5px; border-radius: 999px; background: var(--line); margin: 0 auto 12px; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
