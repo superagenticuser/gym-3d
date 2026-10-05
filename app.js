@@ -501,6 +501,13 @@
     document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
     if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
   }
+  const toTop = $("toTop");
+  if (toTop) {
+    window.addEventListener("scroll", () => {
+      toTop.classList.toggle("show", window.scrollY > 600);
+    }, { passive: true });
+    toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  }
   function openSettings() {
     const grid = $("accentGrid");
     const cur = currentAccent().id;

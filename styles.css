@@ -241,10 +241,10 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 
 /* ================= v3: footer ================= */
 footer { border-top: 1px solid var(--line); margin-top: 40px; }
-footer { border-top: 1px solid var(--line); background: linear-gradient(180deg, transparent, rgba(200,255,0,0.03)); margin-top: 56px; }
+footer { border-top: 1px solid var(--line); margin-top: 56px; }
 .foot-inner { max-width: 720px; margin: 0 auto; padding: 56px 24px 32px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
 .foot-brand { font-size: 22px; }
-.foot-brand .brand-mark { color: var(--volt); filter: drop-shadow(0 0 12px rgba(200,255,0,0.4)); }
+.foot-brand .brand-mark { color: var(--volt); }
 .foot-tagline { color: var(--muted); font-size: 15px; margin: 0; }
 .foot-num { color: var(--volt); font-weight: 700; }
 .foot-links { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -252,6 +252,9 @@ footer { border-top: 1px solid var(--line); background: linear-gradient(180deg, 
 .foot-links a:hover { color: var(--volt); border-color: var(--volt); }
 .foot-disclaimer { font-size: 13px; margin: 8px 0 0; }
 .foot-copy { font-size: 13px; margin: 0; opacity: 0.7; }
+.to-top { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); color: var(--volt); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 90; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 0.25s, transform 0.25s; }
+.to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.to-top:hover { border-color: var(--volt); }
 
 /* ================= v3: detail layout (3D on top) ================= */
 .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
