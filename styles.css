@@ -394,10 +394,12 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 .modal {
   width: min(420px, 100%);
   max-width: calc(100vw - 36px);
+  max-height: calc(100dvh - 130px);
   margin-left: auto; margin-right: auto;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 18px; padding: 22px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+  display: flex; flex-direction: column;
 }
 .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .modal-head h3 { font-size: 20px; }
@@ -443,7 +445,7 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; }
 
 /* ================= v6: training intelligence ================= */
 /* settings extras */
-.modal-body { max-height: 70vh; overflow-y: auto; }
+.modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
 .seg-row { display: flex; gap: 8px; }
 .seg {
   flex: 1; padding: 10px; border-radius: 12px; cursor: pointer;
@@ -776,7 +778,7 @@ body.no-adv #travelBtn, body.no-adv .tempo-toggle, body.no-adv .tempo-box { disp
 #dlgVeil { z-index: 1000; }
 .dlg { width: min(360px, 100%); }
 .dlg-msg { font-size: 15px; line-height: 1.5; color: var(--ink); margin: 4px 0 18px; }
-.dlg-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.dlg-btns { display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; margin-top: 16px; }
 .dlg-btns .btn-danger-solid { background: #f87171; color: #0b0d12; border: none; }
 /* ---------- motion polish (disabled when reduceMotion is on: body.rm) ---------- */
 body:not(.rm) .btn { transition: transform .12s ease, background .15s ease, border-color .15s ease; }
