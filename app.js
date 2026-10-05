@@ -918,8 +918,8 @@
     const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
     $("dSteps").innerHTML += `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
     $("dMuscles").innerHTML =
-      `<span class="tag primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
-      ex.secondary.map(s => { const g = groupOf(s); return `<span class="tag" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`; }).join("");
+      `<span class="tag tag-lg primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
+      ex.secondary.map(s => { const g = groupOf(s); return `<span class="tag tag-lg" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`; }).join("");
     const sim = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary).slice(0, 4);
     $("dSimilar").innerHTML = sim.map(x =>
       `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
@@ -1029,11 +1029,12 @@
     veil.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
       <div class="sheet-head">
         <h3 style="margin:0">${esc(info.name)}</h3>
-        <button class="modal-x sheet-close" aria-label="Close">×</button>
+        <button class="modal-x sheet-close" aria-label="Close"></button>
       </div>
       <p class="muted" style="font-size:13px;margin:0 0 12px">Top exercises - tap one to open it</p>
-      ${list.length ? `<div class="mini-cards">${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<p class="muted">No exercises yet.</p>`}
+      ${list.length ? `<div class="mini-cards">${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
     </div>`;
+    veil.querySelector(".sheet-close").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     const onEsc = e => { if (e.key === "Escape") closeSheet(); };
     const closeSheet = () => { document.removeEventListener("keydown", onEsc); veil.remove(); };
     veil.addEventListener("click", e => {
@@ -1111,13 +1112,13 @@
     } else {
       const recLabel = ago === 0 ? "Trained today" : ago === 1 ? "Trained yesterday" : `Trained ${ago} days ago`;
       const recState = ago <= 1 ? "Recovering" : ago <= 3 ? "Recovered" : "Ready";
-      const recColor = ago <= 1 ? "#f59e0b" : "var(--volt)";
+      const recColor = ago <= 1 ? "var(--warn)" : "var(--volt)";
       recHTML = `<span style="color:${recColor};font-weight:700">${recState}</span> <span class="muted">- ${recLabel}</span>`;
     }
     const today = fmtDate(new Date());
     const soreMap = getSoreness();
     const soreState = (soreMap[today] && soreMap[today][groupId]) || null;
-    const soreLabel = soreState === "sore" ? `<span style="color:#f59e0b;font-weight:700">Sore today</span>`
+    const soreLabel = soreState === "sore" ? `<span style="color:var(--warn);font-weight:700">Sore today</span>`
       : soreState === "injured" ? `<span style="color:#f87171;font-weight:700">Injured - take it easy</span>` : "";
     $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
       <p style="margin-top:8px;font-size:14px">${recHTML}</p>
@@ -1131,7 +1132,7 @@
     $("bodyExercises").innerHTML = list.length
       ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
         list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]}</span></div>`).join("")
-      : `<p class="muted">No exercises yet.</p>`;
+      : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`;
   }
 
   // FAVORITES
@@ -1226,7 +1227,7 @@
     $("bDays").innerHTML = builder.days.map((d, di) => `
       <div class="day-block">
         <div class="day-head">
-          <input type="text" value="${esc(d.name)}" data-bday="${di}" maxlength="40" aria-label="Day name" />
+          <input type="text" class="text-input" value="${esc(d.name)}" data-bday="${di}" maxlength="40" aria-label="Day name" />
           <button class="icon-btn" data-bdel-day="${di}" aria-label="Delete day">${window.FORGE_ICON("x")}</button>
         </div>
         ${d.exercises.map((x, xi) => {
@@ -1273,7 +1274,7 @@
           <button class="btn btn-primary btn-sm" data-tpl-apply="${t.id}">Apply</button>
           <button class="btn btn-ghost btn-sm danger" data-tpl-del="${t.id}">Delete</button>
         </div>
-      </div>`).join("") : `<p class="muted">No templates yet. Build a day and tap "Save as template".</p>`;
+      </div>`).join("") : `<div class="empty-note"><p><b>No templates yet.</b></p><p>Build a day and tap "Save as template".</p></div>`;
     $("pickerVeil").classList.remove("hidden");
   }
   function renderPicker(q) {
@@ -1659,8 +1660,8 @@
         <div class="stat-card"><b>${bal.ratio ? bal.ratio.toFixed(2) : "-"}</b><span>push/pull ratio</span></div>
         <div class="stat-card"><b>${bal.legRatio ? bal.legRatio.toFixed(2) : "-"}</b><span>quad/ham ratio</span></div>
       </div>
-      ${bal.ratio > 1.3 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Push volume ${Math.round(bal.ratio * 100)}% of pull. Add more rows and pull-ups.</span></div>` : ""}
-      ${bal.legRatio > 1.6 ? `<div class="onerm-box" style="border-color:#f59e0b"><b>Imbalance:</b> <span class="muted">Quads dominate hamstrings. Add Romanian deadlifts and leg curls.</span></div>` : ""}
+      ${bal.ratio > 1.3 ? `<div class="onerm-box warn"><b>Imbalance:</b> <span class="muted">Push volume ${Math.round(bal.ratio * 100)}% of pull. Add more rows and pull-ups.</span></div>` : ""}
+      ${bal.legRatio > 1.6 ? `<div class="onerm-box warn"><b>Imbalance:</b> <span class="muted">Quads dominate hamstrings. Add Romanian deadlifts and leg curls.</span></div>` : ""}
       ${plats.length ? `<h3 style="margin-top:20px">Plateaus detected</h3>` + plats.map(p => `<div class="onerm-box"><b>${p.name}</b> <span class="muted">stuck for ${p.sessions} sessions. Try: +1 set, swap variation, or deload.</span></div>`).join("") : ""}
       ${corr.length ? `<h3 style="margin-top:20px">Correlations</h3>` + corr.map(c => `<p>💡 ${c}</p>`).join("") : ""}
       <h3 style="margin-top:20px">Total volume lifted</h3>
@@ -2201,7 +2202,7 @@
         <button class="set-done ${taken.includes(s.id) ? "hit" : ""}" data-supp="${s.id}" aria-label="Mark ${esc(s.name)} taken" style="width:34px;height:34px">${window.FORGE_ICON("check")}</button>
         <span style="flex:1;font-size:14px">${esc(s.name)}</span>
         <button class="icon-btn" data-suppdel="${s.id}" aria-label="Remove supplement">${window.FORGE_ICON("x")}</button>
-      </div>`).join("") : `<p class="muted" style="font-size:13px">No supplements yet. Add your daily stack below.</p>`;
+      </div>`).join("") : `<div class="empty-note"><p><b>No supplements yet.</b></p><p>Add your daily stack below.</p></div>`;
   }
   function getWater(dateKey) {
     try { return JSON.parse(localStorage.getItem("forge-water") || "{}")[dateKey] || 0; }
@@ -2656,10 +2657,10 @@
     body.innerHTML = `
       <h3>Body measurements</h3>
       <div class="measure-grid">
-        <div class="builder-field"><label>Weight (${units})</label><input type="number" id="mWeight" step="any" placeholder="–" /></div>
-        <div class="builder-field"><label>Waist (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mWaist" step="any" placeholder="–" /></div>
-        <div class="builder-field"><label>Chest (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mChest" step="any" placeholder="–" /></div>
-        <div class="builder-field"><label>Arms (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mArms" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Weight (${units})</label><input type="number" id="mWeight" class="text-input" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Waist (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mWaist" class="text-input" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Chest (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mChest" class="text-input" step="any" placeholder="–" /></div>
+        <div class="builder-field"><label>Arms (${units === "kg" ? "cm" : "in"})</label><input type="number" id="mArms" class="text-input" step="any" placeholder="–" /></div>
       </div>
       <button class="btn btn-primary btn-sm" id="mSave" style="margin-bottom:14px">Log measurements</button>
       <div id="mChart"></div>
@@ -2730,7 +2731,7 @@
     const lo = min - pad, hi = max + pad, range = hi - lo || 1;
     const change = vals[vals.length - 1] - vals[0];
     const changeTxt = (change > 0 ? "+" : "") + fromKg(change).toFixed(1) + " " + unit;
-    const changeColor = change > 0.05 ? "#f59e0b" : change < -0.05 ? accent : "var(--muted)";
+    const changeColor = change > 0.05 ? "var(--warn)" : change < -0.05 ? accent : "var(--muted)";
     $("mChart").innerHTML = `<div class="chart-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <h4 style="margin:0">Weight trend</h4>
@@ -2835,7 +2836,7 @@
         <img src="${p.src}" alt="Progress photo ${p.date}" />
         <div class="photo-date">${p.date}</div>
         <button class="photo-del" data-pdel="${i}" aria-label="Delete photo">×</button>
-      </div>`).join("") || `<p class="muted">No photos yet.</p>`;
+      </div>`).join("") || `<div class="empty-note"><p><b>No photos yet.</b></p><p>Take a progress photo to start tracking.</p></div>`;
     grid.querySelectorAll("[data-pdel]").forEach(b => {
       b.addEventListener("click", ev => {
         ev.stopPropagation();
@@ -2857,12 +2858,13 @@
     const veil = document.createElement("div");
     veil.className = "modal-veil";
     veil.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:640px">
-      <div class="modal-head"><h3>Compare photos</h3><button class="modal-x" aria-label="Close">×</button></div>
+      <div class="modal-head"><h3>Compare photos</h3><button class="modal-x" aria-label="Close"></button></div>
       <div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div><img src="${a.src}" style="width:100%;border-radius:12px" alt="Photo ${a.date}" /><p class="muted" style="text-align:center;margin-top:6px">${a.date}</p></div>
         <div><img src="${b.src}" style="width:100%;border-radius:12px" alt="Photo ${b.date}" /><p class="muted" style="text-align:center;margin-top:6px">${b.date}</p></div>
       </div></div>
     </div>`;
+    veil.querySelector(".modal-x").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     veil.addEventListener("click", e => { if (e.target === veil || e.target.closest(".modal-x")) veil.remove(); });
     document.body.appendChild(veil);
   }
@@ -2936,7 +2938,7 @@
         <div class="stat-card"><b>${xpLevel(getXP().xp)}</b><span>level (${getXP().xp.toLocaleString()} XP)</span></div>
         <div class="stat-card"><b>${getXP().freeze || 0}</b><span>streak freeze${(getXP().freeze || 0) === 1 ? "" : "s"}</span></div>
       </div>
-      ${checkDeload() ? `<div class="onerm-box" style="border-color:#f59e0b"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
+      ${checkDeload() ? `<div class="onerm-box warn"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 16 weeks</h3>
       ${streakCalendar(log)}
       <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>`;
@@ -2975,7 +2977,7 @@
       recs.sort((a, b) => b.pr.weight - a.pr.weight || b.pr.reps - a.pr.reps);
       body.innerHTML = recs.length ? recs.map(({ ex, pr }) =>
         `<div class="rec-row">${window.FORGE_ICON("trophy")}<b>${esc(ex.name)}</b><span>${pr.weight > 0 ? fmtW(pr.weight) + " × " + pr.reps : pr.reps + " reps"}</span></div>`
-      ).join("") : `<div class="empty-note"><p>No records yet. Log a workout to set your first.</p></div>`;
+      ).join("") : `<div class="empty-note"><p><b>No records yet.</b></p><p>Log a workout to set your first.</p></div>`;
     } else {
       const vol = volumeByMuscle(28);
       const entries = Object.keys(vol).map(g => ({ g, n: vol[g] })).sort((a, b) => b.n - a.n);
@@ -2983,7 +2985,7 @@
       body.innerHTML = entries.length
         ? `<p class="muted" style="margin-bottom:14px">Sets per muscle group, last 28 days.</p>` +
           entries.map(({ g, n }) => `<div class="vol-row"><span class="vn">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span><span class="bar"><i style="width:${Math.round(n / max * 100)}%"></i></span><span class="vc">${n} sets</span></div>`).join("")
-        : `<div class="empty-note"><p>Nothing in the last 28 days.</p></div>`;
+        : `<div class="empty-note"><p><b>Nothing in the last 28 days.</b></p><p>Log a workout and your volume will show up here.</p></div>`;
     }
   }
   }
@@ -3363,7 +3365,7 @@
       if (_ci && _ci.energy != null && _ci.energy <= 2 && d.exercises.length > 1) {
         const banner = document.createElement("div");
         banner.className = "onerm-box"; banner.id = "scaleBanner";
-        banner.style.borderColor = "#f59e0b"; banner.style.marginBottom = "12px";
+        banner.style.borderColor = "var(--warn)"; banner.style.marginBottom = "12px";
         banner.innerHTML = `<b>Low energy today (${_ci.energy}/5).</b> <span class="muted">Want a shorter session? We can drop the last exercise.</span>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
             <button class="btn btn-primary btn-sm" data-scale="shorten">Shorten session</button>

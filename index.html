@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.57" />
+<link rel="stylesheet" href="styles.css?v=10.58" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -97,7 +97,7 @@
         <div class="badges" id="dBadges"></div>
         <h2 id="dName"></h2>
       </div>
-      <button class="fav-btn" id="dFav">Save to favorites</button>
+      <button class="fav-btn btn btn-ghost" id="dFav">Save to favorites</button>
     </div>
     <div class="detail-3d">
       <div id="detail3d" class="stage"></div>
@@ -265,11 +265,11 @@
     <p class="lede" data-i18n="builder_lede">Build your own training plan from the exercise library.</p>
     <div class="builder-field">
       <label for="bName" data-i18n="b_name">Program name</label>
-      <input type="text" id="bName" data-i18n-ph="b_name_ph" placeholder="e.g. My Push Day Split" maxlength="60" />
+      <input type="text" id="bName" class="text-input" data-i18n-ph="b_name_ph" placeholder="e.g. My Push Day Split" maxlength="60" />
     </div>
     <div class="builder-field">
       <label for="bTagline" data-i18n="b_tagline">Tagline (optional)</label>
-      <input type="text" id="bTagline" data-i18n-ph="b_tagline_ph" placeholder="e.g. 3 days, dumbbells only" maxlength="80" />
+      <input type="text" id="bTagline" class="text-input" data-i18n-ph="b_tagline_ph" placeholder="e.g. 3 days, dumbbells only" maxlength="80" />
     </div>
     <div id="bDays"></div>
     <button class="btn btn-ghost btn-sm" id="bAddDay" data-i18n="b_add_day">Add day</button>
@@ -303,11 +303,11 @@
     <div class="modal-body">
       <div class="builder-field">
         <label for="plateBar">Bar weight</label>
-        <input type="number" id="plateBar" value="20" step="any" min="0" />
+        <input type="number" id="plateBar" class="text-input" value="20" step="any" min="0" />
       </div>
       <div class="builder-field">
         <label for="plateTarget">Target weight</label>
-        <input type="number" id="plateTarget" value="100" step="any" min="0" />
+        <input type="number" id="plateTarget" class="text-input" value="100" step="any" min="0" />
       </div>
       <div id="plateResult"></div>
     </div>
@@ -402,7 +402,7 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.57</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.58</p>
   </div>
 </footer>
 
@@ -411,7 +411,7 @@
   <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle">
     <div class="modal-head"><h3 id="dlgTitle">FORGE</h3></div>
     <p class="dlg-msg" id="dlgMsg"></p>
-    <input type="text" id="dlgInput" class="hidden" style="width:100%;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:15px;margin:4px 0 12px" />
+    <input type="text" id="dlgInput" class="text-input hidden" />
     <div class="dlg-btns">
       <button class="btn btn-ghost btn-sm" id="dlgCancel">Cancel</button>
       <button class="btn btn-primary btn-sm" id="dlgOk">OK</button>
@@ -460,7 +460,7 @@
       <div class="toggle-row"><span data-i18n="set_motion">Reduce motion</span><button class="toggle" id="tglMotion" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <p class="setting-label">Daily workout reminder</p>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="time" id="reminderTime" style="background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:15px" />
+        <input type="time" id="reminderTime" class="text-input" />
         <button class="btn btn-ghost btn-sm" id="reminderClear">Clear</button>
       </div>
       <p class="muted setting-note">Shows a reminder banner on the home screen when it is time to train.</p>
