@@ -2495,11 +2495,13 @@
     // align to week columns starting Monday
     while (days[0].getDay() !== 1) days.shift();
     let html = `<div class="heatmap" role="img" aria-label="Workout activity, last ${weeks} weeks">`;
-    let prevM = -1;
+    let prevM = -1, monthIdx = -1;
     for (let w = 0; w < days.length; w += 7) {
       const m = days[w].getMonth();
-      html += `<span class="hm-month" aria-hidden="true">${m !== prevM ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
-      prevM = m;
+      const isNewMonth = m !== prevM;
+      if (isNewMonth) { monthIdx++; prevM = m; }
+      const mo = monthIdx % 2 === 1 ? " mo" : "";
+      html += `<span class="hm-month${mo}" aria-hidden="true">${isNewMonth ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
       for (let d = 0; d < 7 && w + d < days.length; d++) {
         const dt = days[w + d];
         const key = fmtDate(dt);
@@ -2507,7 +2509,7 @@
         const lvl = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4;
         const isToday = key === fmtDate(today);
         const label = dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + (n ? `: ${n} workout${n > 1 ? "s" : ""}` : ": rest day");
-        html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}" title="${label}"></div>`;
+        html += `<div class="hm-day${lvl ? " l" + lvl : ""}${isToday ? " today" : ""}${mo}" title="${label}"></div>`;
       }
     }
     html += `</div>`;
