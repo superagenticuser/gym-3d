@@ -827,6 +827,34 @@
     "Discipline is choosing what you want most over what you want now.",
     "The pain you feel today will be the strength you feel tomorrow."
   ];
+  function miniToast(msg) {
+    const t = document.createElement("div");
+    t.className = "mini-toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add("show"));
+    setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 2200);
+  }
+  let logoTaps = 0, logoTimer = null;
+  const footBrand = document.querySelector(".foot-brand");
+  if (footBrand) {
+    footBrand.style.cursor = "pointer";
+    footBrand.addEventListener("click", (e) => {
+      e.preventDefault();
+      logoTaps++;
+      clearTimeout(logoTimer);
+      logoTimer = setTimeout(() => { logoTaps = 0; }, 2000);
+      if (logoTaps >= 5) {
+        logoTaps = 0;
+        footBrand.animate(
+          [{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }],
+          { duration: 600, easing: "cubic-bezier(.2,.8,.3,1)" }
+        );
+        const msgs = ["You found it!", "Still forging!", "No shortcuts. Just reps.", "Okay, back to training!"];
+        miniToast(msgs[Math.floor(Math.random() * msgs.length)]);
+      }
+    });
+  }
   const fq = $("footQuote");
   if (fq) {
     const d = new Date();
@@ -855,6 +883,11 @@
   if (fv && fc) {
     fc.innerHTML = CHANGELOG.map(([v, t]) => `<div><b>${v}</b> - ${t}</div>`).join("");
     fv.onclick = () => fc.classList.toggle("hidden");
+  }
+  const hg = $("homeGreet");
+  if (hg) {
+    const hr = new Date().getHours();
+    hg.textContent = hr < 5 ? "Night owl" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
   }
   const toTop = $("toTop");
   if (toTop) {
