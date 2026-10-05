@@ -2831,13 +2831,12 @@
     }
     const sets = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
     const vol = ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + setVolumeKg(x.id, s), 0), 0), 0);
-    const detail = ws.map(w => `<p style="margin:12px 0 4px"><b>${esc(w.programName)}${w.dayName ? ": " + esc(w.dayName) : ""}</b></p><ul style="margin:0 0 8px">` +
+    const detail = ws.map(w => `<div class="cal-wo"><p class="cal-wo-title"><b>${esc(w.programName)}</b>${w.dayName ? `<span class="muted"> · ${esc(w.dayName)}</span>` : ""}</p>` +
       w.exercises.map(x => {
         const ex = byId(x.id);
-        return `<li>${esc(ex ? ex.name : x.id)}<ul class="muted" style="font-size:13px">` +
-          x.sets.map(s => `<li>${s.reps} reps${s.weight ? " @ " + fmtW(s.weight) : ""}${s.rpe != null ? " · RPE " + s.rpe : ""}${s.failed ? " · <b style='color:#f87171'>failed</b>" : ""}</li>`).join("") +
-          `</ul></li>`;
-      }).join("") + `</ul>`).join("");
+        const setStr = x.sets.map(s => `${s.reps}${s.weight ? " × " + fmtW(s.weight) : ""}${s.rpe != null ? " @ RPE " + s.rpe : ""}${s.failed ? " (failed)" : ""}`).join(", ");
+        return `<p class="cal-ex"><span class="cal-ex-name">${esc(ex ? ex.name : x.id)}</span><span class="muted"> · ${setStr}</span></p>`;
+      }).join("") + `</div>`).join("");
     el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3><p class="muted">${ws.length} workout${ws.length > 1 ? "s" : ""} · ${sets} sets · ${fmtW(vol)} volume</p>${detail}`;
   }
   function renderBodyTab(body) {
