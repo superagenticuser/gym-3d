@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.28" />
+<link rel="stylesheet" href="styles.css?v=10.29" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -389,11 +389,21 @@
     </nav>
     <p class="foot-stats"><span id="footEx">193</span> exercises · 9 programs · interactive 3D body</p>
     <p class="muted">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · v10.28</p>
+    <p class="muted foot-copy">© 2026 FORGE · v10.29</p>
   </div>
 </footer>
 
 <!-- SETTINGS -->
+<div class="modal-veil hidden" id="dlgVeil">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="modal-head"><h3 id="dlgTitle">FORGE</h3></div>
+    <p class="dlg-msg" id="dlgMsg"></p>
+    <div class="dlg-btns">
+      <button class="btn btn-ghost btn-sm" id="dlgCancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="dlgOk">OK</button>
+    </div>
+  </div>
+</div>
 <div class="modal-veil hidden" id="settingsVeil">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="modal-head">
