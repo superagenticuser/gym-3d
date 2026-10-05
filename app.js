@@ -1254,7 +1254,7 @@
   function openPicker(di) {
     pickerDay = di; templateDay = -1;
     $("pickerTitle").textContent = "Add exercises";
-    $("pickerSearch").style.display = "";
+    $("pickerSearch").closest(".search-wrap").style.display = "";
     $("pickerClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     $("pickerSearch").value = "";
     renderPicker("");
@@ -1266,7 +1266,7 @@
     templateDay = di;
     const tpl = getTemplates();
     $("pickerTitle").textContent = "Apply template";
-    $("pickerSearch").style.display = "none";
+    $("pickerSearch").closest(".search-wrap").style.display = "none";
     $("pickerList").innerHTML = tpl.length ? tpl.map(t =>
       `<div class="picker-item tpl-item" style="cursor:default">
         <b>${esc(t.name)}</b><span class="tag">${t.exercises.length} exercises</span>
@@ -1292,7 +1292,14 @@
   function saveBuilder() {
     builder.name = $("bName").value.trim();
     builder.tagline = $("bTagline").value.trim() || "Custom program";
-    if (!builder.name) { appAlert("Give your program a name."); return; }
+    if (!builder.name) {
+      appPrompt("Program name:", "", "Save program").then(name => {
+        if (!name || !name.trim()) return;
+        $("bName").value = name.trim();
+        saveBuilder();
+      });
+      return;
+    }
     const days = builder.days.filter(d => d.exercises.length > 0);
     if (!days.length) { appAlert("Add at least one exercise to a day."); return; }
     const id = "custom-" + Date.now().toString(36);
@@ -2492,16 +2499,19 @@
       d.setDate(d.getDate() - i);
       days.push(d);
     }
-    // align to week columns starting Monday
-    while (days[0].getDay() !== 1) days.shift();
     let html = `<div class="heatmap" role="img" aria-label="Workout activity, last ${weeks} weeks">`;
-    let prevM = -1, monthIdx = -1;
+    let monthIdx = 0;
     for (let w = 0; w < days.length; w += 7) {
-      const m = days[w].getMonth();
-      const isNewMonth = m !== prevM;
-      if (isNewMonth) { monthIdx++; prevM = m; }
+      let mLabel = "";
+      if (w === 0) mLabel = days[w].toLocaleDateString(undefined, { month: "short" });
+      else {
+        for (let d = 0; d < 7 && w + d < days.length; d++) {
+          if (days[w + d].getDate() === 1) { mLabel = days[w + d].toLocaleDateString(undefined, { month: "short" }); break; }
+        }
+      }
+      if (mLabel) monthIdx++;
       const mo = monthIdx % 2 === 1 ? " mo" : "";
-      html += `<span class="hm-month${mo}" aria-hidden="true">${isNewMonth ? days[w].toLocaleDateString(undefined, { month: "short" }) : ""}</span>`;
+      html += `<span class="hm-month${mo}" aria-hidden="true">${mLabel}</span>`;
       for (let d = 0; d < 7 && w + d < days.length; d++) {
         const dt = days[w + d];
         const key = fmtDate(dt);
