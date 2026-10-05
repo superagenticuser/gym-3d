@@ -817,6 +817,45 @@
 
   /* ---------- helpers ---------- */
   const $ = id => document.getElementById(id);
+  const QUOTES = [
+    "The last three or four reps is what makes the muscle grow.",
+    "Strength does not come from winning. Your struggles develop your strengths.",
+    "The body achieves what the mind believes.",
+    "Don\u2019t wish for it. Work for it.",
+    "Push yourself because no one else is going to do it for you.",
+    "Great things never come from comfort zones.",
+    "Discipline is choosing what you want most over what you want now.",
+    "The pain you feel today will be the strength you feel tomorrow."
+  ];
+  const fq = $("footQuote");
+  if (fq) {
+    const d = new Date();
+    fq.textContent = "\u201C" + QUOTES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % QUOTES.length] + "\u201D";
+  }
+  const fa = $("footAccents");
+  if (fa) {
+    fa.innerHTML = ACCENTS.map(a =>
+      `<button style="background:${a.color}" data-faccent="${a.id}" aria-label="${a.name}" title="${a.name}" class="${(localStorage.getItem("forge-accent") || "volt") === a.id ? "on" : ""}"></button>`
+    ).join("");
+    fa.querySelectorAll("[data-faccent]").forEach(b => {
+      b.onclick = () => {
+        applyAccent(b.dataset.faccent);
+        fa.querySelectorAll("[data-faccent]").forEach(x => x.classList.toggle("on", x === b));
+      };
+    });
+  }
+  const CHANGELOG = [
+    ["v10.83", "Smaller program builder buttons."],
+    ["v10.82", "Fixed JS crash that broke the app."],
+    ["v10.80", "Back to top button. Removed footer glow."],
+    ["v10.78", "Fixed broken styles from footer CSS."],
+    ["v10.77", "New centered footer design."]
+  ];
+  const fv = $("footVer"), fc = $("footChangelog");
+  if (fv && fc) {
+    fc.innerHTML = CHANGELOG.map(([v, t]) => `<div><b>${v}</b> - ${t}</div>`).join("");
+    fv.onclick = () => fc.classList.toggle("hidden");
+  }
   const toTop = $("toTop");
   if (toTop) {
     window.addEventListener("scroll", () => {
