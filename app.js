@@ -1030,9 +1030,37 @@
       <div class="sheet-grab"></div>
       <h3 style="margin:0 0 2px">${esc(info.name)}</h3>
       <p class="muted" style="font-size:13px;margin:0 0 12px">Top exercises - tap one to open it</p>
-      ${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("") || `<p class="muted">No exercises yet.</p>`}
+      ${list.length ? `<div class="mini-cards">${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<p class="muted">No exercises yet.</p>`}
     </div>`;
-    veil.addEventListener("click", e => { if (e.target === veil) veil.remove(); });
+    const onEsc = e => { if (e.key === "Escape") closeSheet(); };
+    const closeSheet = () => { document.removeEventListener("keydown", onEsc); veil.remove(); };
+    veil.addEventListener("click", e => {
+      if (e.target === veil || e.target.closest("[data-ex]")) closeSheet();
+    });
+    document.addEventListener("keydown", onEsc);
+    // swipe down on the grab area to dismiss
+    const sheet = veil.querySelector(".sheet");
+    let dragSheet = false, startY = 0, dragDy = 0;
+    sheet.addEventListener("pointerdown", e => {
+      if (sheet.scrollTop > 0) return;
+      if (e.clientY - sheet.getBoundingClientRect().top > 130) return;
+      if (e.target.closest("[data-ex]")) return;
+      dragSheet = true; startY = e.clientY; dragDy = 0;
+    });
+    sheet.addEventListener("pointermove", e => {
+      if (!dragSheet) return;
+      dragDy = Math.max(0, e.clientY - startY);
+      sheet.style.transform = "translateY(" + dragDy + "px)";
+    });
+    const endSheetDrag = () => {
+      if (!dragSheet) return;
+      dragSheet = false;
+      if (dragDy > 110) closeSheet();
+      else sheet.style.transform = "";
+      dragDy = 0;
+    };
+    sheet.addEventListener("pointerup", endSheetDrag);
+    sheet.addEventListener("pointercancel", () => { dragSheet = false; sheet.style.transform = ""; dragDy = 0; });
     document.body.appendChild(veil);
   }
   function renderBody(selected) {
