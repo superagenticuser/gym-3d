@@ -899,6 +899,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.09", "Fix body finish setting scope."],
     ["v11.08", "Fix reduced motion override, photo slider alignment, compare dialog header."],
     ["v11.07", "Body finish moved to settings (applies everywhere); fixed reduced motion toggle."],
     ["v11.06", "Correct barbell anatomy: plates load on the sleeves at the bar ends."],
@@ -968,6 +969,10 @@
   const byId = id => EXERCISES.find(e => e.id === id);
   let viewers = [];
   function clearViewers() { viewers.forEach(v => v.dispose()); viewers = []; }
+  function applyBodyFinish(name) {
+    viewers.forEach(v => { if (v.setFinish) v.setFinish(name); });
+    if (window._bodyViewer && window._bodyViewer.setFinish && !viewers.includes(window._bodyViewer)) window._bodyViewer.setFinish(name);
+  }
   let demos = [];
   function clearDemos() { demos.forEach(d => d.destroy()); demos = []; }
 
@@ -1284,10 +1289,6 @@
     $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
     $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
     $("bPain").onclick = () => { window._bodyMode = "pain"; syncMode(); };
-  function applyBodyFinish(name) {
-    viewers.forEach(v => { if (v.setFinish) v.setFinish(name); });
-    if (window._bodyViewer && window._bodyViewer.setFinish) window._bodyViewer.setFinish(name);
-  }
     window._bodyViewer = v;
     v.setFinish(getSettings().bodyFinish || "standard");
     selectMuscle(selected || "chest");
