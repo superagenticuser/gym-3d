@@ -941,7 +941,7 @@
   });
 
   /* ---------- views ---------- */
-  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress", "builder"];
+  const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress", "builder", "privacy"];
   function show(name) {
     clearViewers();
     clearDemos();
@@ -4038,6 +4038,7 @@
     else if (parts[0] === "program" && parts[1]) { show("program"); renderProgram(parts[1]); }
     else if (parts[0] === "workout" && parts[1] && parts[2] !== undefined) { show("workout"); window._scaleDone = false; window._travelOn = false; const _tb = $("travelBtn"); if (_tb) { _tb.classList.remove("on"); _tb.textContent = "Travel mode"; } renderWorkout(parts[1], parseInt(parts[2], 10), parseInt(params.get("week") || "0", 10) || null); }
     else if (parts[0] === "progress") { show("progress"); renderProgress(); }
+    else if (parts[0] === "privacy") { show("privacy"); }
     else if (parts[0] === "builder") { show("builder"); newBuilder(); }
     else { show("home"); renderHome(); }
     if (window._refreshTimerMini) setTimeout(window._refreshTimerMini, 60);
