@@ -436,7 +436,7 @@
       if (dead) return;
       raf = requestAnimationFrame(loop);
       const idle = !dragging && pointers.size === 0 && Date.now() - lastAct > 3000;
-      if (opts.autoRotate && idle) {
+      if (opts.autoRotate && !getSettings().reduceMotion && idle) {
         rotY += 0.004; targetRotY = rotY;
       }
       rotY += (targetRotY - rotY) * 0.12;
@@ -481,7 +481,6 @@
       neutralMat.transparent = f.opacity < 1;
       neutralMat.needsUpdate = true;
       for (const id in mats) apply(mats[id]);
-      try { localStorage.setItem("forge-body-finish", name); } catch (e) {}
     }
     return {
       highlight,
@@ -547,7 +546,7 @@
     const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
     tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
     tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
-    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced); tg("tglHaptic", s.haptics);
+    tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced); tg("tglHaptic", s.haptics); syncFinishUI();
     const _rt = $("reminderTime"); if (_rt) _rt.value = s.reminder || "";
     const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
     $("eqGrid").innerHTML = eqs.map(q =>
@@ -631,7 +630,7 @@
   }
 
   /* ---------- settings state ---------- */
-  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false, haptics: true };
+  const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false, haptics: true, bodyFinish: "standard" };
   function getSettings() {
     try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
     catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
@@ -900,6 +899,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.07", "Body finish moved to settings (applies everywhere); fixed reduced motion toggle."],
     ["v11.06", "Correct barbell anatomy: plates load on the sleeves at the bar ends."],
     ["v11.05", "Tighter barbell diagram: bar and collars hug the plates."],
     ["v11.04", "Last-time beatdown, photo compare slider, grouped equipment swaps, page transitions, 3D body finishes."],
@@ -1045,6 +1045,7 @@
       `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
     ).join("");
     const v = createBodyViewer($("hero3d"), { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
+    if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
     viewers.push(v);
     const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
     let i = 0;
@@ -1186,6 +1187,7 @@
       $("dProg").innerHTML = _hist.length ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>` : "";
     }
     const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
+    if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
     viewers.push(v);
     if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
     const full = ex.primary === "full-body" || ex.primary === "cardio";
@@ -1288,15 +1290,12 @@
     $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
     $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
     $("bPain").onclick = () => { window._bodyMode = "pain"; syncMode(); };
-    const bf = $("bodyFinish");
-    if (bf) bf.addEventListener("change", () => { if (window._bodyViewer) window._bodyViewer.setFinish(bf.value); });
+  function applyBodyFinish(name) {
+    viewers.forEach(v => { if (v.setFinish) v.setFinish(name); });
+    if (window._bodyViewer && window._bodyViewer.setFinish) window._bodyViewer.setFinish(name);
+  }
     window._bodyViewer = v;
-    try {
-      const savedFinish = localStorage.getItem("forge-body-finish") || "standard";
-      v.setFinish(savedFinish);
-      const fs = $("bodyFinish");
-      if (fs) fs.value = savedFinish;
-    } catch (e) {}
+    v.setFinish(getSettings().bodyFinish || "standard");
     selectMuscle(selected || "chest");
   }
   function selectMuscle(groupId) {
@@ -4354,9 +4353,29 @@
   function applyAdvanced() {
     document.body.classList.toggle("no-adv", !getSettings().advanced);
   }
+  function syncFinishUI() {
+    const cur = getSettings().bodyFinish || "standard";
+    document.querySelectorAll("#finishSeg [data-finish]").forEach(b =>
+      b.classList.toggle("on", b.dataset.finish === cur));
+  }
+  // migrate legacy finish from localStorage to settings
+  try {
+    const legacy = localStorage.getItem("forge-body-finish");
+    if (legacy && !getSettings().bodyFinish) {
+      const st = getSettings(); st.bodyFinish = legacy; saveSettings(st);
+    }
+    localStorage.removeItem("forge-body-finish");
+  } catch (e) {}
   $("goalSeg").addEventListener("click", e => {
     const b = e.target.closest("[data-goal]");
     if (b) { const s = getSettings(); s.goal = b.dataset.goal; saveSettings(s); syncSettingsUI(); }
+  });
+  $("finishSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-finish]");
+    if (b) {
+      const st = getSettings(); st.bodyFinish = b.dataset.finish; saveSettings(st);
+      syncFinishUI(); applyBodyFinish(st.bodyFinish);
+    }
   });
   $("exportData").addEventListener("click", () => {
     const data = {
