@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.13", "Movement balance radar on Insights, set-complete micro-animation."],
     ["v11.12", "Fix finish preview layout in settings."],
     ["v11.11", "Live 3D preview for body finish in settings."],
     ["v11.10", "Rewrite photo slider with clip-path so images stay aligned."],
@@ -1984,6 +1985,69 @@
     return Math.max(0, Math.round(score));
   }
 
+  /* ---------- movement pattern radar ---------- */
+  const PATTERNS = ["push", "pull", "squat", "hinge", "lunge", "carry"];
+  const PATTERN_NAMES = { push: "Push", pull: "Pull", squat: "Squat", hinge: "Hinge", lunge: "Lunge", carry: "Carry" };
+  const MUSCLE_TO_PATTERN = {
+    chest: "push", shoulders: "push", triceps: "push",
+    back: "pull", lats: "pull", biceps: "pull",
+    quads: "squat",
+    hamstrings: "hinge", glutes: "hinge", "lower-back": "hinge",
+    traps: "carry", forearms: "carry", abs: "carry", obliques: "carry",
+    "full-body": "carry", cardio: "carry"
+  };
+  const LUNGE_WORDS = ["lunge", "bulgarian", "split squat", "step-up", "stepup", "step up"];
+  function patternOfExercise(ex) {
+    const nm = (ex.name || "").toLowerCase();
+    if (LUNGE_WORDS.some(w => nm.includes(w))) return "lunge";
+    return MUSCLE_TO_PATTERN[groupOf(ex.primary)] || "carry";
+  }
+  function patternVolume(days) {
+    const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
+    const vol = { push: 0, pull: 0, squat: 0, hinge: 0, lunge: 0, carry: 0 };
+    getLog().forEach(w => {
+      if (new Date(w.date + "T12:00:00") < cutoff) return;
+      w.exercises.forEach(x => {
+        const ex = byId(x.id); if (!ex) return;
+        vol[patternOfExercise(ex)] += x.sets.length;
+      });
+    });
+    return vol;
+  }
+  function radarSection() {
+    const vol = patternVolume(28);
+    const total = PATTERNS.reduce((a, p) => a + vol[p], 0);
+    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3><div class="empty-note"><p><b>No training data in the last 28 days.</b></p><p>Log workouts and your movement balance will appear here.</p></div>`;
+    const max = Math.max.apply(null, PATTERNS.map(p => vol[p]).concat([1]));
+    const W = 400, H = 360, cx = 200, cy = 180, R = 115;
+    const pt = (i, frac) => {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / PATTERNS.length;
+      return [cx + Math.cos(a) * R * frac, cy + Math.sin(a) * R * frac];
+    };
+    let grid = "";
+    [0.25, 0.5, 0.75, 1].forEach(f => {
+      grid += `<polygon points="${PATTERNS.map((_, i) => pt(i, f).map(n => n.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+    });
+    let axes = "";
+    PATTERNS.forEach((p, i) => {
+      const xy = pt(i, 1);
+      axes += `<line x1="${cx}" y1="${cy}" x2="${xy[0].toFixed(1)}" y2="${xy[1].toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;
+      const lb = pt(i, 1.24), vl = pt(i, 1.42);
+      const anchor = Math.abs(lb[0] - cx) < 10 ? "middle" : (lb[0] > cx ? "start" : "end");
+      axes += `<text x="${lb[0].toFixed(1)}" y="${(lb[1] + 4).toFixed(1)}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="var(--ink)">${PATTERN_NAMES[p]}</text>`;
+      axes += `<text x="${vl[0].toFixed(1)}" y="${(vl[1] + 4).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--muted)">${vol[p]} sets</text>`;
+    });
+    const poly = PATTERNS.map((p, i) => pt(i, vol[p] / max).map(n => n.toFixed(1)).join(",")).join(" ");
+    const dots = PATTERNS.map((p, i) => { const d = pt(i, vol[p] / max); return `<circle cx="${d[0].toFixed(1)}" cy="${d[1].toFixed(1)}" r="4" fill="var(--volt)"/>`; }).join("");
+    const weakest = PATTERNS.reduce((a, b) => vol[a] <= vol[b] ? a : b);
+    const weakestTip = vol[weakest] === 0
+      ? `No ${PATTERN_NAMES[weakest].toLowerCase()} work logged in 28 days.`
+      : `${PATTERN_NAMES[weakest]} is your least trained pattern at ${vol[weakest]} sets.`;
+    return `<h3 style="margin-top:20px">Movement balance</h3>
+    <p class="muted" style="font-size:13px;margin-bottom:12px">Sets per movement pattern, last 28 days. Shape shows balance, not absolute volume. Carry covers traps, forearms, core and conditioning.</p>
+    <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block;max-width:430px;margin:0 auto" role="img" aria-label="Movement pattern balance radar chart">${grid}${axes}<polygon points="${poly}" fill="color-mix(in srgb, var(--volt) 22%, transparent)" stroke="var(--volt)" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg></div>
+    <div class="onerm-box"><b>Weakest pattern: ${PATTERN_NAMES[weakest]}.</b> <span class="muted">${weakestTip}</span></div>`;
+  }
   function renderInsightsTab(body) {
     const bal = muscleBalance();
     const dots = dotsScore();
@@ -2001,6 +2065,7 @@
       </div>
       ${bal.ratio > 1.3 ? `<div class="onerm-box warn"><b>Imbalance:</b> <span class="muted">Push volume ${Math.round(bal.ratio * 100)}% of pull. Add more rows and pull-ups.</span></div>` : ""}
       ${bal.legRatio > 1.6 ? `<div class="onerm-box warn"><b>Imbalance:</b> <span class="muted">Quads dominate hamstrings. Add Romanian deadlifts and leg curls.</span></div>` : ""}
+      ${radarSection()}
       ${plats.length ? `<h3 style="margin-top:20px">Plateaus detected</h3>` + plats.map(p => `<div class="onerm-box"><b>${p.name}</b> <span class="muted">stuck for ${p.sessions} sessions. Try: +1 set, swap variation, or deload.</span></div>`).join("") : ""}
       ${corr.length ? `<h3 style="margin-top:20px">Correlations</h3>` + corr.map(c => `<p>💡 ${c}</p>`).join("") : ""}
       <h3 style="margin-top:20px">Total volume lifted</h3>
@@ -4011,7 +4076,13 @@
     if (sd) {
       const wasHit = sd.classList.contains("hit");
       sd.classList.toggle("hit");
-      if (!wasHit) buzz(15);
+      if (!wasHit) {
+        buzz(15);
+        sd.classList.remove("just-hit"); void sd.offsetWidth; sd.classList.add("just-hit");
+        setTimeout(() => sd.classList.remove("just-hit"), 380);
+        const row = sd.closest(".set-row2");
+        if (row) { row.classList.remove("set-flash"); void row.offsetWidth; row.classList.add("set-flash"); }
+      }
       try { updateBeatdown(parseInt(sd.dataset.x, 10)); } catch (e2) {}
       if (!wasHit && getSettings().autoRest) {
         const xi = parseInt(sd.dataset.x, 10);
