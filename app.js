@@ -900,6 +900,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.05", "Tighter barbell diagram: bar and collars hug the plates."],
     ["v11.04", "Last-time beatdown, photo compare slider, grouped equipment swaps, page transitions, 3D body finishes."],
     ["v11.03", "Visual barbell diagram in plate calculator."],
     ["v11.02", "Tighter gap between content and footer."],
@@ -1524,13 +1525,20 @@
   function plateDiagramSVG(used, units) {
     const maxW = units === "kg" ? 25 : 45;
     const W = 400, H = 130, cx = W / 2, cy = H / 2;
+    // first pass: measure total plate width so the bar and collars hug the plates
+    let plateSpan = 0;
+    used.forEach(w => { plateSpan += Math.round(9 + 11 * (w / maxW)) + 2; });
+    const inner = 10;                       // gap between center knurl and first plate
+    const collarGap = 6;                    // gap between last plate and collar
+    const gripLen = 70;                     // visible bar beyond collars (hands grip here)
+    const halfBar = inner + plateSpan + collarGap + 8 + gripLen;
+    const barX = cx - halfBar, barW = halfBar * 2;
     let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Barbell loading diagram">`;
     // bar
-    svg += `<rect x="8" y="${cy - 3}" width="${W - 16}" height="6" rx="3" fill="#8a8f98"/>`;
-    // collars
-    svg += `<rect x="${cx - 118}" y="${cy - 9}" width="6" height="18" rx="2" fill="#5a5f66"/>`;
-    svg += `<rect x="${cx + 112}" y="${cy - 9}" width="6" height="18" rx="2" fill="#5a5f66"/>`;
-    let offset = 8;
+    svg += `<rect x="${barX}" y="${cy - 3}" width="${barW}" height="6" rx="3" fill="#8a8f98"/>`;
+    // center knurl mark
+    svg += `<rect x="${cx - 1.5}" y="${cy - 5}" width="3" height="10" rx="1.5" fill="#6a6f78"/>`;
+    let offset = inner;
     used.forEach(w => {
       const frac = w / maxW;
       const ph = Math.round(34 + 66 * frac);      // plate height
@@ -1551,6 +1559,10 @@
       }
       offset += pw + 2;
     });
+    // collars snug against the last plate
+    const colX = inner + plateSpan + collarGap;
+    svg += `<rect x="${cx - colX - 7}" y="${cy - 10}" width="7" height="20" rx="2" fill="#5a5f66"/>`;
+    svg += `<rect x="${cx + colX}" y="${cy - 10}" width="7" height="20" rx="2" fill="#5a5f66"/>`;
     svg += `</svg>`;
     return svg;
   }
