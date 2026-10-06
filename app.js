@@ -873,6 +873,13 @@
     });
   }
   const CHANGELOG = [
+    ["v10.90", "Release notes now update automatically."],
+    ["v10.89", "Removed redundant footer pills. Capitalized footer tagline."],
+    ["v10.88", "Privacy page. Slimmer footer."],
+    ["v10.87", "Subtle dot pattern footer background."],
+    ["v10.86", "Version bump to trigger fresh Pages build."],
+    ["v10.85", "Footer easter egg. Homepage greeting."],
+    ["v10.84", "Footer accent dots. Daily training quote."],
     ["v10.83", "Smaller program builder buttons."],
     ["v10.82", "Fixed JS crash that broke the app."],
     ["v10.80", "Back to top button. Removed footer glow."],
