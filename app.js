@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.15", "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"],
     ["v11.14", "Fix radar chart label overlap."],
     ["v11.13", "Movement balance radar on Insights, set-complete micro-animation."],
     ["v11.12", "Fix finish preview layout in settings."],
@@ -3999,7 +4000,9 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
           <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
           <button class="btn btn-ghost btn-sm tempo-toggle" data-tempo="${xi}">Tempo coach</button>
+          ${!isBW && lw ? `<button class="btn btn-ghost btn-sm warmup-toggle" data-warmup="${xi}">Warm up</button>` : ""}
         </div>
+        <div class="warmup-box hidden" id="warmup-${xi}"></div>
         <div class="tempo-box hidden" id="tempo-${xi}">
           <p class="muted" style="font-size:12px;margin:0 0 8px">Paces each rep: slow lowering, a pause, then lifting.</p>
           ${(() => { const tp = getTempo(x.id); return `
@@ -4113,6 +4116,32 @@
     }
     const tt = e.target.closest(".tempo-toggle");
     if (tt) { const box = $("tempo-" + tt.dataset.tempo); if (box) box.classList.toggle("hidden"); stopTempo(); return; }
+    const wut = e.target.closest(".warmup-toggle");
+    if (wut) {
+      const xi = wut.dataset.warmup, box = $("warmup-" + xi);
+      if (box) {
+        const isHidden = box.classList.toggle("hidden");
+        wut.classList.toggle("open", !isHidden);
+        if (!isHidden && !box.dataset.built) {
+          let wKg = null;
+          const wIn = document.querySelector(`input[data-x="${xi}"][data-f="weight"]`);
+          if (wIn && parseFloat(wIn.value) > 0) wKg = toKg(parseFloat(wIn.value));
+          if (!wKg && currentWorkout && currentWorkout.exercises[parseInt(xi, 10)]) {
+            const x = currentWorkout.exercises[parseInt(xi, 10)];
+            wKg = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
+          }
+          const sets = warmupSets(wKg);
+          box.dataset.built = "1";
+          box.innerHTML = sets.length
+            ? `<p class="muted" style="font-size:12px;margin:0 0 8px">Warm-up for ${fmtW(wKg)}. Tap each set when done.</p>` +
+              sets.map((s, si) => `<div class="warmup-row"><button class="set-done warmup-done" aria-label="Mark warm-up set ${si + 1} done">${window.FORGE_ICON("check")}</button><span><b>${fmtW(s.weight)}</b> × ${s.reps} reps</span></div>`).join("")
+            : `<p class="muted" style="font-size:13px;margin:0">Enter a working weight above first.</p>`;
+        }
+      }
+      return;
+    }
+    const wud = e.target.closest(".warmup-done");
+    if (wud) { wud.classList.toggle("hit"); const row = wud.closest(".warmup-row"); if (row) row.classList.toggle("done", wud.classList.contains("hit")); return; }
     const ts = e.target.closest(".tempo-start");
     if (ts) {
       const xi = ts.dataset.x, box = $("tempo-" + xi);
