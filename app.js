@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.00", "Body map uses more width on large screens."],
     ["v10.99", "Footer sticks to bottom on short pages."],
     ["v10.98", "Body map fills available width from tablet landscape up."],
     ["v10.97", "Wider body map and larger heatmap on desktop."],

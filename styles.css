@@ -931,11 +931,11 @@ body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 /* ---------- wide-screen refinements ---------- */
 @media (min-width: 1024px) {
   #view-body {
-    width: min(1400px, calc(100vw - 32px));
+    width: min(1680px, calc(100vw - 32px));
     margin-left: 50%;
     transform: translateX(-50%);
   }
-  .body-layout { grid-template-columns: 1.35fr .8fr; }
+  .body-layout { grid-template-columns: 1.5fr .85fr; width: 100%; }
 }
 @media (min-width: 900px) {
   .heatmap { grid-template-rows: auto repeat(7, 17px); gap: 5px; }
