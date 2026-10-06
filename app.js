@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.14", "Fix radar chart label overlap."],
     ["v11.13", "Movement balance radar on Insights, set-complete micro-animation."],
     ["v11.12", "Fix finish preview layout in settings."],
     ["v11.11", "Live 3D preview for body finish in settings."],
@@ -2032,10 +2033,10 @@
     PATTERNS.forEach((p, i) => {
       const xy = pt(i, 1);
       axes += `<line x1="${cx}" y1="${cy}" x2="${xy[0].toFixed(1)}" y2="${xy[1].toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;
-      const lb = pt(i, 1.24), vl = pt(i, 1.42);
+      const lb = pt(i, 1.24);
       const anchor = Math.abs(lb[0] - cx) < 10 ? "middle" : (lb[0] > cx ? "start" : "end");
       axes += `<text x="${lb[0].toFixed(1)}" y="${(lb[1] + 4).toFixed(1)}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="var(--ink)">${PATTERN_NAMES[p]}</text>`;
-      axes += `<text x="${vl[0].toFixed(1)}" y="${(vl[1] + 4).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--muted)">${vol[p]} sets</text>`;
+      axes += `<text x="${lb[0].toFixed(1)}" y="${(lb[1] + 20).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--muted)">${vol[p]} sets</text>`;
     });
     const poly = PATTERNS.map((p, i) => pt(i, vol[p] / max).map(n => n.toFixed(1)).join(",")).join(" ");
     const dots = PATTERNS.map((p, i) => { const d = pt(i, vol[p] / max); return `<circle cx="${d[0].toFixed(1)}" cy="${d[1].toFixed(1)}" r="4" fill="var(--volt)"/>`; }).join("");
