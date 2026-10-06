@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v10.91", "Release notes show latest 5 with a Show older toggle."],
     ["v10.90", "Release notes now update automatically."],
     ["v10.89", "Removed redundant footer pills. Capitalized footer tagline."],
     ["v10.88", "Privacy page. Slimmer footer."],
@@ -888,7 +889,21 @@
   ];
   const fv = $("footVer"), fc = $("footChangelog");
   if (fv && fc) {
-    fc.innerHTML = CHANGELOG.map(([v, t]) => `<div><b>${v}</b> - ${t}</div>`).join("");
+    const N = 5;
+    const row = ([v, t]) => `<div><b>${v}</b> - ${t}</div>`;
+    const recent = CHANGELOG.slice(0, N).map(row).join("");
+    const older = CHANGELOG.length > N
+      ? `<div class="hidden" id="footOlder">${CHANGELOG.slice(N).map(row).join("")}</div>
+         <button class="foot-more" id="footMore">Show older</button>`
+      : "";
+    fc.innerHTML = recent + older;
+    const more = $("footMore");
+    if (more) more.onclick = e => {
+      e.stopPropagation();
+      const o = $("footOlder");
+      o.classList.toggle("hidden");
+      more.textContent = o.classList.contains("hidden") ? "Show older" : "Show less";
+    };
     fv.onclick = () => fc.classList.toggle("hidden");
   }
   const hg = $("homeGreet");
