@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=10.91" />
+<link rel="stylesheet" href="styles.css?v=10.92" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -405,12 +405,32 @@
 </main>
 
 <section class="view hidden" id="view-privacy">
-  <h2>Privacy</h2>
-  <div class="card" style="max-width:640px">
-    <p><b>Your data stays on your device.</b></p>
-    <p class="muted">FORGE stores everything locally in your browser: workouts, measurements, photos, check-ins, and settings. Nothing is sent to any server.</p>
-    <p class="muted">There is no account, no tracking, and no analytics. If you clear your browser data, your FORGE data goes with it, so use the Backup page to export it.</p>
-    <p class="muted">The 3D body, exercise library, and all features work fully offline after the first load.</p>
+  <div class="priv-hero">
+    <span class="priv-badge"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+    <h2>Privacy</h2>
+    <p class="muted">Your data stays on your device. Period.</p>
+  </div>
+  <div class="priv-list">
+    <div class="priv-row">
+      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span>
+      <div><b>Stored locally</b><p class="muted">Workouts, measurements, photos, check-ins, and settings live in your browser. Nothing is sent to any server.</p></div>
+    </div>
+    <div class="priv-row">
+      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <div><b>No account needed</b><p class="muted">No sign-up, no login, no email. Open the app and train.</p></div>
+    </div>
+    <div class="priv-row">
+      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      <div><b>No tracking</b><p class="muted">No analytics, no ads, no third-party scripts watching you.</p></div>
+    </div>
+    <div class="priv-row">
+      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 20 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg></span>
+      <div><b>Works offline</b><p class="muted">The 3D body, exercise library, and every feature work fully offline after the first load.</p></div>
+    </div>
+    <div class="priv-row">
+      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
+      <div><b>You own your data</b><p class="muted">Clearing browser data erases it, so use the Backup page to export a copy anytime.</p></div>
+    </div>
   </div>
 </section>
 <footer>
@@ -424,7 +444,7 @@
     <p class="foot-quote" id="footQuote"></p>
     <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
     <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v10.91</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
+    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v10.92</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
     <div class="foot-changelog hidden" id="footChangelog"></div>
   </div>
 </footer>

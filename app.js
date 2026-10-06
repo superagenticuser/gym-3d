@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v10.92", "Redesigned privacy page with icon rows."],
     ["v10.91", "Release notes show latest 5 with a Show older toggle."],
     ["v10.90", "Release notes now update automatically."],
     ["v10.89", "Removed redundant footer pills. Capitalized footer tagline."],
