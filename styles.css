@@ -580,9 +580,17 @@ footer::before { content: ""; position: absolute; inset: 0; pointer-events: none
 }
 .tempo-in:focus { outline: none; border-color: var(--volt); }
 .tempo-display { font-weight: 800; font-size: 16px; color: var(--volt); min-width: 70px; }
+.warmup-box {
+  background: var(--surface2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; margin: 8px 0;
+}
+.warmup-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; }
+.warmup-row.done span { opacity: 0.45; text-decoration: line-through; }
+.warmup-row .set-done { width: 34px; height: 34px; }
 /* gym mode: distraction-free, big touch targets */
 body.gym-mode #view-workout .timer, body.gym-mode #view-workout .guide-toggle,
 body.gym-mode #view-workout .tempo-toggle, body.gym-mode #view-workout .tempo-box,
+body.gym-mode #view-workout .warmup-toggle, body.gym-mode #view-workout .warmup-box,
 body.gym-mode #view-workout .ex-note-input, body.gym-mode #view-workout .wo-muscle,
 body.gym-mode #view-workout .superset-badge, body.gym-mode #view-workout .giant-badge, body.gym-mode #woSub { display: none; }
 body.gym-mode #view-workout .set-row2 { gap: 16px; padding: 14px 0; }
