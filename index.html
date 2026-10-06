@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=11.10" />
+<link rel="stylesheet" href="styles.css?v=11.11" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -443,7 +443,7 @@
     <p class="foot-quote" id="footQuote"></p>
     <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
     <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.10</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
+    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.11</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
     <div class="foot-changelog hidden" id="footChangelog"></div>
   </div>
 </footer>
@@ -539,11 +539,14 @@
       <p class="muted setting-note">Shows travel mode and tempo coach in workouts.</p>
       <div class="toggle-row"><span data-i18n="set_motion">Reduce motion</span><button class="toggle" id="tglMotion" role="switch" aria-checked="false"><span class="knob"></span></button></div>
       <p class="setting-label">3D body finish</p>
-      <div class="seg-row" id="finishSeg">
-        <button class="seg" data-finish="standard">Standard</button>
-        <button class="seg" data-finish="chrome">Chrome</button>
-        <button class="seg" data-finish="xray">X-ray</button>
-        <button class="seg" data-finish="matte">Matte</button>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="seg-row" id="finishSeg" style="flex:1;min-width:200px">
+          <button class="seg" data-finish="standard">Standard</button>
+          <button class="seg" data-finish="chrome">Chrome</button>
+          <button class="seg" data-finish="xray">X-ray</button>
+          <button class="seg" data-finish="matte">Matte</button>
+        </div>
+        <div id="finishPreview" style="width:90px;height:120px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel);flex-shrink:0"></div>
       </div>
       <p class="setting-label">Daily workout reminder</p>
       <div style="display:flex;gap:8px;align-items:center">

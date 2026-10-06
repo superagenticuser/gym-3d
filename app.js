@@ -527,6 +527,7 @@
     document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
     if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
   }
+  let finishPreviewViewer = null;
   function openSettings() {
     const grid = $("accentGrid");
     const cur = currentAccent().id;
@@ -535,8 +536,24 @@
       `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`).join("");
     syncSettingsUI();
     $("settingsVeil").classList.remove("hidden");
+    // live 3D preview for the finish selector
+    try {
+      const pc = $("finishPreview");
+      if (pc && !finishPreviewViewer) {
+        finishPreviewViewer = createBodyViewer(pc, { autoRotate: false, dist: 5.2 });
+        if (finishPreviewViewer.setFinish) finishPreviewViewer.setFinish(getSettings().bodyFinish || "standard");
+      } else if (finishPreviewViewer && finishPreviewViewer.setFinish) {
+        finishPreviewViewer.setFinish(getSettings().bodyFinish || "standard");
+      }
+    } catch (e) {}
   }
-  function closeSettings() { $("settingsVeil").classList.add("hidden"); }
+  function closeSettings() {
+    $("settingsVeil").classList.add("hidden");
+    try {
+      if (finishPreviewViewer) { finishPreviewViewer.dispose(); finishPreviewViewer = null; }
+      const pc = $("finishPreview"); if (pc) pc.innerHTML = "";
+    } catch (e) {}
+  }
   function syncSettingsUI() {
     const s = getSettings();
     document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
@@ -899,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.11", "Live 3D preview for body finish in settings."],
     ["v11.10", "Rewrite photo slider with clip-path so images stay aligned."],
     ["v11.09", "Fix body finish setting scope."],
     ["v11.08", "Fix reduced motion override, photo slider alignment, compare dialog header."],
@@ -4372,6 +4390,7 @@
     if (b) {
       const st = getSettings(); st.bodyFinish = b.dataset.finish; saveSettings(st);
       syncFinishUI(); applyBodyFinish(st.bodyFinish);
+      try { if (finishPreviewViewer && finishPreviewViewer.setFinish) finishPreviewViewer.setFinish(st.bodyFinish); } catch (e2) {}
     }
   });
   $("exportData").addEventListener("click", () => {
