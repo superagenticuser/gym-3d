@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.03", "Visual barbell diagram in plate calculator."],
     ["v11.02", "Tighter gap between content and footer."],
     ["v11.01", "Reduced bottom padding before footer."],
     ["v11.00", "Body map uses more width on large screens."],
@@ -1466,6 +1467,45 @@
   }
 
   // PLATE CALCULATOR
+  // Plate colors follow the common competition scheme (kg) / gym scheme (lb)
+  const PLATE_COLORS = {
+    25: "#d43a2f", 20: "#2f6fd4", 15: "#d4a92f", 10: "#3aa655", 5: "#e8e8e8",
+    2.5: "#c0392b", 1.25: "#95a5a6",
+    45: "#d43a2f", 35: "#2f6fd4"
+  };
+  function plateDiagramSVG(used, units) {
+    const maxW = units === "kg" ? 25 : 45;
+    const W = 400, H = 130, cx = W / 2, cy = H / 2;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Barbell loading diagram">`;
+    // bar
+    svg += `<rect x="8" y="${cy - 3}" width="${W - 16}" height="6" rx="3" fill="#8a8f98"/>`;
+    // collars
+    svg += `<rect x="${cx - 118}" y="${cy - 9}" width="6" height="18" rx="2" fill="#5a5f66"/>`;
+    svg += `<rect x="${cx + 112}" y="${cy - 9}" width="6" height="18" rx="2" fill="#5a5f66"/>`;
+    let offset = 8;
+    used.forEach(w => {
+      const frac = w / maxW;
+      const ph = Math.round(34 + 66 * frac);      // plate height
+      const pw = Math.round(9 + 11 * frac);       // plate thickness
+      const color = PLATE_COLORS[w] || "#8a8f98";
+      const dark = color === "#e8e8e8";
+      const y = cy - ph / 2;
+      // right side
+      svg += `<rect x="${cx + offset}" y="${y}" width="${pw}" height="${ph}" rx="3" fill="${color}" stroke="${dark ? "#9aa0a8" : "rgba(0,0,0,0.35)"}" stroke-width="1"/>`;
+      // left side (mirror)
+      svg += `<rect x="${cx - offset - pw}" y="${y}" width="${pw}" height="${ph}" rx="3" fill="${color}" stroke="${dark ? "#9aa0a8" : "rgba(0,0,0,0.35)"}" stroke-width="1"/>`;
+      // weight label on larger plates
+      if (ph >= 52) {
+        const fs = ph >= 80 ? 13 : 11;
+        const tc = (dark || w === 15) ? "#1a1d21" : "#fff";
+        svg += `<text x="${cx + offset + pw / 2}" y="${cy + fs / 3}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${tc}" font-family="inherit">${w}</text>`;
+        svg += `<text x="${cx - offset - pw / 2}" y="${cy + fs / 3}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${tc}" font-family="inherit">${w}</text>`;
+      }
+      offset += pw + 2;
+    });
+    svg += `</svg>`;
+    return svg;
+  }
   function calcPlates() {
     const units = getSettings().units;
     const bar = parseFloat($("plateBar").value) || 0;
@@ -1480,12 +1520,13 @@
     for (const p of plates) {
       while (remaining >= p - 0.001) { used.push(p); remaining -= p; }
     }
+    const diagram = used.length ? `<div class="plate-diagram">${plateDiagramSVG(used, units)}</div>` : "";
     if (remaining > 0.01) {
-      $("plateResult").innerHTML = `<p class="muted">Closest: ${used.length ? used.join(" + ") : "bar only"} per side (${(remaining * 2).toFixed(1)} ${units} short).</p>`;
+      $("plateResult").innerHTML = diagram + `<p class="muted">Closest: ${used.length ? used.join(" + ") : "bar only"} per side (${(remaining * 2).toFixed(1)} ${units} short).</p>`;
     } else {
-      $("plateResult").innerHTML = used.length
-        ? `<p style="font-size:16px"><b>Per side:</b> ${used.join(" + ")} <span class="muted">${units}</span></p>`
-        : `<p class="muted">Just the bar.</p>`;
+      $("plateResult").innerHTML = diagram + (used.length
+        ? `<p style="font-size:16px;margin-top:10px"><b>Per side:</b> ${used.join(" + ")} <span class="muted">${units}</span></p>`
+        : `<p class="muted">Just the bar.</p>`);
     }
   }
   function openPlates() {
