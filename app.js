@@ -900,6 +900,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.06", "Correct barbell anatomy: plates load on the sleeves at the bar ends."],
     ["v11.05", "Tighter barbell diagram: bar and collars hug the plates."],
     ["v11.04", "Last-time beatdown, photo compare slider, grouped equipment swaps, page transitions, 3D body finishes."],
     ["v11.03", "Visual barbell diagram in plate calculator."],
@@ -1525,21 +1526,28 @@
   function plateDiagramSVG(used, units) {
     const maxW = units === "kg" ? 25 : 45;
     const W = 400, H = 130, cx = W / 2, cy = H / 2;
-    // first pass: measure total plate width so the bar and collars hug the plates
+    // real barbell anatomy from the center out: grip shaft, then plates on the
+    // sleeves, then collars, then a short bar tip
     let plateSpan = 0;
     used.forEach(w => { plateSpan += Math.round(9 + 11 * (w / maxW)) + 2; });
-    const inner = 10;                       // gap between center knurl and first plate
-    const collarGap = 6;                    // gap between last plate and collar
-    const gripLen = 70;                     // visible bar beyond collars (hands grip here)
-    const halfBar = inner + plateSpan + collarGap + 8 + gripLen;
+    const shaftHalf = 95;                   // grip area each side of center
+    const collarGap = 4;                    // gap between last plate and collar
+    const tipLen = 14;                      // bar tip beyond the collar
+    const halfBar = shaftHalf + plateSpan + collarGap + 8 + tipLen;
     const barX = cx - halfBar, barW = halfBar * 2;
     let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Barbell loading diagram">`;
-    // bar
+    // bar shaft
     svg += `<rect x="${barX}" y="${cy - 3}" width="${barW}" height="6" rx="3" fill="#8a8f98"/>`;
     // center knurl mark
     svg += `<rect x="${cx - 1.5}" y="${cy - 5}" width="3" height="10" rx="1.5" fill="#6a6f78"/>`;
-    let offset = inner;
-    used.forEach(w => {
+    // knurl rings where the sleeves start
+    svg += `<rect x="${cx - shaftHalf - 1.5}" y="${cy - 5}" width="3" height="10" rx="1.5" fill="#6a6f78"/>`;
+    svg += `<rect x="${cx + shaftHalf - 1.5}" y="${cy - 5}" width="3" height="10" rx="1.5" fill="#6a6f78"/>`;
+    // plates load OUTSIDE-IN: heaviest plate nearest the sleeve start (inside),
+    // lighter plates toward the collar (outside), like real loading
+    const ordered = [...used].sort((a, b) => b - a);
+    let offset = shaftHalf;
+    ordered.forEach(w => {
       const frac = w / maxW;
       const ph = Math.round(34 + 66 * frac);      // plate height
       const pw = Math.round(9 + 11 * frac);       // plate thickness
@@ -1559,8 +1567,8 @@
       }
       offset += pw + 2;
     });
-    // collars snug against the last plate
-    const colX = inner + plateSpan + collarGap;
+    // collars outside the last (lightest) plate
+    const colX = shaftHalf + plateSpan + collarGap;
     svg += `<rect x="${cx - colX - 7}" y="${cy - 10}" width="7" height="20" rx="2" fill="#5a5f66"/>`;
     svg += `<rect x="${cx + colX}" y="${cy - 10}" width="7" height="20" rx="2" fill="#5a5f66"/>`;
     svg += `</svg>`;
