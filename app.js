@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.01", "Reduced bottom padding before footer."],
     ["v11.00", "Body map uses more width on large screens."],
     ["v10.99", "Footer sticks to bottom on short pages."],
     ["v10.98", "Body map fills available width from tablet landscape up."],
