@@ -844,6 +844,13 @@ body.no-adv #travelBtn, body.no-adv .tempo-toggle, body.no-adv .tempo-box { disp
 .dlg-btns { display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; margin-top: 16px; }
 .dlg-btns .btn-danger-solid { background: #f87171; color: #0b0d12; border: none; }
 /* ---------- motion polish (disabled when reduceMotion is on: body.rm) ---------- */
+/* set-complete micro-animation: checkmark pop plus a quick glow sweep on the row */
+body:not(.rm) .set-done.just-hit { animation: setPop .32s cubic-bezier(.2,1.6,.4,1); }
+@keyframes setPop { 0% { transform: scale(.55); } 55% { transform: scale(1.18); } 100% { transform: scale(1); } }
+body:not(.rm) .set-done.just-hit .ic { animation: checkPop .3s ease; }
+@keyframes checkPop { from { transform: scale(0) rotate(-30deg); } to { transform: scale(1) rotate(0); } }
+body:not(.rm) .set-row2.set-flash { animation: rowFlash .45s ease; border-radius: 10px; }
+@keyframes rowFlash { 0% { background: color-mix(in srgb, var(--volt) 20%, transparent); } 100% { background: transparent; } }
 body:not(.rm) .btn { transition: transform .12s ease, background .15s ease, border-color .15s ease; }
 body:not(.rm) .btn:active { transform: scale(.96); }
 body:not(.rm) .view:not(.hidden) { animation: viewIn .24s ease; }
