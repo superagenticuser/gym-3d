@@ -107,6 +107,12 @@
     const rim = new THREE.DirectionalLight(0x7c8cff, 0.85); rim.position.set(-4, 3, -4); scene.add(rim);
     const fill = new THREE.DirectionalLight(0xdde4ff, 0.35); fill.position.set(0, 2, 6); scene.add(fill);
 
+    const BODY_FINISHES = {
+      standard: { base: 0x3b4356, neutral: 0x222836, roughness: 0.45, metalness: 0.08, opacity: 1 },
+      chrome: { base: 0x9aa4b8, neutral: 0x5a6272, roughness: 0.15, metalness: 0.9, opacity: 1 },
+      xray: { base: 0x7cc4ff, neutral: 0x3a5a7a, roughness: 0.3, metalness: 0.1, opacity: 0.35 },
+      matte: { base: 0x4a4458, neutral: 0x2a2733, roughness: 0.9, metalness: 0.0, opacity: 1 }
+    };
     const VTHEME = { base: 0x3b4356, neutral: 0x222836, primary: 0x5e2a22 };
     const vTheme = VTHEME;
 
@@ -457,11 +463,32 @@
         if (mats[id]) { mats[id].emissive.setHex(0xff2222); mats[id].emissiveIntensity = 0.9; }
       });
     }
+    function setFinish(name) {
+      const f = BODY_FINISHES[name] || BODY_FINISHES.standard;
+      const apply = m => {
+        m.color.setHex(f.base);
+        m.roughness = f.roughness;
+        m.metalness = f.metalness;
+        m.opacity = f.opacity;
+        m.transparent = f.opacity < 1;
+        m.needsUpdate = true;
+      };
+      apply(baseMat);
+      neutralMat.color.setHex(f.neutral);
+      neutralMat.roughness = f.roughness;
+      neutralMat.metalness = f.metalness;
+      neutralMat.opacity = f.opacity;
+      neutralMat.transparent = f.opacity < 1;
+      neutralMat.needsUpdate = true;
+      for (const id in mats) apply(mats[id]);
+      try { localStorage.setItem("forge-body-finish", name); } catch (e) {}
+    }
     return {
       highlight,
       setAccent,
       setHeat,
       setPain,
+      setFinish,
       setView(v, instant) {
         let t = (v === "back") ? Math.PI : 0;
         t += Math.round((rotY - t) / (Math.PI * 2)) * Math.PI * 2;
@@ -873,6 +900,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.04", "Last-time beatdown, photo compare slider, grouped equipment swaps, page transitions, 3D body finishes."],
     ["v11.03", "Visual barbell diagram in plate calculator."],
     ["v11.02", "Tighter gap between content and footer."],
     ["v11.01", "Reduced bottom padding before footer."],
@@ -981,6 +1009,13 @@
     clearDemos();
     if (timerInt) { clearInterval(timerInt); timerInt = null; }
     views.forEach(v => { const s = $("view-" + v); if (s) s.classList.toggle("hidden", v !== name); });
+    // page transition: animate the incoming view
+    const incoming = $("view-" + name);
+    if (incoming && !getSettings().reduceMotion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      incoming.classList.remove("view-enter");
+      void incoming.offsetWidth; // restart animation
+      incoming.classList.add("view-enter");
+    }
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
       (name === "detail" && a.dataset.nav === "exercises") ||
       ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
@@ -1079,11 +1114,16 @@
       `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
     ).join("");
     const myEq = getSettings().myEquipment || [];
-    const swaps = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary && x.equipment !== ex.equipment)
-      .sort((a, b) => (myEq.includes(b.equipment) ? 1 : 0) - (myEq.includes(a.equipment) ? 1 : 0))
-      .slice(0, 3);
-    $("dSwaps").innerHTML = swaps.length ? swaps.map(x =>
-      `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="tag">${eqName[x.equipment]}</span>${window.FORGE_ICON("arrow-right")}</button>`
+    const altPool = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary && x.equipment !== ex.equipment);
+    // group by equipment, prioritize user's own equipment
+    const byEq = {};
+    altPool.forEach(x => { (byEq[x.equipment] = byEq[x.equipment] || []).push(x); });
+    const eqOrder = Object.keys(byEq).sort((a, b) => (myEq.includes(b) ? 1 : 0) - (myEq.includes(a) ? 1 : 0));
+    $("dSwaps").innerHTML = eqOrder.length ? eqOrder.map(eq =>
+      `<div class="swap-group"><p class="swap-eq">${eqName[eq]}${myEq.includes(eq) ? ` <span class="tag volt-tag" style="font-size:10px">yours</span>` : ""}</p>` +
+      byEq[eq].slice(0, 4).map(x =>
+        `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="muted" style="font-size:12px">${cap1(x.level)}</span>${window.FORGE_ICON("arrow-right")}</button>`
+      ).join("") + `</div>`
     ).join("") : `<p class="muted">No swaps needed, this one covers it.</p>`;
     // 1RM estimator from logged sets (Epley formula)
     const log = getLog();
@@ -1246,7 +1286,15 @@
     $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
     $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
     $("bPain").onclick = () => { window._bodyMode = "pain"; syncMode(); };
+    const bf = $("bodyFinish");
+    if (bf) bf.addEventListener("change", () => { if (window._bodyViewer) window._bodyViewer.setFinish(bf.value); });
     window._bodyViewer = v;
+    try {
+      const savedFinish = localStorage.getItem("forge-body-finish") || "standard";
+      v.setFinish(savedFinish);
+      const fs = $("bodyFinish");
+      if (fs) fs.value = savedFinish;
+    } catch (e) {}
     selectMuscle(selected || "chest");
   }
   function selectMuscle(groupId) {
@@ -1855,6 +1903,30 @@
       }
     }
     return null;
+  }
+  function lastSessionFull(exId) {
+    // returns the most recent logged session's sets for this exercise
+    const log = getLog();
+    for (let i = log.length - 1; i >= 0; i--) {
+      const x = (log[i].exercises || []).find(e => e.id === exId);
+      if (x && x.sets && x.sets.length) {
+        return { date: log[i].date, sets: x.sets.map(st => ({ weight: st.weight || 0, reps: st.reps || 0 })) };
+      }
+    }
+    return null;
+  }
+  function lastSessionSummary(ls) {
+    if (!ls || !ls.sets.length) return "";
+    const units = unitLabel();
+    // compact: group identical sets, e.g. "3x8 @ 60kg"
+    const groups = [];
+    ls.sets.forEach(st => {
+      const key = st.weight + "x" + st.reps;
+      const g = groups.find(g => g.key === key);
+      if (g) g.n++;
+      else groups.push({ key, n: 1, weight: st.weight, reps: st.reps });
+    });
+    return groups.map(g => `${g.n}x${g.reps} @ ${fmtW(g.weight)}${units}`).join(", ");
   }
   function checkDeload() {
     const log = getLog();
@@ -3199,14 +3271,62 @@
     const veil = document.createElement("div");
     veil.className = "modal-veil";
     veil.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:640px">
-      <div class="modal-head"><h3>Compare photos</h3><button class="modal-x" aria-label="Close"></button></div>
-      <div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><img src="${a.src}" style="width:100%;border-radius:12px" alt="Photo ${a.date}" /><p class="muted" style="text-align:center;margin-top:6px">${a.date}</p></div>
-        <div><img src="${b.src}" style="width:100%;border-radius:12px" alt="Photo ${b.date}" /><p class="muted" style="text-align:center;margin-top:6px">${b.date}</p></div>
-      </div></div>
+      <div class="modal-head"><h3>Compare photos</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="seg-ctrl" role="tablist">
+            <button class="seg-btn active" data-cmode="side">Side by side</button>
+            <button class="seg-btn" data-cmode="slider">Slider</button>
+          </div>
+          <button class="modal-x" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="cmp-side" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><img src="${a.src}" style="width:100%;border-radius:12px" alt="Photo ${a.date}" /><p class="muted" style="text-align:center;margin-top:6px">${a.date}</p></div>
+          <div><img src="${b.src}" style="width:100%;border-radius:12px" alt="Photo ${b.date}" /><p class="muted" style="text-align:center;margin-top:6px">${b.date}</p></div>
+        </div>
+        <div class="cmp-slider-wrap hidden">
+          <div class="cmp-slider" id="cmpSlider">
+            <img class="cmp-img-base" src="${b.src}" alt="Photo ${b.date}" />
+            <div class="cmp-img-top" style="background-image:url(${a.src})"></div>
+            <div class="cmp-handle"><div class="cmp-grip"></div></div>
+            <span class="cmp-label cmp-label-a">${a.date}</span>
+            <span class="cmp-label cmp-label-b">${b.date}</span>
+          </div>
+          <p class="muted" style="text-align:center;font-size:12px;margin-top:8px">Drag the handle to compare</p>
+        </div>
+      </div>
     </div>`;
     veil.querySelector(".modal-x").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
     veil.addEventListener("click", e => { if (e.target === veil || e.target.closest(".modal-x")) veil.remove(); });
+    // mode toggle
+    veil.querySelectorAll("[data-cmode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        veil.querySelectorAll("[data-cmode]").forEach(b => b.classList.toggle("active", b === btn));
+        const slider = btn.dataset.cmode === "slider";
+        veil.querySelector(".cmp-side").classList.toggle("hidden", slider);
+        veil.querySelector(".cmp-slider-wrap").classList.toggle("hidden", !slider);
+      });
+    });
+    // slider drag logic
+    const sliderEl = veil.querySelector("#cmpSlider");
+    const top = veil.querySelector(".cmp-img-top");
+    const handle = veil.querySelector(".cmp-handle");
+    let dragging = false;
+    const setPos = clientX => {
+      const r = sliderEl.getBoundingClientRect();
+      let pct = ((clientX - r.left) / r.width) * 100;
+      pct = Math.max(2, Math.min(98, pct));
+      top.style.width = pct + "%";
+      handle.style.left = pct + "%";
+    };
+    handle.addEventListener("pointerdown", e => { dragging = true; handle.setPointerCapture(e.pointerId); });
+    handle.addEventListener("pointermove", e => { if (dragging) setPos(e.clientX); });
+    handle.addEventListener("pointerup", () => dragging = false);
+    handle.addEventListener("pointercancel", () => dragging = false);
+    sliderEl.addEventListener("pointerdown", e => { if (e.target !== handle && !handle.contains(e.target)) setPos(e.clientX); });
+    // init at 50%
+    requestAnimationFrame(() => { top.style.width = "50%"; handle.style.left = "50%"; });
     document.body.appendChild(veil);
   }
 
@@ -3773,7 +3893,7 @@
           ${x._swapped ? `<span class="tag volt-tag">Travel swap</span>` : ""}
           <span class="tag">${x.sets} × ${esc(x.reps)}</span>
         </div>
-        ${sug && sug.suggested > 0 ? `<p class="muted" style="font-size:13px;margin:4px 0;display:flex;align-items:center;gap:6px">${window.FORGE_ICON ? window.FORGE_ICON("lightbulb") : ""} Last: ${fmtW(sug.last)} × ${sug.reps} → try ${fmtW(sug.suggested)}</p>` : ""}
+        ${(() => { const ls = lastSessionFull(x.id); return ls ? `<p class="last-time-line" style="font-size:13px;margin:6px 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="muted">Last time:</span> <b>${esc(lastSessionSummary(ls))}</b><span class="beat-badge hidden" id="beat-${xi}"></span></p>` : ""; })()}
         <input class="ex-note-input" data-x="${xi}" placeholder="Note for next time…" value="${esc(note)}" aria-label="Exercise note">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
           <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
@@ -3818,6 +3938,30 @@
     }
   }
 
+  function updateBeatdown(xi) {
+    const badge = $("beat-" + xi);
+    if (!badge || !currentWorkout || !currentWorkout.exercises[xi]) return;
+    const woEx = currentWorkout.exercises[xi];
+    const ls = lastSessionFull(woEx.id);
+    if (!ls) { badge.classList.add("hidden"); return; }
+    // current completed volume (from DOM inputs)
+    let curVol = 0, curSets = 0;
+    document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).forEach(btn => {
+      const si = parseInt(btn.dataset.s, 10);
+      const wIn = document.querySelector(`input[data-x="${xi}"][data-s="${si}"][data-f="weight"], input[data-x="${xi}"][data-s="${si}"][data-f="added"]`);
+      const rIn = document.querySelector(`input[data-x="${xi}"][data-s="${si}"][data-f="reps"]`);
+      const w = wIn ? (parseFloat(wIn.value) || 0) : 0;
+      const r = rIn ? (parseInt(rIn.value) || 0) : 0;
+      curVol += w * r; curSets++;
+    });
+    const lastVol = ls.sets.reduce((a, st) => a + st.weight * st.reps, 0);
+    if (curSets > 0 && curVol > lastVol) {
+      badge.textContent = "Beating last time";
+      badge.classList.remove("hidden");
+    } else {
+      badge.classList.add("hidden");
+    }
+  }
   document.addEventListener("click", e => {
     const gt = e.target.closest(".guide-toggle");
     if (gt) {
@@ -3833,6 +3977,7 @@
       const wasHit = sd.classList.contains("hit");
       sd.classList.toggle("hit");
       if (!wasHit) buzz(15);
+      try { updateBeatdown(parseInt(sd.dataset.x, 10)); } catch (e2) {}
       if (!wasHit && getSettings().autoRest) {
         const xi = parseInt(sd.dataset.x, 10);
         const woEx = currentWorkout && currentWorkout.exercises[xi];
