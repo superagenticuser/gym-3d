@@ -899,6 +899,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.08", "Fix reduced motion override, photo slider alignment, compare dialog header."],
     ["v11.07", "Body finish moved to settings (applies everywhere); fixed reduced motion toggle."],
     ["v11.06", "Correct barbell anatomy: plates load on the sleeves at the bar ends."],
     ["v11.05", "Tighter barbell diagram: bar and collars hug the plates."],
@@ -1011,13 +1012,6 @@
     clearDemos();
     if (timerInt) { clearInterval(timerInt); timerInt = null; }
     views.forEach(v => { const s = $("view-" + v); if (s) s.classList.toggle("hidden", v !== name); });
-    // page transition: animate the incoming view
-    const incoming = $("view-" + name);
-    if (incoming && !getSettings().reduceMotion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      incoming.classList.remove("view-enter");
-      void incoming.offsetWidth; // restart animation
-      incoming.classList.add("view-enter");
-    }
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
       (name === "detail" && a.dataset.nav === "exercises") ||
       ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
@@ -3290,13 +3284,14 @@
     const veil = document.createElement("div");
     veil.className = "modal-veil";
     veil.innerHTML = `<div class="modal" role="dialog" aria-modal="true" style="max-width:640px">
-      <div class="modal-head"><h3>Compare photos</h3>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="seg-ctrl" role="tablist">
-            <button class="seg-btn active" data-cmode="side">Side by side</button>
-            <button class="seg-btn" data-cmode="slider">Slider</button>
-          </div>
+      <div class="modal-head" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <h3 style="margin:0">Compare photos</h3>
           <button class="modal-x" aria-label="Close"></button>
+        </div>
+        <div class="seg-ctrl" role="tablist" style="align-self:center">
+          <button class="seg-btn active" data-cmode="side">Side by side</button>
+          <button class="seg-btn" data-cmode="slider">Slider</button>
         </div>
       </div>
       <div class="modal-body">

@@ -252,8 +252,8 @@ footer::before { content: ""; position: absolute; inset: 0; pointer-events: none
   -webkit-mask-image: radial-gradient(520px 220px at 50% 20%, black, transparent 75%);
   mask-image: radial-gradient(520px 220px at 50% 20%, black, transparent 75%); }
 .cmp-slider { position: relative; width: 100%; aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; touch-action: none; user-select: none; }
-.cmp-img-base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cmp-img-top { position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background-size: cover; background-position: left center; border-right: 2px solid var(--volt); }
+.cmp-img-base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.cmp-img-top { position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background-size: cover; background-position: center; border-right: 2px solid var(--volt); }
 .cmp-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 36px; margin-left: -18px; cursor: ew-resize; display: flex; align-items: center; justify-content: center; touch-action: none; }
 .cmp-grip { width: 36px; height: 36px; border-radius: 50%; background: var(--volt); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
 .cmp-grip::before, .cmp-grip::after { content: ""; border: solid #111; border-width: 0 2.5px 2.5px 0; padding: 4px; }
@@ -270,9 +270,6 @@ footer::before { content: ""; position: absolute; inset: 0; pointer-events: none
 .swap-card { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; color: var(--text); }
 .swap-card b { flex: 1; font-size: 14px; }
 .swap-card svg { width: 16px; height: 16px; color: var(--volt); flex-shrink: 0; }
-@keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.view-enter { animation: viewIn 0.28s ease-out; }
-@media (prefers-reduced-motion: reduce) { .view-enter { animation: none; } }
 .beat-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--volt); color: #111; text-transform: uppercase; letter-spacing: 0.4px; }
 .beat-badge.hidden { display: none; }
 .last-time-line b { color: var(--text); }
@@ -847,6 +844,8 @@ body.no-adv #travelBtn, body.no-adv .tempo-toggle, body.no-adv .tempo-box { disp
 body:not(.rm) .btn { transition: transform .12s ease, background .15s ease, border-color .15s ease; }
 body:not(.rm) .btn:active { transform: scale(.96); }
 body:not(.rm) .view:not(.hidden) { animation: viewIn .24s ease; }
+/* bulletproof: kill all animation when reduced motion is on */
+body.rm *, body.rm *::before, body.rm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } }
 body:not(.rm) .stat-card, body:not(.rm) .mini-card, body:not(.rm) .prog-card, body:not(.rm) .ex-card { animation: cardIn .3s ease backwards; }
 @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } }
