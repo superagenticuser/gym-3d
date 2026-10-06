@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.02", "Tighter gap between content and footer."],
     ["v11.01", "Reduced bottom padding before footer."],
     ["v11.00", "Body map uses more width on large screens."],
     ["v10.99", "Footer sticks to bottom on short pages."],
