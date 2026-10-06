@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v10.96", "Centered privacy cards on wide screens."],
     ["v10.95", "Privacy page back inside main, hero badge restored."],
     ["v10.94", "Privacy page uses standard page title pattern."],
     ["v10.93", "Fixed privacy page spacing and accent colors."],

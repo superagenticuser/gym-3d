@@ -916,7 +916,7 @@ body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 .foot-more { background: none; border: none; color: var(--volt); font-size: 12px; cursor: pointer; padding: 4px 0 0; }
 .foot-more:hover { text-decoration: underline; }
 
-.priv-list { max-width: 620px; display: flex; flex-direction: column; gap: 12px; }
+.priv-list { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .priv-row { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
 .priv-row b { display: block; margin-bottom: 4px; font-size: 15px; }
 .priv-row p { margin: 0; font-size: 14px; line-height: 1.5; }
