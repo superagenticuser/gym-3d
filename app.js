@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.16", "Fix doubled unit in last-time summary (was showing kg twice)"],
     ["v11.15", "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"],
     ["v11.14", "Fix radar chart label overlap."],
     ["v11.13", "Movement balance radar on Insights, set-complete micro-animation."],
@@ -1954,7 +1955,6 @@
   }
   function lastSessionSummary(ls) {
     if (!ls || !ls.sets.length) return "";
-    const units = unitLabel();
     // compact: group identical sets, e.g. "3x8 @ 60kg"
     const groups = [];
     ls.sets.forEach(st => {
@@ -1963,7 +1963,7 @@
       if (g) g.n++;
       else groups.push({ key, n: 1, weight: st.weight, reps: st.reps });
     });
-    return groups.map(g => `${g.n}x${g.reps} @ ${fmtW(g.weight)}${units}`).join(", ");
+    return groups.map(g => `${g.n}x${g.reps} @ ${fmtW(g.weight)}`).join(", ");
   }
   function checkDeload() {
     const log = getLog();
