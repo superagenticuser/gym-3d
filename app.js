@@ -899,6 +899,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.10", "Rewrite photo slider with clip-path so images stay aligned."],
     ["v11.09", "Fix body finish setting scope."],
     ["v11.08", "Fix reduced motion override, photo slider alignment, compare dialog header."],
     ["v11.07", "Body finish moved to settings (applies everywhere); fixed reduced motion toggle."],
@@ -3303,7 +3304,7 @@
         <div class="cmp-slider-wrap hidden">
           <div class="cmp-slider" id="cmpSlider">
             <img class="cmp-img-base" src="${b.src}" alt="Photo ${b.date}" />
-            <div class="cmp-img-top" style="background-image:url(${a.src})"></div>
+            <img class="cmp-img-top" src="${a.src}" alt="Photo ${a.date}" />
             <div class="cmp-handle"><div class="cmp-grip"></div></div>
             <span class="cmp-label cmp-label-a">${a.date}</span>
             <span class="cmp-label cmp-label-b">${b.date}</span>
@@ -3323,7 +3324,7 @@
         veil.querySelector(".cmp-slider-wrap").classList.toggle("hidden", !slider);
       });
     });
-    // slider drag logic
+    // slider drag logic: clip-path keeps both images full-size and aligned
     const sliderEl = veil.querySelector("#cmpSlider");
     const top = veil.querySelector(".cmp-img-top");
     const handle = veil.querySelector(".cmp-handle");
@@ -3332,7 +3333,7 @@
       const r = sliderEl.getBoundingClientRect();
       let pct = ((clientX - r.left) / r.width) * 100;
       pct = Math.max(2, Math.min(98, pct));
-      top.style.width = pct + "%";
+      top.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
       handle.style.left = pct + "%";
     };
     handle.addEventListener("pointerdown", e => { dragging = true; handle.setPointerCapture(e.pointerId); });
@@ -3341,7 +3342,7 @@
     handle.addEventListener("pointercancel", () => dragging = false);
     sliderEl.addEventListener("pointerdown", e => { if (e.target !== handle && !handle.contains(e.target)) setPos(e.clientX); });
     // init at 50%
-    requestAnimationFrame(() => { top.style.width = "50%"; handle.style.left = "50%"; });
+    requestAnimationFrame(() => { top.style.clipPath = "inset(0 50% 0 0)"; handle.style.left = "50%"; });
     document.body.appendChild(veil);
   }
 
