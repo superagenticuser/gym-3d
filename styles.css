@@ -925,3 +925,14 @@ body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 .priv-hero { text-align: center; padding: 0 0 8px; }
 .priv-hero h2 { margin: 14px 0 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
 .priv-badge { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 20px; background: color-mix(in srgb, var(--volt) 14%, transparent); color: var(--volt); }
+
+/* ---------- wide-screen refinements ---------- */
+@media (min-width: 1300px) {
+  #view-body { margin-left: -70px; margin-right: -70px; }
+  .body-layout { grid-template-columns: 1.35fr .8fr; }
+}
+@media (min-width: 900px) {
+  .heatmap { grid-template-rows: auto repeat(7, 17px); gap: 5px; }
+  .heatmap .hm-day { width: 17px; height: 17px; border-radius: 4px; }
+  .heatmap-legend .hm-day { width: 15px; height: 15px; }
+}
