@@ -498,6 +498,8 @@ footer::before { content: ""; position: absolute; inset: 0; pointer-events: none
 /* ================= v6: training intelligence ================= */
 /* settings extras */
 .modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; }
+.seg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg-grid .seg { text-align: center; }
 .seg-row { display: flex; gap: 8px; }
 .seg {
   flex: 1; padding: 10px; border-radius: 12px; cursor: pointer;

@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.12", "Fix finish preview layout in settings."],
     ["v11.11", "Live 3D preview for body finish in settings."],
     ["v11.10", "Rewrite photo slider with clip-path so images stay aligned."],
     ["v11.09", "Fix body finish setting scope."],
