@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v10.95", "Privacy page back inside main, hero badge restored."],
     ["v10.94", "Privacy page uses standard page title pattern."],
     ["v10.93", "Fixed privacy page spacing and accent colors."],
     ["v10.92", "Redesigned privacy page with icon rows."],

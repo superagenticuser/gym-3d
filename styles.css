@@ -921,3 +921,7 @@ body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 .priv-row b { display: block; margin-bottom: 4px; font-size: 15px; }
 .priv-row p { margin: 0; font-size: 14px; line-height: 1.5; }
 .priv-ico { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: color-mix(in srgb, var(--volt) 12%, transparent); color: var(--volt); }
+
+.priv-hero { text-align: center; padding: 0 0 8px; }
+.priv-hero h2 { margin: 14px 0 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.priv-badge { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 20px; background: color-mix(in srgb, var(--volt) 14%, transparent); color: var(--volt); }
