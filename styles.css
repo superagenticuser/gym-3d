@@ -927,8 +927,12 @@ body:not(.rm) .sheet { animation: sheetUp .25s ease; }
 .priv-badge { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 20px; background: color-mix(in srgb, var(--volt) 14%, transparent); color: var(--volt); }
 
 /* ---------- wide-screen refinements ---------- */
-@media (min-width: 1300px) {
-  #view-body { margin-left: -70px; margin-right: -70px; }
+@media (min-width: 1024px) {
+  #view-body {
+    width: min(1400px, calc(100vw - 32px));
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
   .body-layout { grid-template-columns: 1.35fr .8fr; }
 }
 @media (min-width: 900px) {
