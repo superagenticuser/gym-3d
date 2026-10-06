@@ -873,6 +873,7 @@
     });
   }
   const CHANGELOG = [
+    ["v10.94", "Privacy page uses standard page title pattern."],
     ["v10.93", "Fixed privacy page spacing and accent colors."],
     ["v10.92", "Redesigned privacy page with icon rows."],
     ["v10.91", "Release notes show latest 5 with a Show older toggle."],
