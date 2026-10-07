@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.27", "Move recovery dashboard to own section on body page"],
     ["v11.26", "Fix recovery suggestion card, ensure body dashboard renders"],
     ["v11.25", "Move recovery dashboard to 3D Body page"],
     ["v11.24", "Fix goals not refreshing after add"],
