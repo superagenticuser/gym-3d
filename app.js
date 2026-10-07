@@ -918,6 +918,8 @@
     });
   }
   const CHANGELOG = [
+    ["v11.30", "Volume count-up shows whole numbers only"],
+    ["v11.29", "Match recovery dashboard card style to body panel"],
     ["v11.28", "Compact workout complete buttons to one row with icons"],
     ["v11.27", "Move recovery dashboard to own section on body page"],
     ["v11.26", "Fix recovery suggestion card, ensure body dashboard renders"],
@@ -3738,7 +3740,7 @@
       <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>`;
       body.querySelectorAll("[data-cu]").forEach(b => {
         const v = parseFloat(b.dataset.cu), f = b.dataset.cufmt;
-        countUp(b, v, f === "w" ? (x => fmtW(x)) : f === "pct" ? (x => Math.round(x) + "%") : undefined);
+        countUp(b, v, f === "w" ? (x => Math.round(fromKg(x)).toLocaleString() + " " + unitLabel()) : f === "pct" ? (x => Math.round(x) + "%") : undefined);
       });
     } else if (tab === "history") {
       const byDate = {};
