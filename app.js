@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.18", "Fix nav pill glide, week ring text and empty data, empty state icons"],
     ["v11.17", "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"],
     ["v11.16", "Fix doubled unit in last-time summary (was showing kg twice)"],
     ["v11.15", "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"],
@@ -1046,15 +1047,15 @@
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
       (name === "detail" && a.dataset.nav === "exercises") ||
       ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
-    // slide the nav indicator under the active link
+    // slide the nav pill behind the active link
     requestAnimationFrame(() => {
-      const active = document.querySelector(".nav a.active"), ind = $("navIndicator"), nav = document.querySelector(".nav");
-      if (active && ind && nav) {
+      const active = document.querySelector(".nav a.active"), pill = $("navPill"), nav = document.querySelector(".nav");
+      if (active && pill && nav) {
         const nr = nav.getBoundingClientRect(), ar = active.getBoundingClientRect();
-        ind.style.left = (ar.left - nr.left) + "px";
-        ind.style.width = ar.width + "px";
-        ind.style.opacity = "1";
-      } else if (ind) ind.style.opacity = "0";
+        pill.style.left = (ar.left - nr.left) + "px";
+        pill.style.width = ar.width + "px";
+        pill.style.opacity = "1";
+      } else if (pill) pill.style.opacity = "0";
     });
     window.scrollTo(0, 0);
   }
@@ -1087,16 +1088,18 @@
         .reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0), 0);
       const thisW = vol(monday, now), lastW = vol(lastMon, monday);
       const streak = workoutStreak();
-      if (!log.length) { hp.innerHTML = ""; return; }
+      if (!log.length || (thisW === 0 && lastW === 0)) { hp.innerHTML = ""; return; }
       const pct = lastW > 0 ? Math.min(100, Math.round(thisW / lastW * 100)) : (thisW > 0 ? 100 : 0);
       const circ = 2 * Math.PI * 34, off = circ * (1 - pct / 100);
       hp.innerHTML = `<div class="ring-wrap">
-        <svg viewBox="0 0 84 84" width="84" height="84" class="prog-ring">
-          <circle cx="42" cy="42" r="34" fill="none" stroke="var(--line)" stroke-width="8"/>
-          <circle cx="42" cy="42" r="34" fill="none" stroke="var(--volt)" stroke-width="8" stroke-linecap="round"
-            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 42 42)" class="ring-fill"/>
-          <text x="42" y="47" text-anchor="middle" class="ring-pct">${pct}%</text>
-        </svg>
+        <div class="ring-holder">
+          <svg viewBox="0 0 84 84" width="84" height="84" class="prog-ring">
+            <circle cx="42" cy="42" r="34" fill="none" stroke="var(--line)" stroke-width="8"/>
+            <circle cx="42" cy="42" r="34" fill="none" stroke="var(--volt)" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 42 42)" class="ring-fill"/>
+          </svg>
+          <span class="ring-pct-html">${pct}%</span>
+        </div>
         <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} kg vs ${Math.round(lastW).toLocaleString()} kg last week</span>
         ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
       </div>`;
@@ -2060,7 +2063,7 @@
   function radarSection() {
     const vol = patternVolume(28);
     const total = PATTERNS.reduce((a, p) => a + vol[p], 0);
-    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3>` + emptyArt("scale", "No training data in the last 28 days", "Log workouts and your movement balance will appear here.");
+    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3>` + emptyArt("target", "No training data in the last 28 days", "Log workouts and your movement balance will appear here.");
     const max = Math.max.apply(null, PATTERNS.map(p => vol[p]).concat([1]));
     const W = 400, H = 360, cx = 200, cy = 180, R = 115;
     const pt = (i, frac) => {
@@ -2135,7 +2138,7 @@
       weeks.push({ label: start.toLocaleDateString(undefined, { month: "short", day: "numeric" }), avg: n ? sum / n : null });
     }
     if (!weeks.some(w => w.avg != null)) {
-      return `<h3 style="margin-top:20px">RPE trend</h3>` + emptyArt("chart", "No RPE data yet", "Log RPE on your sets and the trend will appear here.");
+      return `<h3 style="margin-top:20px">RPE trend</h3>` + emptyArt("chart-column", "No RPE data yet", "Log RPE on your sets and the trend will appear here.");
     }
     const W = 600, H = 220, padL = 34, padR = 12, padT = 12, padB = 28;
     const iw = W - padL - padR, ih = H - padT - padB;
