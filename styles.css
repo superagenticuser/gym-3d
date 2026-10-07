@@ -655,8 +655,8 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .empty-note { color: var(--muted); text-align: center; padding: 40px 20px; max-width: 320px; margin-left: auto; margin-right: auto; }
 .empty-note b { font-size: var(--t-card); color: var(--ink); display: block; margin-bottom: 6px; }
 /* recovery dashboard */
-.rec-dash { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
-.rec-dash h3 { margin: 0 0 4px; font-size: var(--t-card); }
+.rec-dash { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; }
+.rec-dash h3 { margin: 0 0 6px; font-size: 24px; }
 .rec-suggest { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
 .rec-suggest b { color: var(--volt); }
 .rec-suggest-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 0 0 16px; }
