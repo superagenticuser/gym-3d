@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.26", "Fix recovery suggestion card, ensure body dashboard renders"],
     ["v11.25", "Move recovery dashboard to 3D Body page"],
     ["v11.24", "Fix goals not refreshing after add"],
     ["v11.23", "Fix volume records row layout overlap"],
@@ -1177,7 +1178,7 @@
       if (!el) return;
       const r = getRecoveryStats();
       if (!r || !r.best) { el.innerHTML = ""; return; }
-      el.innerHTML = `<p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p>`;
+      el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p></div>`;
     })();
     // goal tracker
     (function () {
@@ -4818,6 +4819,7 @@
     else if (parts[0] === "body") {
       show("body");
       renderBody(params.get("m"));
+      try { renderBodyRecovery(); } catch (e) {}
       if (params.get("replay") && window._replayEntry) {
         setTimeout(() => startReplay(window._replayEntry), 800);
       }
