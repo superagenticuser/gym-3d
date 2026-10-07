@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.19", "Fix nav pill glide for scrolled nav positions"],
     ["v11.18", "Fix nav pill glide, week ring text and empty data, empty state icons"],
     ["v11.17", "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"],
     ["v11.16", "Fix doubled unit in last-time summary (was showing kg twice)"],
@@ -1048,15 +1049,22 @@
       (name === "detail" && a.dataset.nav === "exercises") ||
       ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
     // slide the nav pill behind the active link
-    requestAnimationFrame(() => {
+    const positionNavPill = () => {
       const active = document.querySelector(".nav a.active"), pill = $("navPill"), nav = document.querySelector(".nav");
       if (active && pill && nav) {
         const nr = nav.getBoundingClientRect(), ar = active.getBoundingClientRect();
-        pill.style.left = (ar.left - nr.left) + "px";
+        pill.style.left = (ar.left - nr.left + nav.scrollLeft) + "px";
         pill.style.width = ar.width + "px";
         pill.style.opacity = "1";
       } else if (pill) pill.style.opacity = "0";
-    });
+    };
+    requestAnimationFrame(positionNavPill);
+    // keep the pill aligned when the nav scrolls horizontally
+    const _nav = document.querySelector(".nav");
+    if (_nav && !_nav._pillScrollBound) {
+      _nav._pillScrollBound = true;
+      _nav.addEventListener("scroll", () => requestAnimationFrame(positionNavPill), { passive: true });
+    }
     window.scrollTo(0, 0);
   }
 

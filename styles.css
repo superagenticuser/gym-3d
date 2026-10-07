@@ -232,7 +232,7 @@ footer { border-top: 1px solid var(--line); padding: 28px; text-align: center; c
 .nav {
   display: flex; gap: 2px; align-items: center;
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: 999px; padding: 4px;
+  border-radius: 999px; padding: 4px; position: relative;
 }
 .nav a {
   display: flex; align-items: center; gap: 7px;
