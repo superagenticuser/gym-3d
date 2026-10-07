@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.31", "Align all card padding to documented system"],
     ["v11.30", "Volume count-up shows whole numbers only"],
     ["v11.29", "Match recovery dashboard card style to body panel"],
     ["v11.28", "Compact workout complete buttons to one row with icons"],
