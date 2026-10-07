@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.20", "Revert empty state illustrations"],
     ["v11.19", "Fix nav pill glide for scrolled nav positions"],
     ["v11.18", "Fix nav pill glide, week ring text and empty data, empty state icons"],
     ["v11.17", "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"],
@@ -990,7 +991,7 @@
     toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
   }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const emptyArt = (icon, title, hint) => `<div class="empty-note"><div class="empty-art">${window.FORGE_ICON ? window.FORGE_ICON(icon) : ""}</div><p><b>${title}</b></p><p>${hint}</p></div>`;
+  const emptyNote = (title, hint) => `<div class="empty-note"><p><b>${title}</b></p><p>${hint}</p></div>`;
   const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
   const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
   const lvlDots = l => l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●";
@@ -1413,7 +1414,7 @@
     $("favGrid").innerHTML = list.map(cardHTML).join("");
     const fe = $("favEmpty");
     fe.classList.toggle("hidden", list.length > 0);
-    if (!list.length) fe.innerHTML = emptyArt("heart", "No favorites yet", "Tap the heart on any exercise to save it here.");
+    if (!list.length) fe.innerHTML = emptyNote("No favorites yet", "Tap the heart on any exercise to save it here.");
   }
 
   // QUIZ
@@ -2071,7 +2072,7 @@
   function radarSection() {
     const vol = patternVolume(28);
     const total = PATTERNS.reduce((a, p) => a + vol[p], 0);
-    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3>` + emptyArt("target", "No training data in the last 28 days", "Log workouts and your movement balance will appear here.");
+    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3>` + emptyNote("No training data in the last 28 days", "Log workouts and your movement balance will appear here.");
     const max = Math.max.apply(null, PATTERNS.map(p => vol[p]).concat([1]));
     const W = 400, H = 360, cx = 200, cy = 180, R = 115;
     const pt = (i, frac) => {
@@ -2146,7 +2147,7 @@
       weeks.push({ label: start.toLocaleDateString(undefined, { month: "short", day: "numeric" }), avg: n ? sum / n : null });
     }
     if (!weeks.some(w => w.avg != null)) {
-      return `<h3 style="margin-top:20px">RPE trend</h3>` + emptyArt("chart-column", "No RPE data yet", "Log RPE on your sets and the trend will appear here.");
+      return `<h3 style="margin-top:20px">RPE trend</h3>` + emptyNote("No RPE data yet", "Log RPE on your sets and the trend will appear here.");
     }
     const W = 600, H = 220, padL = 34, padR = 12, padT = 12, padB = 28;
     const iw = W - padL - padR, ih = H - padT - padB;

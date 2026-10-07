@@ -653,8 +653,6 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .vol-row .bar i { display: block; height: 100%; background: var(--volt); border-radius: 999px; }
 .vol-row .vc { min-width: 64px; text-align: right; color: var(--muted); font-size: 13px; }
 .empty-note { color: var(--muted); text-align: center; padding: 40px 20px; max-width: 320px; margin-left: auto; margin-right: auto; }
-.empty-art { width: 72px; height: 72px; margin: 0 auto 16px; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--volt) 10%, transparent); color: var(--volt); border: 1px dashed var(--line2); }
-.empty-art .ic { width: 32px; height: 32px; }
 .empty-note b { font-size: var(--t-card); color: var(--ink); display: block; margin-bottom: 6px; }
 
 /* recovery heatmap */
