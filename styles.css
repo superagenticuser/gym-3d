@@ -699,9 +699,9 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .pr-item .pr-ic .ic { width: 18px; height: 18px; }
 .pr-item .pb { font-weight: 700; font-size: 14px; }
 .pr-item .pm { font-size: 12px; color: var(--muted); }
-.vol-rec-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+.vol-rec-row { display: flex; flex-direction: column; gap: 4px; background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
 .vol-rec-row b { font-size: 14px; }
-.vol-rec-row span { font-size: 13px; color: var(--muted); }
+.vol-rec-row span { font-size: 13px; color: var(--muted); line-height: 1.4; }
 /* side-by-side set comparison */
 .set-last { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
 .set-last.beat { color: var(--volt); border-color: var(--volt); font-weight: 700; }
