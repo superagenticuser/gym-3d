@@ -654,6 +654,63 @@ body.gym-mode #view-workout .wo-ex-head b { font-size: 22px; }
 .vol-row .vc { min-width: 64px; text-align: right; color: var(--muted); font-size: 13px; }
 .empty-note { color: var(--muted); text-align: center; padding: 40px 20px; max-width: 320px; margin-left: auto; margin-right: auto; }
 .empty-note b { font-size: var(--t-card); color: var(--ink); display: block; margin-bottom: 6px; }
+/* recovery dashboard */
+.rec-dash { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.rec-dash h3 { margin: 0 0 4px; font-size: var(--t-card); }
+.rec-suggest { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+.rec-suggest b { color: var(--volt); }
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.rec-item { background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.rec-item .rn { font-weight: 700; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.rec-item .rs { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.rs-fresh { background: color-mix(in srgb, var(--volt) 18%, transparent); color: var(--volt); }
+.rs-ready { background: color-mix(in srgb, #ffd166 18%, transparent); color: #ffd166; }
+.rs-rec { background: color-mix(in srgb, #ff5d5d 15%, transparent); color: #ff5d5d; }
+.rec-bar { height: 6px; border-radius: 3px; background: var(--line); margin-top: 8px; overflow: hidden; }
+.rec-bar i { display: block; height: 100%; border-radius: 3px; background: var(--volt); transition: width .6s cubic-bezier(.2,.8,.3,1); }
+.rec-days { font-size: 11px; color: var(--muted); margin-top: 4px; }
+/* goal tracker */
+.goal-dash { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.goal-dash h3 { margin: 0 0 12px; font-size: var(--t-card); display: flex; justify-content: space-between; align-items: center; }
+.goal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.goal-card { background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; position: relative; }
+.goal-card .gt { font-weight: 700; font-size: 14px; }
+.goal-card .gm { font-size: 12px; color: var(--muted); margin: 4px 0 8px; }
+.goal-bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin: 8px 0 4px; }
+.goal-bar i { display: block; height: 100%; border-radius: 4px; background: var(--volt); transition: width .6s cubic-bezier(.2,.8,.3,1); }
+.goal-pct { font-size: 12px; font-weight: 700; color: var(--volt); }
+.goal-pace { font-size: 11px; margin-top: 2px; }
+.pace-on { color: var(--volt); }
+.pace-off { color: #ffd166; }
+.goal-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px; }
+.goal-del:hover { color: #ff5d5d; }
+.goal-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+.goal-form select, .goal-form input { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+.goal-form select:focus, .goal-form input:focus { border-color: var(--volt); outline: none; }
+/* PR timeline */
+.pr-timeline { margin-top: 20px; }
+.pr-timeline h3 { margin: 0 0 8px; font-size: var(--t-card); }
+.pr-filter { margin-bottom: 12px; }
+.pr-filter select { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 8px 10px; font-size: 13px; max-width: 100%; }
+.pr-filter select:focus { border-color: var(--volt); outline: none; }
+.pr-feed { display: flex; flex-direction: column; gap: 8px; }
+.pr-item { display: flex; gap: 12px; align-items: flex-start; background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.pr-item .pr-ic { color: var(--volt); flex-shrink: 0; margin-top: 2px; }
+.pr-item .pr-ic .ic { width: 18px; height: 18px; }
+.pr-item .pb { font-weight: 700; font-size: 14px; }
+.pr-item .pm { font-size: 12px; color: var(--muted); }
+.vol-rec-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+.vol-rec-row b { font-size: 14px; }
+.vol-rec-row span { font-size: 13px; color: var(--muted); }
+/* side-by-side set comparison */
+.set-last { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+.set-last.beat { color: var(--volt); border-color: var(--volt); font-weight: 700; }
+/* post-workout rating */
+#woStars span { color: var(--line2); transition: color .15s; user-select: none; }
+#woStars span.lit { color: var(--volt); }
+#woRatingNote { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 8px 10px; font-size: 13px; width: 100%; box-sizing: border-box; }
+#woRatingNote:focus { border-color: var(--volt); outline: none; }
+.rating-avg { font-size: 13px; color: var(--muted); margin-top: 8px; }
 
 /* recovery heatmap */
 .heat-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 13px; color: var(--muted); }

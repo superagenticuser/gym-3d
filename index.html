@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=11.21" />
+<link rel="stylesheet" href="styles.css?v=11.22" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -63,6 +63,8 @@
           <div><b>3D</b><span>interactive body</span></div>
         </div>
         <div class="hero-progress" id="heroProgress"></div>
+        <div id="recoveryDash" style="margin-top:16px"></div>
+        <div id="goalsDash" style="margin-top:16px"></div>
       </div>
       <div class="hero-3d" id="hero3d"></div>
     </div>
@@ -196,6 +198,7 @@
     <a class="back" id="woBack" href="#/programs"><span class="back-icon" data-icon="arrow-left"></span> Back</a>
     <p class="kicker" id="woSub"></p>
     <h2 class="section-title" id="woTitle"></h2>
+    <p class="muted hidden" id="woPace" style="font-size:13px;margin:-8px 0 12px"></p>
     <div class="timer">
       <div class="timer-ring-wrap">
         <svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true">
@@ -230,6 +233,12 @@
     <div class="done-banner hidden" id="woDone">
       <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
       <p class="muted">Logged. Keep the streak going.</p>
+      <p class="muted" id="woDurationLine" style="margin-top:4px;font-weight:600"></p>
+      <div id="woRating" style="margin:12px 0">
+        <p class="muted" style="font-size:13px;margin-bottom:8px">How was this workout?</p>
+        <div id="woStars" style="display:flex;gap:6px;justify-content:center;font-size:28px;cursor:pointer"></div>
+        <input id="woRatingNote" class="text-input" placeholder="Optional note..." style="margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto">
+      </div>
       <p class="muted" id="woXpLine" style="margin-top:6px"></p>
       <div class="xpbar" id="woXpBar" style="max-width:320px;margin-left:auto;margin-right:auto"><div id="woXpFill"></div></div>
       <p class="muted" id="woXpNext" style="font-size:12px;margin-top:4px"></p>
@@ -445,7 +454,7 @@
     <p class="foot-quote" id="footQuote"></p>
     <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
     <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.21</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
+    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.22</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
     <div class="foot-changelog hidden" id="footChangelog"></div>
   </div>
 </footer>

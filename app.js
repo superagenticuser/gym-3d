@@ -665,6 +665,8 @@
     catch (e) { return []; }
   }
   function saveLog(l) { localStorage.setItem("forge-log", JSON.stringify(l)); }
+  function getGoals() { try { const g = JSON.parse(localStorage.getItem("forge-goals") || "[]"); return Array.isArray(g) ? g : []; } catch (e) { return []; } }
+  function saveGoals(g) { localStorage.setItem("forge-goals", JSON.stringify(g)); }
   function getTemplates() { try { const t = JSON.parse(localStorage.getItem("forge-templates") || "[]"); return Array.isArray(t) ? t : []; } catch (e) { return []; } }
   function saveTemplates(t) { localStorage.setItem("forge-templates", JSON.stringify(t)); }
   function lastWeightKg(exId) {
@@ -916,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.22", "7 new features: recovery dashboard, goals, PR timeline, volume PRs, set comparison, ratings, pace timer"],
     ["v11.21", "Fix week volume excluding today's workouts"],
     ["v11.20", "Revert empty state illustrations"],
     ["v11.19", "Fix nav pill glide for scrolled nav positions"],
@@ -1114,6 +1117,144 @@
         <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} kg vs ${Math.round(lastW).toLocaleString()} kg last week</span>
         ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
       </div>`;
+    })();
+    // muscle recovery dashboard
+    (function () {
+      const el = $("recoveryDash");
+      if (!el) return;
+      const log = getLog();
+      if (!log.length) { el.innerHTML = ""; return; }
+      const groups = ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "abs", "calves"];
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const stats = groups.map(g => {
+        let daysAgo = 99, lastVol = 0;
+        log.forEach(w => {
+          let vol = 0, hit = false;
+          (w.exercises || []).forEach(x => {
+            const ex = byId(x.id); if (!ex) return;
+            const gs = [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf));
+            if (gs.includes(g)) {
+              hit = true;
+              vol += (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+            }
+          });
+          if (hit) {
+            const d = Math.round((today - new Date(w.date + "T00:00:00")) / 864e5);
+            if (d < daysAgo) { daysAgo = d; lastVol = vol; }
+          }
+        });
+        const volumeFactor = Math.min(30, lastVol / 1000 * 10);
+        const freshness = Math.max(0, Math.min(100, Math.round(daysAgo * 25 - volumeFactor)));
+        const status = freshness >= 75 ? "Fresh" : freshness >= 40 ? "Ready" : "Recovering";
+        const cls = freshness >= 75 ? "rs-fresh" : freshness >= 40 ? "rs-ready" : "rs-rec";
+        return { g, name: MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g, daysAgo, freshness, status, cls };
+      });
+      const majors = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes"];
+      const best = stats.filter(s => majors.includes(s.g)).sort((a, b) => b.freshness - a.freshness)[0];
+      el.innerHTML = `<div class="rec-dash">
+        <h3>Muscle recovery</h3>
+        ${best ? `<p class="rec-suggest">Today is a good <b>${best.name.toLowerCase()} day</b> (${best.freshness}% fresh).</p>` : ""}
+        <div class="rec-grid">
+          ${stats.map(s => `<div class="rec-item">
+            <div class="rn"><span>${s.name}</span><span class="rs ${s.cls}">${s.status}</span></div>
+            <div class="rec-bar"><i style="width:${s.freshness}%"></i></div>
+            <div class="rec-days">${s.daysAgo >= 99 ? "Not trained yet" : s.daysAgo === 0 ? "Trained today" : s.daysAgo === 1 ? "1 day ago" : s.daysAgo + " days ago"}</div>
+          </div>`).join("")}
+        </div>
+      </div>`;
+    })();
+    // goal tracker
+    (function () {
+      const el = $("goalsDash");
+      if (!el) return;
+      const goals = getGoals();
+      const render = () => {
+        el.innerHTML = `<div class="goal-dash">
+          <h3>Goals <button class="btn btn-ghost btn-sm" id="goalAddBtn">+ Add goal</button></h3>
+          <div id="goalForm" class="hidden"></div>
+          ${goals.length ? `<div class="goal-grid">${goals.map(g => {
+            let title, sub, pct, paceTxt, paceCls;
+            if (g.type === "weight") {
+              const ex = byId(g.exerciseId);
+              const pr = exercisePR(g.exerciseId);
+              const cur = pr ? pr.weight : 0;
+              pct = g.target > 0 ? Math.min(100, Math.round(cur / g.target * 100)) : 0;
+              title = `${ex ? ex.name : "Lift"} ${g.target}kg`;
+              sub = `Current best: ${cur > 0 ? fmtW(cur) : "none yet"} · by ${g.targetDate}`;
+              const total = new Date(g.targetDate) - new Date(g.created);
+              const elapsed = Date.now() - new Date(g.created);
+              const expected = total > 0 ? Math.min(100, elapsed / total * 100) : 100;
+              const onPace = pct >= expected * 0.9;
+              paceTxt = onPace ? "On pace" : "Behind pace";
+              paceCls = onPace ? "pace-on" : "pace-off";
+            } else {
+              const weeks = g.weeks || 8;
+              const start = new Date(g.created); start.setHours(0, 0, 0, 0);
+              const log = getLog();
+              let done = 0;
+              for (let w = 0; w < weeks; w++) {
+                const ws = new Date(start); ws.setDate(ws.getDate() + w * 7);
+                const we = new Date(ws); we.setDate(we.getDate() + 7);
+                const c = log.filter(x => new Date(x.date + "T00:00:00") >= ws && new Date(x.date + "T00:00:00") < we).length;
+                if (c >= g.target) done++;
+              }
+              pct = Math.min(100, Math.round(done / weeks * 100));
+              title = `Train ${g.target}x/week for ${weeks} weeks`;
+              sub = `${done}/${weeks} weeks hit · ${g.target}x per week target`;
+              paceTxt = done > 0 ? `${done} week${done > 1 ? "s" : ""} on target` : "Not started";
+              paceCls = done > 0 ? "pace-on" : "pace-off";
+            }
+            return `<div class="goal-card">
+              <button class="goal-del" data-goal-del="${g.id}" aria-label="Delete goal">×</button>
+              <div class="gt">${esc(title)}</div>
+              <div class="gm">${esc(sub)}</div>
+              <div class="goal-bar"><i style="width:${pct}%"></i></div>
+              <div class="goal-pct">${pct}%</div>
+              <div class="goal-pace ${paceCls}">${esc(paceTxt)}</div>
+            </div>`;
+          }).join("")}</div>` : `<p class="muted" style="font-size:13px">No goals yet. Set a strength target or a training frequency goal.</p>`}
+        </div>`;
+        const addBtn = $("goalAddBtn");
+        if (addBtn) addBtn.onclick = () => {
+          const f = $("goalForm");
+          const exOpts = EXERCISES.filter(e => e.equipment !== "bodyweight").slice(0, 60).map(e => `<option value="${e.id}">${esc(e.name)}</option>`).join("");
+          f.classList.remove("hidden");
+          f.innerHTML = `<div class="goal-form">
+            <select id="ngType"><option value="weight">Strength goal</option><option value="frequency">Frequency goal</option></select>
+            <span id="ngExWrap"><select id="ngEx">${exOpts}</select></span>
+            <input id="ngTarget" type="number" min="1" placeholder="Target kg" style="width:100px">
+            <span id="ngDateWrap"><input id="ngDate" type="date"></span>
+            <span id="ngWeeksWrap" class="hidden"><input id="ngWeeks" type="number" min="1" max="52" value="8" style="width:70px" placeholder="Weeks"></span>
+            <button class="btn btn-primary btn-sm" id="ngSave">Save</button>
+          </div>`;
+          $("ngType").onchange = e => {
+            const isW = e.target.value === "weight";
+            $("ngExWrap").classList.toggle("hidden", !isW);
+            $("ngDateWrap").classList.toggle("hidden", !isW);
+            $("ngWeeksWrap").classList.toggle("hidden", isW);
+            $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+          };
+          $("ngSave").onclick = () => {
+            const type = $("ngType").value;
+            const target = parseFloat($("ngTarget").value);
+            if (!target || target <= 0) { appAlert("Enter a valid target."); return; }
+            const g = { id: "g" + Date.now().toString(36), type, target, created: fmtDate(new Date()) };
+            if (type === "weight") {
+              g.exerciseId = $("ngEx").value;
+              g.targetDate = $("ngDate").value || fmtDate(new Date(Date.now() + 90 * 864e5));
+            } else {
+              g.weeks = parseInt($("ngWeeks").value) || 8;
+            }
+            const gs = getGoals(); gs.push(g); saveGoals(gs);
+            render();
+          };
+        };
+        el.querySelectorAll("[data-goal-del]").forEach(b => b.onclick = () => {
+          saveGoals(getGoals().filter(g => g.id !== b.dataset.goalDel));
+          render();
+        });
+      };
+      render();
     })();
     const counts = {};
     EXERCISES.forEach(e => counts[e.primary] = (counts[e.primary] || 0) + 1);
@@ -3553,6 +3694,12 @@
     if (tab === "overview") {
       const totalSets = log.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.length, 0), 0);
       const totalVol = totalVolumeKg(log);
+      const rated = log.filter(w => w.rating);
+      const avgRating = rated.length ? (rated.reduce((a, w) => a + w.rating, 0) / rated.length) : 0;
+      const fiveStar = rated.filter(w => w.rating === 5 && w.durationMin);
+      const avgFiveDur = fiveStar.length ? Math.round(fiveStar.reduce((a, w) => a + w.durationMin, 0) / fiveStar.length) : 0;
+      const withDur = log.filter(w => w.durationMin);
+      const avgDur = withDur.length ? Math.round(withDur.reduce((a, w) => a + w.durationMin, 0) / withDur.length) : 0;
       body.innerHTML = `<div class="stat-grid">
         <div class="stat-card"><b data-cu="${log.length}">0</b><span>workouts logged</span></div>
         <div class="stat-card"><b data-cu="${workoutStreak()}">0</b><span>day streak</span></div>
@@ -3561,7 +3708,10 @@
         <div class="stat-card"><b data-cu="${recoveryScore()}" data-cufmt="pct">0</b><span>recovery</span></div>
         <div class="stat-card"><b>${xpLevel(getXP().xp)}</b><span>level (${getXP().xp.toLocaleString()} XP)</span></div>
         <div class="stat-card"><b>${getXP().freeze || 0}</b><span>streak freeze${(getXP().freeze || 0) === 1 ? "" : "s"}</span></div>
+        ${rated.length ? `<div class="stat-card"><b>${avgRating.toFixed(1)} ★</b><span>avg rating (${rated.length})</span></div>` : ""}
+        ${avgDur ? `<div class="stat-card"><b>${avgDur} min</b><span>avg workout pace</span></div>` : ""}
       </div>
+      ${avgFiveDur ? `<p class="rating-avg">Your 5-star workouts average ${avgFiveDur} min.</p>` : ""}
       ${checkDeload() ? `<div class="onerm-box warn"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
       <h3 style="margin-top:20px">Last 16 weeks</h3>
       ${streakCalendar(log)}
@@ -3600,9 +3750,92 @@
         if (pr && (pr.weight > 0 || pr.reps > 0)) recs.push({ ex, pr });
       });
       recs.sort((a, b) => b.pr.weight - a.pr.weight || b.pr.reps - a.pr.reps);
-      body.innerHTML = recs.length ? recs.map(({ ex, pr }) =>
+      // PR timeline: scan logs chronologically, record each time a weight PR was beaten
+      const prEvents = [];
+      const bestSoFar = {};
+      const sortedLog = getLog().slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.ts || 0) - (b.ts || 0)));
+      sortedLog.forEach(w => {
+        (w.exercises || []).forEach(x => {
+          (x.sets || []).forEach(s => {
+            const wgt = s.weight || 0;
+            if (wgt <= 0) return;
+            const cur = bestSoFar[x.id] || 0;
+            if (wgt > cur) {
+              bestSoFar[x.id] = wgt;
+              const ex = byId(x.id);
+              prEvents.push({ date: w.date, id: x.id, name: ex ? ex.name : x.id, weight: wgt, reps: s.reps || 0 });
+            }
+          });
+        });
+      });
+      prEvents.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+      const prExIds = [...new Set(prEvents.map(e => e.id))].sort((a, b) => {
+        const ea = byId(a), eb = byId(b);
+        return (ea ? ea.name : a).localeCompare(eb ? eb.name : b);
+      });
+      // volume records per muscle group (daily + weekly best)
+      const volRecs = (function () {
+        const daily = {}, weekly = {};
+        const log = getLog();
+        log.forEach(w => {
+          const dayVol = {};
+          (w.exercises || []).forEach(x => {
+            const ex = byId(x.id); if (!ex) return;
+            const v = (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+            [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf)).forEach(g => {
+              dayVol[g] = (dayVol[g] || 0) + v;
+            });
+          });
+          Object.keys(dayVol).forEach(g => {
+            if (!daily[g] || dayVol[g] > daily[g].vol) daily[g] = { vol: dayVol[g], date: w.date };
+          });
+        });
+        // weekly: group by ISO week starting Monday
+        const weekVol = {};
+        log.forEach(w => {
+          const d = new Date(w.date + "T00:00:00");
+          const mon = new Date(d); mon.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+          const wk = fmtDate(mon);
+          (w.exercises || []).forEach(x => {
+            const ex = byId(x.id); if (!ex) return;
+            const v = (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+            [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf)).forEach(g => {
+              const k = wk + "|" + g;
+              weekVol[k] = (weekVol[k] || 0) + v;
+            });
+          });
+        });
+        Object.keys(weekVol).forEach(k => {
+          const [wk, g] = k.split("|");
+          if (!weekly[g] || weekVol[k] > weekly[g].vol) weekly[g] = { vol: weekVol[k], date: wk };
+        });
+        return { daily, weekly };
+      })();
+      const volGroups = [...new Set([...Object.keys(volRecs.daily), ...Object.keys(volRecs.weekly)])].sort();
+      body.innerHTML = (recs.length ? `<h3 style="margin-top:0">Current records</h3>` + recs.map(({ ex, pr }) =>
         `<div class="rec-row">${window.FORGE_ICON("trophy")}<b>${esc(ex.name)}</b><span>${pr.weight > 0 ? fmtW(pr.weight) + " × " + pr.reps : pr.reps + " reps"}</span></div>`
-      ).join("") : `<div class="empty-note"><p><b>No records yet.</b></p><p>Log a workout to set your first.</p></div>`;
+      ).join("") : `<div class="empty-note"><p><b>No records yet.</b></p><p>Log a workout to set your first.</p></div>`)
+      + (volGroups.length ? `<h3 style="margin-top:20px">Volume records</h3><p class="muted" style="font-size:13px;margin-bottom:12px">Best single-day and single-week volume per muscle group.</p>` +
+        volGroups.map(g => {
+          const d = volRecs.daily[g], wk = volRecs.weekly[g];
+          const nm = MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g;
+          return `<div class="vol-rec-row"><b>${esc(nm)}</b><span>${d ? `Day: ${Math.round(d.vol).toLocaleString()} kg (${d.date})` : ""}${d && wk ? " · " : ""}${wk ? `Week: ${Math.round(wk.vol).toLocaleString()} kg (w/c ${wk.date})` : ""}</span></div>`;
+        }).join("") : "")
+      + `<div class="pr-timeline"><h3>PR timeline</h3>
+        ${prEvents.length ? `<div class="pr-filter"><select id="prFilter"><option value="">All exercises</option>${prExIds.map(id => { const e = byId(id); return `<option value="${id}">${esc(e ? e.name : id)}</option>`; }).join("")}</select></div>
+        <div class="pr-feed" id="prFeed"></div>` : `<div class="empty-note"><p><b>No PR history yet.</b></p><p>Your PR milestones will appear here as you train.</p></div>`}
+      </div>`;
+      // PR timeline filter
+      const renderPRFeed = (fid) => {
+        const feed = $("prFeed");
+        if (!feed) return;
+        const list = fid ? prEvents.filter(e => e.id === fid) : prEvents;
+        feed.innerHTML = list.length ? list.map(e =>
+          `<div class="pr-item"><span class="pr-ic">${window.FORGE_ICON("trophy")}</span><div><div class="pb">${esc(e.name)} - ${fmtW(e.weight)} × ${e.reps}</div><div class="pm">${e.date}</div></div></div>`
+        ).join("") : `<div class="empty-note"><p><b>Nothing here.</b></p><p>No PRs for this exercise yet.</p></div>`;
+      };
+      const pf = $("prFilter");
+      if (pf) { renderPRFeed(""); pf.onchange = () => renderPRFeed(pf.value); }
     } else {
       const vol = volumeByMuscle(28);
       const entries = Object.keys(vol).map(g => ({ g, n: vol[g] })).sort((a, b) => b.n - a.n);
@@ -4011,14 +4244,17 @@
       const lw = (x.weight != null && x.weight > 0) ? x.weight : lastWeightKg(x.id);
       const repsNum = parseInt(x.reps) || 8;
       const lastRpe = getRPE(x.id);
+      const ls = lastSessionFull(x.id);
       const rows = Array.from({ length: x.sets }, (_, si) => {
         const wVal = lw != null ? fromKg(lw) : "";
         const repsVal = (x.repsArr && x.repsArr[si] != null) ? x.repsArr[si] : repsNum;
         const wValSi = (x.weightsArr && x.weightsArr[si] != null) ? fromKg(x.weightsArr[si]) : wVal;
+        const lsSet = (ls && ls.sets && ls.sets[si]) ? ls.sets[si] : null;
+        const lsLabel = lsSet ? `<span class="set-last" data-x="${xi}" data-s="${si}" title="Last time">${lsSet.reps}×${fmtW(lsSet.weight)}</span>` : "";
         return `<div class="set-row2">
           <button class="set-done" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} done">${window.FORGE_ICON("check")}</button>
           <button class="set-fail" data-x="${xi}" data-s="${si}" aria-label="Mark set ${si + 1} as failed" title="Failed set (missed reps)">${window.FORGE_ICON("x")}</button>
-          <span class="set-num">Set ${si + 1}</span>
+          <span class="set-num">Set ${si + 1}</span>${lsLabel}
           <span class="set-reps"><input type="number" min="1" value="${repsVal}" data-x="${xi}" data-s="${si}" data-f="reps" aria-label="Reps"> reps</span>
           ${isBW ? `<span class="set-bw">Bodyweight</span><input class="set-weight" type="number" min="0" step="any" placeholder="+kg" value="${wValSi}" data-x="${xi}" data-s="${si}" data-f="added" aria-label="Added weight" style="width:64px"><span class="set-unit">${unitLabel()}</span>`
                  : `<input class="set-weight" type="number" min="0" step="any" placeholder="–" value="${wValSi}" data-x="${xi}" data-s="${si}" data-f="weight" aria-label="Weight"><span class="set-unit">${unitLabel()}</span>`}
@@ -4082,6 +4318,11 @@
     $("woDone").classList.add("hidden");
     $("woFinish").classList.remove("hidden");
     window._woPid = pid; window._woDi = di; window._woWeek = week || null;
+    // pace timer: reset, starts on first set done
+    window._woStartTime = null;
+    if (window._paceInt) { clearInterval(window._paceInt); window._paceInt = null; }
+    const _paceEl = $("woPace");
+    if (_paceEl) { _paceEl.classList.add("hidden"); _paceEl.textContent = ""; }
     // energy-based scaling: low check-in energy suggests a shorter session
     if (!window._scaleDone) {
       const _ci = getCheckin(fmtDate(new Date()));
@@ -4143,8 +4384,40 @@
         setTimeout(() => sd.classList.remove("just-hit"), 380);
         const row = sd.closest(".set-row2");
         if (row) { row.classList.remove("set-flash"); void row.offsetWidth; row.classList.add("set-flash"); }
+        // pace timer: start on first set done
+        if (!window._woStartTime) {
+          window._woStartTime = Date.now();
+          const paceEl = $("woPace");
+          if (paceEl) {
+            paceEl.classList.remove("hidden");
+            const tick = () => {
+              const s = Math.floor((Date.now() - window._woStartTime) / 1000);
+              const m = Math.floor(s / 60);
+              paceEl.textContent = `Elapsed: ${m}:${String(s % 60).padStart(2, "0")}`;
+            };
+            tick();
+            window._paceInt = setInterval(tick, 1000);
+          }
+        }
       }
       try { updateBeatdown(parseInt(sd.dataset.x, 10)); } catch (e2) {}
+      // per-set comparison: highlight if this set beats last time
+      try {
+        const xi = parseInt(sd.dataset.x, 10), si = parseInt(sd.dataset.s, 10);
+        const lbl = document.querySelector(`.set-last[data-x="${xi}"][data-s="${si}"]`);
+        if (lbl && !wasHit) {
+          const wIn = document.querySelector(`input[data-x="${xi}"][data-s="${si}"][data-f="weight"], input[data-x="${xi}"][data-s="${si}"][data-f="added"]`);
+          const rIn = document.querySelector(`input[data-x="${xi}"][data-s="${si}"][data-f="reps"]`);
+          const w = wIn ? (parseFloat(wIn.value) || 0) : 0;
+          const r = rIn ? (parseInt(rIn.value) || 0) : 0;
+          const woEx = currentWorkout && currentWorkout.exercises[xi];
+          const ls2 = woEx ? lastSessionFull(woEx.id) : null;
+          const lsSet = ls2 && ls2.sets && ls2.sets[si];
+          if (lsSet && (w > lsSet.weight || (w === lsSet.weight && r > lsSet.reps))) lbl.classList.add("beat");
+        } else if (lbl && wasHit) {
+          lbl.classList.remove("beat");
+        }
+      } catch (e3) {}
       if (!wasHit && getSettings().autoRest) {
         const xi = parseInt(sd.dataset.x, 10);
         const woEx = currentWorkout && currentWorkout.exercises[xi];
@@ -4328,7 +4601,41 @@
         }
       });
     });
-    const log = getLog(); log.push(entry); saveLog(log);
+    const log = getLog();
+    // volume PR check: best daily volume per muscle group before this workout
+    const prevVolBest = {};
+    log.forEach(w => {
+      const dv = {};
+      (w.exercises || []).forEach(x => {
+        const ex = byId(x.id); if (!ex) return;
+        const v = (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+        [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf)).forEach(g => { dv[g] = (dv[g] || 0) + v; });
+      });
+      Object.keys(dv).forEach(g => { if (!prevVolBest[g] || dv[g] > prevVolBest[g]) prevVolBest[g] = dv[g]; });
+    });
+    log.push(entry); saveLog(log);
+    // pace timer: save duration
+    if (window._woStartTime) {
+      entry.durationMin = Math.max(1, Math.round((Date.now() - window._woStartTime) / 60000));
+      const l2 = getLog();
+      if (l2.length) { l2[l2.length - 1].durationMin = entry.durationMin; saveLog(l2); }
+      if (window._paceInt) { clearInterval(window._paceInt); window._paceInt = null; }
+      const paceEl = $("woPace");
+      if (paceEl) paceEl.classList.add("hidden");
+    }
+    // check if this workout set new daily volume records
+    const newVolPRs = [];
+    const entryVol = {};
+    entry.exercises.forEach(x => {
+      const ex = byId(x.id); if (!ex) return;
+      const v = (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+      [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf)).forEach(g => { entryVol[g] = (entryVol[g] || 0) + v; });
+    });
+    Object.keys(entryVol).forEach(g => {
+      if (entryVol[g] > 0 && (!prevVolBest[g] || entryVol[g] > prevVolBest[g])) {
+        newVolPRs.push({ group: g, name: MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g, vol: entryVol[g] });
+      }
+    });
     if (_woNoteEl) _woNoteEl.value = "";
     // XP: 2 per set, 50 per PR, 25 streak bonus, 100 dungeon bonus
     let xpGain = entry.exercises.reduce((a, x) => a + x.sets.length * 2, 0) + newPRs.length * 50;
@@ -4359,7 +4666,59 @@
     done[key].push(today); saveDone();
     $("woDone").classList.remove("hidden");
     $("woFinish").classList.add("hidden");
+    const _durEl = $("woDurationLine");
+    if (_durEl) _durEl.textContent = entry.durationMin ? `Finished in ${entry.durationMin} min.` : "";
+    // post-workout rating stars
+    (function () {
+      const wrap = $("woStars");
+      if (!wrap) return;
+      window._woRating = 0;
+      const noteEl = $("woRatingNote");
+      if (noteEl) noteEl.value = "";
+      const paint = (n) => {
+        wrap.innerHTML = [1, 2, 3, 4, 5].map(i => `<span data-star="${i}" class="${i <= n ? "lit" : ""}">★</span>`).join("");
+      };
+      paint(0);
+      wrap.onclick = (e) => {
+        const s = e.target.closest("[data-star]");
+        if (!s) return;
+        const n = parseInt(s.dataset.star, 10);
+        window._woRating = n;
+        paint(n);
+        // save to the log entry
+        const l = getLog();
+        if (l.length) {
+          l[l.length - 1].rating = n;
+          const nt = $("woRatingNote");
+          if (nt) l[l.length - 1].ratingNote = nt.value.trim();
+          saveLog(l);
+          window._lastEntry = l[l.length - 1];
+        }
+      };
+      if (noteEl) noteEl.onchange = () => {
+        const l = getLog();
+        if (l.length && window._woRating) {
+          l[l.length - 1].ratingNote = noteEl.value.trim();
+          saveLog(l);
+          window._lastEntry = l[l.length - 1];
+        }
+      };
+    })();
     if (newPRs.length) showPRCelebration(newPRs);
+    else if (newVolPRs.length) {
+      const veil = document.createElement("div");
+      veil.className = "pr-veil";
+      veil.innerHTML = `<div class="pr-card">
+        <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : ""}</div>
+        <h2>Volume record${newVolPRs.length > 1 ? "s" : ""}!</h2>
+        ${newVolPRs.map(v => `<p><b>${esc(v.name)}</b><br><span>${Math.round(v.vol).toLocaleString()} kg in one day</span></p>`).join("")}
+        <button class="btn btn-primary" id="prClose">Keep going</button>
+      </div>`;
+      veil.addEventListener("click", e => { if (e.target === veil || e.target.closest("#prClose")) veil.remove(); });
+      document.body.appendChild(veil);
+      spawnConfetti(veil, 42);
+      setTimeout(() => veil.remove(), 8000);
+    }
     else { const _wb = $("woDone"); if (_wb) spawnConfetti(_wb, 28); }
     clearInterval(timerInt); timerInt = null;
     // scroll to the summary so the user sees it
