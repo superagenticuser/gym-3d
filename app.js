@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.21", "Fix week volume excluding today's workouts"],
     ["v11.20", "Revert empty state illustrations"],
     ["v11.19", "Fix nav pill glide for scrolled nav positions"],
     ["v11.18", "Fix nav pill glide, week ring text and empty data, empty state icons"],
@@ -1093,9 +1094,10 @@
       const monday = new Date(now); monday.setHours(0, 0, 0, 0);
       monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
       const lastMon = new Date(monday); lastMon.setDate(monday.getDate() - 7);
+      const nextMon = new Date(monday); nextMon.setDate(monday.getDate() + 7);
       const vol = (from, to) => log.filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
         .reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0), 0);
-      const thisW = vol(monday, now), lastW = vol(lastMon, monday);
+      const thisW = vol(monday, nextMon), lastW = vol(lastMon, monday);
       const streak = workoutStreak();
       if (!log.length || (thisW === 0 && lastW === 0)) { hp.innerHTML = ""; return; }
       const pct = lastW > 0 ? Math.min(100, Math.round(thisW / lastW * 100)) : (thisW > 0 ? 100 : 0);

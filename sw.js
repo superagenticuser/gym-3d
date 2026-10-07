@@ -1,4 +1,4 @@
-const CACHE = "forge-v11.20";
+const CACHE = "forge-v11.21";
 const ASSETS = [
   "./",
   "./index.html",
