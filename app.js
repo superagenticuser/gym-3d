@@ -918,6 +918,9 @@
     });
   }
   const CHANGELOG = [
+    ["v11.25", "Move recovery dashboard to 3D Body page"],
+    ["v11.24", "Fix goals not refreshing after add"],
+    ["v11.23", "Fix volume records row layout overlap"],
     ["v11.22", "7 new features: recovery dashboard, goals, PR timeline, volume PRs, set comparison, ratings, pace timer"],
     ["v11.21", "Fix week volume excluding today's workouts"],
     ["v11.20", "Revert empty state illustrations"],
@@ -1074,6 +1077,56 @@
   }
 
   // HOME
+  // muscle recovery stats (shared by Home suggestion and 3D Body dashboard)
+  function getRecoveryStats() {
+    const log = getLog();
+    if (!log.length) return null;
+    const groups = ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "abs", "calves"];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const stats = groups.map(g => {
+      let daysAgo = 99, lastVol = 0;
+      log.forEach(w => {
+        let vol = 0, hit = false;
+        (w.exercises || []).forEach(x => {
+          const ex = byId(x.id); if (!ex) return;
+          const gs = [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf));
+          if (gs.includes(g)) {
+            hit = true;
+            vol += (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
+          }
+        });
+        if (hit) {
+          const d = Math.round((today - new Date(w.date + "T00:00:00")) / 864e5);
+          if (d < daysAgo) { daysAgo = d; lastVol = vol; }
+        }
+      });
+      const volumeFactor = Math.min(30, lastVol / 1000 * 10);
+      const freshness = Math.max(0, Math.min(100, Math.round(daysAgo * 25 - volumeFactor)));
+      const status = freshness >= 75 ? "Fresh" : freshness >= 40 ? "Ready" : "Recovering";
+      const cls = freshness >= 75 ? "rs-fresh" : freshness >= 40 ? "rs-ready" : "rs-rec";
+      return { g, name: MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g, daysAgo, freshness, status, cls };
+    });
+    const majors = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes"];
+    const best = stats.filter(s => majors.includes(s.g)).sort((a, b) => b.freshness - a.freshness)[0];
+    return { stats, best };
+  }
+  // 3D Body: full recovery dashboard
+  function renderBodyRecovery() {
+    const el = $("bodyRecoveryDash");
+    if (!el) return;
+    const r = getRecoveryStats();
+    if (!r) { el.innerHTML = ""; return; }
+    el.innerHTML = `<div class="rec-dash">
+      <h3>Muscle recovery</h3>
+      <div class="rec-grid">
+        ${r.stats.map(s => `<div class="rec-item">
+          <div class="rn"><span>${s.name}</span><span class="rs ${s.cls}">${s.status}</span></div>
+          <div class="rec-bar"><i style="width:${s.freshness}%"></i></div>
+          <div class="rec-days">${s.daysAgo >= 99 ? "Not trained yet" : s.daysAgo === 0 ? "Trained today" : s.daysAgo === 1 ? "1 day ago" : s.daysAgo + " days ago"}</div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }
   function renderHome() {
     const _rs = getSettings().reminder;
     const _rb = $("reminderBanner");
@@ -1118,57 +1171,20 @@
         ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
       </div>`;
     })();
-    // muscle recovery dashboard
+    // Home: compact recovery suggestion only
     (function () {
       const el = $("recoveryDash");
       if (!el) return;
-      const log = getLog();
-      if (!log.length) { el.innerHTML = ""; return; }
-      const groups = ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "abs", "calves"];
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      const stats = groups.map(g => {
-        let daysAgo = 99, lastVol = 0;
-        log.forEach(w => {
-          let vol = 0, hit = false;
-          (w.exercises || []).forEach(x => {
-            const ex = byId(x.id); if (!ex) return;
-            const gs = [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf));
-            if (gs.includes(g)) {
-              hit = true;
-              vol += (x.sets || []).reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0);
-            }
-          });
-          if (hit) {
-            const d = Math.round((today - new Date(w.date + "T00:00:00")) / 864e5);
-            if (d < daysAgo) { daysAgo = d; lastVol = vol; }
-          }
-        });
-        const volumeFactor = Math.min(30, lastVol / 1000 * 10);
-        const freshness = Math.max(0, Math.min(100, Math.round(daysAgo * 25 - volumeFactor)));
-        const status = freshness >= 75 ? "Fresh" : freshness >= 40 ? "Ready" : "Recovering";
-        const cls = freshness >= 75 ? "rs-fresh" : freshness >= 40 ? "rs-ready" : "rs-rec";
-        return { g, name: MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g, daysAgo, freshness, status, cls };
-      });
-      const majors = ["chest", "back", "shoulders", "quads", "hamstrings", "glutes"];
-      const best = stats.filter(s => majors.includes(s.g)).sort((a, b) => b.freshness - a.freshness)[0];
-      el.innerHTML = `<div class="rec-dash">
-        <h3>Muscle recovery</h3>
-        ${best ? `<p class="rec-suggest">Today is a good <b>${best.name.toLowerCase()} day</b> (${best.freshness}% fresh).</p>` : ""}
-        <div class="rec-grid">
-          ${stats.map(s => `<div class="rec-item">
-            <div class="rn"><span>${s.name}</span><span class="rs ${s.cls}">${s.status}</span></div>
-            <div class="rec-bar"><i style="width:${s.freshness}%"></i></div>
-            <div class="rec-days">${s.daysAgo >= 99 ? "Not trained yet" : s.daysAgo === 0 ? "Trained today" : s.daysAgo === 1 ? "1 day ago" : s.daysAgo + " days ago"}</div>
-          </div>`).join("")}
-        </div>
-      </div>`;
+      const r = getRecoveryStats();
+      if (!r || !r.best) { el.innerHTML = ""; return; }
+      el.innerHTML = `<p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p>`;
     })();
     // goal tracker
     (function () {
       const el = $("goalsDash");
       if (!el) return;
-      const goals = getGoals();
       const render = () => {
+        const goals = getGoals();
         el.innerHTML = `<div class="goal-dash">
           <h3>Goals <button class="btn btn-ghost btn-sm" id="goalAddBtn">+ Add goal</button></h3>
           <div id="goalForm" class="hidden"></div>
@@ -1510,6 +1526,7 @@
     window._bodyViewer = v;
     v.setFinish(getSettings().bodyFinish || "standard");
     selectMuscle(selected || "chest");
+    renderBodyRecovery();
   }
   function selectMuscle(groupId) {
     const v = window._bodyViewer;
