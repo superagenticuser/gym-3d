@@ -916,6 +916,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.17", "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"],
     ["v11.16", "Fix doubled unit in last-time summary (was showing kg twice)"],
     ["v11.15", "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"],
     ["v11.14", "Fix radar chart label overlap."],
@@ -987,6 +988,7 @@
     toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
   }
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const emptyArt = (icon, title, hint) => `<div class="empty-note"><div class="empty-art">${window.FORGE_ICON ? window.FORGE_ICON(icon) : ""}</div><p><b>${title}</b></p><p>${hint}</p></div>`;
   const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
   const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
   const lvlDots = l => l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●";
@@ -1044,6 +1046,16 @@
     document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
       (name === "detail" && a.dataset.nav === "exercises") ||
       ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
+    // slide the nav indicator under the active link
+    requestAnimationFrame(() => {
+      const active = document.querySelector(".nav a.active"), ind = $("navIndicator"), nav = document.querySelector(".nav");
+      if (active && ind && nav) {
+        const nr = nav.getBoundingClientRect(), ar = active.getBoundingClientRect();
+        ind.style.left = (ar.left - nr.left) + "px";
+        ind.style.width = ar.width + "px";
+        ind.style.opacity = "1";
+      } else if (ind) ind.style.opacity = "0";
+    });
     window.scrollTo(0, 0);
   }
 
@@ -1062,6 +1074,33 @@
     }
     $("statEx").textContent = EXERCISES.length;
     $("footEx").textContent = EXERCISES.length;
+    // weekly progress ring + streak flame
+    (function () {
+      const hp = $("heroProgress");
+      if (!hp) return;
+      const log = getLog();
+      const now = new Date();
+      const monday = new Date(now); monday.setHours(0, 0, 0, 0);
+      monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      const lastMon = new Date(monday); lastMon.setDate(monday.getDate() - 7);
+      const vol = (from, to) => log.filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
+        .reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0), 0);
+      const thisW = vol(monday, now), lastW = vol(lastMon, monday);
+      const streak = workoutStreak();
+      if (!log.length) { hp.innerHTML = ""; return; }
+      const pct = lastW > 0 ? Math.min(100, Math.round(thisW / lastW * 100)) : (thisW > 0 ? 100 : 0);
+      const circ = 2 * Math.PI * 34, off = circ * (1 - pct / 100);
+      hp.innerHTML = `<div class="ring-wrap">
+        <svg viewBox="0 0 84 84" width="84" height="84" class="prog-ring">
+          <circle cx="42" cy="42" r="34" fill="none" stroke="var(--line)" stroke-width="8"/>
+          <circle cx="42" cy="42" r="34" fill="none" stroke="var(--volt)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 42 42)" class="ring-fill"/>
+          <text x="42" y="47" text-anchor="middle" class="ring-pct">${pct}%</text>
+        </svg>
+        <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} kg vs ${Math.round(lastW).toLocaleString()} kg last week</span>
+        ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
+      </div>`;
+    })();
     const counts = {};
     EXERCISES.forEach(e => counts[e.primary] = (counts[e.primary] || 0) + 1);
     $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
@@ -1361,7 +1400,9 @@
   function renderFavorites() {
     const list = EXERCISES.filter(e => favs.has(e.id));
     $("favGrid").innerHTML = list.map(cardHTML).join("");
-    $("favEmpty").classList.toggle("hidden", list.length > 0);
+    const fe = $("favEmpty");
+    fe.classList.toggle("hidden", list.length > 0);
+    if (!list.length) fe.innerHTML = emptyArt("heart", "No favorites yet", "Tap the heart on any exercise to save it here.");
   }
 
   // QUIZ
@@ -2019,7 +2060,7 @@
   function radarSection() {
     const vol = patternVolume(28);
     const total = PATTERNS.reduce((a, p) => a + vol[p], 0);
-    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3><div class="empty-note"><p><b>No training data in the last 28 days.</b></p><p>Log workouts and your movement balance will appear here.</p></div>`;
+    if (!total) return `<h3 style="margin-top:20px">Movement balance</h3>` + emptyArt("scale", "No training data in the last 28 days", "Log workouts and your movement balance will appear here.");
     const max = Math.max.apply(null, PATTERNS.map(p => vol[p]).concat([1]));
     const W = 400, H = 360, cx = 200, cy = 180, R = 115;
     const pt = (i, frac) => {
@@ -2059,6 +2100,7 @@
     body.innerHTML = `
       <h3>Training insights</h3>
       <p class="muted" style="font-size:13px;margin-bottom:12px">Deep analysis of your training data. Ratios near 1.0 are balanced.</p>
+      <div class="insights-grid">
       <div class="stat-grid">
         <div class="stat-card"><b>${xpLevel(xp.xp)}</b><span>level (${xp.xp.toLocaleString()} XP)</span></div>
         ${dots ? `<div class="stat-card"><b>${dots}</b><span>DOTS score</span></div>` : ""}
@@ -2073,6 +2115,7 @@
       <h3 style="margin-top:20px">Total volume lifted</h3>
       <p style="font-size:28px;font-weight:800;color:var(--volt)">${Math.round(totalVolumeAll()).toLocaleString()} kg</p>
       ${rpeTrendSection()}
+      </div>
     `;
   }
   function rpeTrendSection() {
@@ -2092,7 +2135,7 @@
       weeks.push({ label: start.toLocaleDateString(undefined, { month: "short", day: "numeric" }), avg: n ? sum / n : null });
     }
     if (!weeks.some(w => w.avg != null)) {
-      return `<h3 style="margin-top:20px">RPE trend</h3><div class="empty-note"><p><b>No RPE data yet.</b></p><p>Log RPE on your sets and the trend will appear here.</p></div>`;
+      return `<h3 style="margin-top:20px">RPE trend</h3>` + emptyArt("chart", "No RPE data yet", "Log RPE on your sets and the trend will appear here.");
     }
     const W = 600, H = 220, padL = 34, padR = 12, padT = 12, padB = 28;
     const iw = W - padL - padR, ih = H - padT - padB;
@@ -4303,6 +4346,7 @@
     $("woDone").classList.remove("hidden");
     $("woFinish").classList.add("hidden");
     if (newPRs.length) showPRCelebration(newPRs);
+    else { const _wb = $("woDone"); if (_wb) spawnConfetti(_wb, 28); }
     clearInterval(timerInt); timerInt = null;
     // scroll to the summary so the user sees it
     setTimeout(() => {
