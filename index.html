@@ -7,7 +7,7 @@
 <meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
 <meta name="theme-color" content="#0b0e13" />
 <link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="styles.css?v=11.27" />
+<link rel="stylesheet" href="styles.css?v=11.28" />
 </head>
 <body>
 <div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
@@ -243,11 +243,11 @@
       <p class="muted" id="woXpLine" style="margin-top:6px"></p>
       <div class="xpbar" id="woXpBar" style="max-width:320px;margin-left:auto;margin-right:auto"><div id="woXpFill"></div></div>
       <p class="muted" id="woXpNext" style="font-size:12px;margin-top:4px"></p>
-      <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:12px 0;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" id="shareCard" style="white-space:nowrap">Share</button>
-        <button class="btn btn-ghost btn-sm" id="shareTextBtn" style="white-space:nowrap">Share as text</button>
-        <button class="btn btn-ghost btn-sm" id="replayBtn" style="white-space:nowrap">3D replay</button>
-        <a class="btn btn-ghost btn-sm" id="woDoneBack" href="#/programs" style="white-space:nowrap">Back to programs</a>
+      <div class="wo-done-actions">
+        <button class="btn btn-ghost btn-sm wo-icon-btn" id="shareCard" title="Share workout card" aria-label="Share workout card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg></button>
+        <button class="btn btn-ghost btn-sm wo-icon-btn" id="shareTextBtn" title="Share as text" aria-label="Share as text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></button>
+        <button class="btn btn-ghost btn-sm wo-icon-btn" id="replayBtn" title="3D replay" aria-label="3D replay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="6 3 20 12 6 21 6 3"/></svg></button>
+        <a class="btn btn-primary btn-sm" id="woDoneBack" href="#/programs" style="white-space:nowrap">Back to programs</a>
       </div>
     </div>
     </div>
@@ -455,7 +455,7 @@
     <p class="foot-quote" id="footQuote"></p>
     <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
     <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.27</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
+    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.28</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
     <div class="foot-changelog hidden" id="footChangelog"></div>
   </div>
 </footer>
