@@ -1299,7 +1299,13 @@
       dead = false,
       curStep = -1;
     let playing = ds.demoAutoplay !== false && !ds.reduceMotion;
-    const speed = ds.demoSpeed || 1;
+    const SPEEDS = [0.25, 0.5, 1, 2];
+    let speed = SPEEDS.indexOf(ds.demoSpeed) >= 0 ? ds.demoSpeed : 1;
+    // control widget refs, filled in by the controls(el) API below
+    let scrubEl = null,
+      counterEl = null,
+      speedEls = [],
+      scrubbing = false;
     function frameAt(time) {
       for (let i = frames.length - 1; i >= 0; i--) if (time >= starts[i]) return i;
       return 0;
@@ -1327,23 +1333,92 @@
             stepsBox.scrollTop = top + active.offsetHeight - stepsBox.clientHeight;
         }
       }
+      // scrub slider follows playback (but not while the user is dragging it)
+      if (scrubEl && !scrubbing && document.activeElement !== scrubEl)
+        scrubEl.value = String(Math.round((t / total) * 1000));
+      if (counterEl) {
+        const label = i + 1 + " / " + frames.length;
+        if (counterEl.textContent !== label) counterEl.textContent = label;
+      }
     }
     const IC = window.FORGE_ICON || (() => "");
     const syncPlayBtn = () => {
       playBtn.innerHTML = IC(playing ? "pause" : "play") + (playing ? "Pause" : "Play");
+      playBtn.setAttribute("aria-label", playing ? "Pause demonstration" : "Play demonstration");
     };
-    syncPlayBtn();
-    playBtn.addEventListener("click", () => {
-      playing = !playing;
+    const play = () => {
+      playing = true;
       syncPlayBtn();
       last = performance.now();
-    });
+    };
+    const pause = () => {
+      playing = false;
+      syncPlayBtn();
+    };
+    const toggle = () => (playing ? pause() : play());
+    syncPlayBtn();
+    playBtn.addEventListener("click", toggle);
     raf = requestAnimationFrame(tick);
+    function saveSpeed(s) {
+      try {
+        const st = JSON.parse(localStorage.getItem("forge-settings") || "{}");
+        st.demoSpeed = s;
+        localStorage.setItem("forge-settings", JSON.stringify(st));
+      } catch (e) {}
+    }
+    function syncSpeedBtns() {
+      speedEls.forEach(b => b.classList.toggle("on", Number(b.dataset.spd) === speed));
+    }
+    function setSpeed(s) {
+      if (SPEEDS.indexOf(s) < 0) return;
+      speed = s;
+      saveSpeed(s);
+      syncSpeedBtns();
+    }
+    // Renders the scrub controls (slider, frame counter, speed buttons) into el
+    // and wires them to this player. Call once from the view layer after createDemo.
+    function controls(el) {
+      if (!el) return;
+      el.innerHTML =
+        '<div class="demo-controls">' +
+        '<input type="range" class="demo-scrub" min="0" max="1000" value="0" step="1" aria-label="Scrub demo timeline">' +
+        '<span class="demo-frames" aria-live="polite"></span>' +
+        '<div class="demo-speeds" role="group" aria-label="Playback speed">' +
+        SPEEDS.map(s => '<button type="button" data-spd="' + s + '">' + s + "x</button>").join("") +
+        "</div></div>";
+      scrubEl = el.querySelector(".demo-scrub");
+      counterEl = el.querySelector(".demo-frames");
+      speedEls = [...el.querySelectorAll(".demo-speeds button")];
+      counterEl.textContent = frameAt(t) + 1 + " / " + frames.length;
+      scrubEl.addEventListener("input", () => {
+        scrubbing = true;
+        t = (Number(scrubEl.value) / 1000) * total;
+      });
+      scrubEl.addEventListener("change", () => {
+        scrubbing = false;
+      });
+      speedEls.forEach(b => b.addEventListener("click", () => setSpeed(Number(b.dataset.spd))));
+      syncSpeedBtns();
+    }
     return {
       destroy() {
         dead = true;
         cancelAnimationFrame(raf);
-      }
+      },
+      play,
+      pause,
+      toggle,
+      setSpeed,
+      getSpeed: () => speed,
+      getTime: () => t,
+      getDuration: () => total,
+      getFrame: () => frameAt(t),
+      frameCount: frames.length,
+      seek(frac) {
+        if (!isFinite(frac)) return;
+        t = Math.min(1, Math.max(0, frac)) * total;
+      },
+      controls
     };
   }
 

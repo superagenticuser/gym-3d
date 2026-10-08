@@ -3,23 +3,91 @@
 
 /* ---------- muscle metadata ---------- */
 const MUSCLE_INFO = {
-  chest: { name: "Chest", desc: "Pectorals. The pushing muscles behind every press, push-up and dip." },
-  back: { name: "Back", desc: "Rhomboids and mid-traps. A thick upper back built with rows and deadlifts." },
-  lats: { name: "Lats", desc: "Latissimus dorsi, the wings. Pull-ups and pulldowns build width." },
-  traps: { name: "Traps", desc: "Trapezius. Shrugs and carries build the upper-back shelf." },
-  "lower-back": { name: "Lower Back", desc: "Erector spinae. Keeps your spine strong under load." },
-  shoulders: { name: "Shoulders", desc: "Deltoids. Pressing and raising builds capped shoulders." },
-  biceps: { name: "Biceps", desc: "Front of the upper arm. Curls of every kind." },
-  triceps: { name: "Triceps", desc: "Back of the upper arm. About two thirds of your arm size." },
-  forearms: { name: "Forearms", desc: "Grip strength. Carries, hangs and wrist work." },
-  abs: { name: "Abs", desc: "Rectus abdominis, the six-pack wall. Train it with resistance." },
-  obliques: { name: "Obliques", desc: "Side core. Rotation and anti-rotation strength." },
-  glutes: { name: "Glutes", desc: "The powerhouse. Hip thrusts, swings and lunges." },
-  quads: { name: "Quads", desc: "Front of the thigh. Squats, presses and lunges." },
-  hamstrings: { name: "Hamstrings", desc: "Back of the thigh. Hinges, curls and Nordics." },
-  calves: { name: "Calves", desc: "Lower leg. Raises with a full stretch and squeeze." },
-  "full-body": { name: "Full Body", desc: "Compound conditioning. Multiple muscles, maximum output." },
-  cardio: { name: "Cardio", desc: "Engine building. Heart, lungs and work capacity." }
+  chest: {
+    name: "Chest",
+    desc: "Pectorals. The pushing muscles behind every press, push-up and dip.",
+    function: "Pushes your arms forward and together. Powers presses, push-ups, and hugging motions."
+  },
+  back: {
+    name: "Back",
+    desc: "Rhomboids and mid-traps. A thick upper back built with rows and deadlifts.",
+    function: "Pulls your shoulder blades together and down. Keeps posture tall and powers every row."
+  },
+  lats: {
+    name: "Lats",
+    desc: "Latissimus dorsi, the wings. Pull-ups and pulldowns build width.",
+    function: "Pulls your arms down and back toward your body. Drives pull-ups, pulldowns, and swimming strokes."
+  },
+  traps: {
+    name: "Traps",
+    desc: "Trapezius. Shrugs and carries build the upper-back shelf.",
+    function: "Shrugs and steadies your shoulders. Supports your neck and helps carry heavy loads."
+  },
+  "lower-back": {
+    name: "Lower Back",
+    desc: "Erector spinae. Keeps your spine strong under load.",
+    function: "Extends and braces your spine. Keeps you upright during lifts and everyday movement."
+  },
+  shoulders: {
+    name: "Shoulders",
+    desc: "Deltoids. Pressing and raising builds capped shoulders.",
+    function: "Lifts and rotates your arms in every direction. Caps pressing and raising movements."
+  },
+  biceps: {
+    name: "Biceps",
+    desc: "Front of the upper arm. Curls of every kind.",
+    function: "Bends your elbow and rotates your forearm. Powers curls and assists pulling."
+  },
+  triceps: {
+    name: "Triceps",
+    desc: "Back of the upper arm. About two thirds of your arm size.",
+    function: "Straightens your elbow. Drives pushdowns, dips, and locks out every press."
+  },
+  forearms: {
+    name: "Forearms",
+    desc: "Grip strength. Carries, hangs and wrist work.",
+    function: "Grips, twists, and stabilizes your wrist. Transfers strength from hand to bar."
+  },
+  abs: {
+    name: "Abs",
+    desc: "Rectus abdominis, the six-pack wall. Train it with resistance.",
+    function: "Bends your trunk forward and braces your core. Protects your spine under load."
+  },
+  obliques: {
+    name: "Obliques",
+    desc: "Side core. Rotation and anti-rotation strength.",
+    function: "Rotates and side-bends your torso. Stabilizes twists and single-sided lifts."
+  },
+  glutes: {
+    name: "Glutes",
+    desc: "The powerhouse. Hip thrusts, swings and lunges.",
+    function: "Extends your hips with force. Powers standing up, sprinting, and climbing."
+  },
+  quads: {
+    name: "Quads",
+    desc: "Front of the thigh. Squats, presses and lunges.",
+    function: "Straightens your knee. Drives squats, lunges, and stairs."
+  },
+  hamstrings: {
+    name: "Hamstrings",
+    desc: "Back of the thigh. Hinges, curls and Nordics.",
+    function: "Bends your knee and extends your hip. Powers sprinting and hinging lifts."
+  },
+  calves: {
+    name: "Calves",
+    desc: "Lower leg. Raises with a full stretch and squeeze.",
+    function: "Lifts your heels to push off the ground. Drives running, jumping, and walking."
+  },
+  "full-body": {
+    name: "Full Body",
+    desc: "Compound conditioning. Multiple muscles, maximum output.",
+    function: "Coordinates every major muscle group at once. Builds power, balance, and stamina together."
+  },
+  cardio: {
+    name: "Cardio",
+    desc: "Engine building. Heart, lungs and work capacity.",
+    function: "Strengthens your heart and lungs. Builds endurance and recovery capacity."
+  }
 };
 
 /* ---------- custom exercises (user-created, stored locally) ---------- */
@@ -628,6 +696,23 @@ function createBodyViewer(container, opts) {
       }
     });
   }
+  function setSorenessTint(soreByGroup) {
+    reset();
+    for (const id in mats) {
+      const lvl = soreByGroup[groupOf(id)];
+      if (lvl === "mild") {
+        mats[id].emissive.setHex(0xffe135);
+        mats[id].emissiveIntensity = 0.5;
+      } else if (lvl === "sore") {
+        mats[id].emissive.setHex(0xff8c1a);
+        mats[id].emissiveIntensity = 0.8;
+      } else if (lvl === "very-sore") {
+        mats[id].emissive.setHex(0xff3b1f);
+        mats[id].emissiveIntensity = 1.1;
+        mats[id].color.setHex(0xff5c47);
+      }
+    }
+  }
   function setFinish(name) {
     const f = BODY_FINISHES[name] || BODY_FINISHES.standard;
     const apply = m => {
@@ -652,6 +737,7 @@ function createBodyViewer(container, opts) {
     setAccent,
     setHeat,
     setPain,
+    setSorenessTint,
     setFinish,
     setView(v, instant) {
       let t = v === "back" ? Math.PI : 0;
@@ -1383,6 +1469,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.39", "interactive upgrades: scrubbable demos, form cues/mistakes, workout builder, variations, tappable charts, badges, soreness overlay, voice commands, anatomy deep-dives; 50 new exercises, 5 new programs"],
   ["v11.38", "prettier formatting across js, css, html; fixed stray div tag"],
   ["v11.37", "code formatting: 2 blank lines between functions, 1 declaration per line in CSS, fixed split brace bugs"],
   ["v11.36", "Refactor: split codebase into js and css modules"],

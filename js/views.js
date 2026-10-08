@@ -414,6 +414,34 @@ function renderDetail(id) {
   const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
   $("dSteps").innerHTML +=
     `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
+  // Exercise-specific cues
+  const exCues = ex.cues || [];
+  $("dCues").innerHTML = exCues.length
+    ? exCues.map(c => `<li>✓ ${esc(c)}</li>`).join("")
+    : `<li class="muted">No specific cues yet.</li>`;
+  // Common mistakes
+  const exMistakes = ex.mistakes || [];
+  $("dMistakes").innerHTML = exMistakes.length
+    ? exMistakes
+        .map(
+          m =>
+            `<div class="mistake-card"><p class="mistake-m"><b>✗ ${esc(m.m)}</b></p><p class="mistake-fix">Fix: ${esc(m.fix)}</p></div>`
+        )
+        .join("")
+    : `<p class="muted">No common mistakes listed.</p>`;
+  // Variations
+  const vars = ex.variations || {};
+  const varCard = (id, label) => {
+    const v = EXERCISES.find(x => x.id === id);
+    if (!v) return "";
+    return `<div class="mini-card" data-ex="${v.id}"><b>${esc(v.name)}</b><span>${eqName[v.equipment]} · ${cap1(v.level)}</span><em>${label}</em></div>`;
+  };
+  const easierHtml = (vars.easier || []).map(id => varCard(id, "Easier")).join("");
+  const harderHtml = (vars.harder || []).map(id => varCard(id, "Harder")).join("");
+  $("dVariations").innerHTML =
+    easierHtml || harderHtml
+      ? `<div class="var-group">${easierHtml ? `<p class="var-label">Easier</p><div class="mini-cards">${easierHtml}</div>` : ""}${harderHtml ? `<p class="var-label">Harder</p><div class="mini-cards">${harderHtml}</div>` : ""}</div>`
+      : `<p class="muted">No variations listed.</p>`;
   $("dMuscles").innerHTML =
     `<span class="tag tag-lg primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
     ex.secondary
@@ -554,7 +582,11 @@ function renderDetail(id) {
   const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
   if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
   viewers.push(v);
-  if (window.FORGE_DEMO) demos.push(window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps));
+  if (window.FORGE_DEMO) {
+    const demo = window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps);
+    if (demo && demo.controls) demo.controls($("demoControls"));
+    demos.push(demo);
+  }
   const full = ex.primary === "full-body" || ex.primary === "cardio";
   v.highlight(full ? [] : expandMuscles(ex.primary), full ? [] : ex.secondary.flatMap(expandMuscles), full);
   const setV = front => {
@@ -589,34 +621,58 @@ document.addEventListener("click", e => {
 
 // BODY MAP
 function openMuscleSheet(mid) {
-  const g = groupOf(mid),
-    info = MUSCLE_INFO[g];
+  const g = groupOf(mid);
+  const info = MUSCLE_INFO[g];
   if (!info) return;
-  const list = EXERCISES.filter(e => e.primary === g || (e.secondary || []).map(groupOf).includes(g)).slice(0, 6);
+  const ranked = EXERCISES.filter(e => e.primary === g || (e.secondary || []).map(groupOf).includes(g))
+    .sort((a, b) => (a.primary === g ? 0 : 1) - (b.primary === g ? 0 : 1))
+    .slice(0, 5);
+  const today = fmtDate(new Date());
+  const sm = getSoreness();
+  let cur = (sm[today] && sm[today][g]) || "none";
   const old = document.querySelector(".sheet-veil");
   if (old) old.remove();
   const veil = document.createElement("div");
   veil.className = "sheet-veil";
+  const chip = (lvl, label) =>
+    `<button class="sore-chip ${cur === lvl ? "on" : ""}" data-sore-log="${lvl}" data-lvl="${lvl}">${label}</button>`;
   veil.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
     <div class="sheet-head">
       <h3 style="margin:0">${esc(info.name)}</h3>
       <button class="modal-x sheet-close" aria-label="Close"></button>
     </div>
-    <p class="muted" style="font-size:13px;margin:0 0 12px">Top exercises - tap one to open it</p>
-    ${list.length ? `<div class="mini-cards">${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
+    <p class="muted muscle-fn">${esc(info.function || info.desc)}</p>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">Top 5 exercises - tap one to open it</p>
+    ${ranked.length ? `<div class="mini-cards">${ranked.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
+    <p class="muted" style="font-size:13px;margin:14px 0 8px">How sore is it today?</p>
+    <div class="sore-chips">
+      ${chip("mild", "Mild")}
+      ${chip("sore", "Sore")}
+      ${chip("very-sore", "Very sore")}
+      ${chip("none", "Clear")}
+    </div>
   </div>`;
   veil.querySelector(".sheet-close").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+  const closeSheet = () => veil.remove();
   const onEsc = e => {
     if (e.key === "Escape") closeSheet();
   };
-  const closeSheet = () => {
-    document.removeEventListener("keydown", onEsc);
-    veil.remove();
-  };
   veil.addEventListener("click", e => {
+    const sc = e.target.closest("[data-sore-log]");
+    if (sc) {
+      const lvl = sc.dataset.soreLog;
+      const m = getSoreness();
+      m[today] = m[today] || {};
+      if (lvl === "none") delete m[today][g];
+      else m[today][g] = lvl;
+      saveSoreness(m);
+      cur = lvl;
+      veil.querySelectorAll("[data-sore-log]").forEach(c => c.classList.toggle("on", c.dataset.soreLog === lvl));
+      return;
+    }
     if (e.target === veil || e.target.closest("[data-ex]") || e.target.closest(".sheet-close")) closeSheet();
   });
-  document.addEventListener("keydown", onEsc);
+  document.addEventListener("keydown", onEsc, { once: true });
   document.body.appendChild(veil);
 }
 
@@ -633,6 +689,18 @@ function renderBody(selected) {
         else pain[g] = Date.now();
         savePain(pain);
         paintPain();
+        return;
+      }
+      if (window._bodyMode === "soreness") {
+        const today = fmtDate(new Date());
+        const m = getSoreness();
+        const todayMap = (m[today] = m[today] || {});
+        const SORE_LEVELS = ["mild", "sore", "very-sore"];
+        const cur = SORE_LEVELS.indexOf(todayMap[g]);
+        if (cur === SORE_LEVELS.length - 1) delete todayMap[g];
+        else todayMap[g] = SORE_LEVELS[cur + 1];
+        saveSoreness(m);
+        paintSoreness();
         return;
       }
       selectMuscle(g);
@@ -664,15 +732,25 @@ function renderBody(selected) {
     const n = marked.length;
     $("painCount").textContent = n ? n + " marked" : "Tap a muscle to mark pain";
   };
+  const paintSoreness = () => {
+    const today = fmtDate(new Date());
+    const todayMap = getSoreness()[today] || {};
+    v.setSorenessTint(todayMap);
+    const n = Object.keys(todayMap).length;
+    $("soreCount").textContent = n ? n + " logged today" : "Tap a muscle to log soreness";
+  };
   const syncMode = () => {
     const mode = window._bodyMode || "muscles";
     $("bMuscles").classList.toggle("on", mode === "muscles");
     $("bRecovery").classList.toggle("on", mode === "recovery");
     $("bFatigue").classList.toggle("on", mode === "fatigue");
     $("bPain").classList.toggle("on", mode === "pain");
-    $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "pain");
+    $("bSoreness").classList.toggle("on", mode === "soreness");
+    $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "pain" || mode === "soreness");
     $("painHint").classList.toggle("hidden", mode !== "pain");
+    $("soreHint").classList.toggle("hidden", mode !== "soreness");
     if (mode === "pain") paintPain();
+    if (mode === "soreness") paintSoreness();
   };
   window._syncBodyMode = syncMode;
   window._bodyMode = "muscles";
@@ -695,6 +773,10 @@ function renderBody(selected) {
   };
   $("bPain").onclick = () => {
     window._bodyMode = "pain";
+    syncMode();
+  };
+  $("bSoreness").onclick = () => {
+    window._bodyMode = "soreness";
     syncMode();
   };
   window._bodyViewer = v;

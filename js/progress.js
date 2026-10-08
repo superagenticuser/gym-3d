@@ -1341,96 +1341,9 @@ function streakCalendar(log) {
   return `<div class="heatmap-scroll">${html}</div>${legend}`;
 }
 
-const BADGES = [
-  { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
-  { id: "ten", icon: "flame", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 },
-  { id: "fifty", icon: "dumbbell", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
-  { id: "streak7", icon: "zap", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
-  { id: "streak30", icon: "star", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
-  {
-    id: "vol10k",
-    icon: "dumbbell",
-    name: "Volume king",
-    desc: "10,000 kg in one workout",
-    check: log =>
-      log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0) >= 10000)
-  },
-  { id: "hundred", icon: "trophy", name: "Century", desc: "Log 100 workouts", check: log => log.length >= 100 },
-  {
-    id: "dl100",
-    icon: "dumbbell",
-    name: "Triple digits",
-    desc: "Deadlift 100 kg",
-    check: log =>
-      log.some(w =>
-        w.exercises.some(x => {
-          const ex = byId(x.id);
-          return ex && /deadlift/i.test(ex.name) && x.sets.some(s => (s.weight || 0) >= 100);
-        })
-      )
-  },
-  {
-    id: "vol100k",
-    icon: "flame",
-    name: "100-ton club",
-    desc: "100,000 kg lifetime volume",
-    check: log => totalVolumeKg(log) >= 100000
-  },
-  { id: "xp5k", icon: "zap", name: "Rising star", desc: "Earn 5,000 XP", check: () => getXP().xp >= 5000 },
-  {
-    id: "earlybird",
-    icon: "star",
-    name: "Consistent",
-    desc: "Train 4 weeks in a row",
-    check: log => weeklyStreak(log) >= 4
-  },
-  {
-    id: "allmuscles",
-    icon: "map",
-    name: "Full body",
-    desc: "Train all 17 muscle groups",
-    check: log => {
-      const groups = new Set();
-      log.forEach(w =>
-        w.exercises.forEach(x => {
-          const ex = byId(x.id);
-          if (ex) groups.add(ex.primary);
-        })
-      );
-      return groups.size >= 17;
-    }
-  }
-];
-
-function getBadges() {
-  try {
-    return JSON.parse(localStorage.getItem("forge-badges") || "[]");
-  } catch (e) {
-    return [];
-  }
-}
-
-function checkBadges() {
-  const log = getLog();
-  const streak = workoutStreak();
-  const earned = getBadges();
-  BADGES.forEach(b => {
-    if (!earned.includes(b.id) && b.check(log, streak)) {
-      earned.push(b.id);
-      // toast notification
-      const toast = document.createElement("div");
-      toast.className = "badge-toast";
-      toast.innerHTML = `<span class="toast-icon">${window.FORGE_ICON ? window.FORGE_ICON(b.icon) : ""}</span><div><b>Badge earned!</b><br>${b.name}</div>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.classList.add("show"), 100);
-      setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 500);
-      }, 4000);
-    }
-  });
-  localStorage.setItem("forge-badges", JSON.stringify(earned));
-}
+/* Badge definitions, evaluation and celebration live in js/badges.js.
+   BADGES, checkBadges, getBadges, getEarnedBadges, getNewBadges and
+   markBadgesSeen are provided there as globals. */
 
 function renderYearTab(body) {
   const yr = new Date().getFullYear();
@@ -1535,17 +1448,32 @@ function renderBoardTab(body) {
 }
 
 function renderBadgesTab(body) {
-  const earned = getBadges();
+  checkBadges();
+  const earned = getEarnedBadges();
+  const earnedIds = Object.keys(earned);
   body.innerHTML =
-    `<h3>Achievements</h3><div class="badge-grid">` +
-    BADGES.map(
-      b => `
-      <div class="badge-card ${earned.includes(b.id) ? "earned" : "locked"}">
-        <div class="badge-icon">${window.FORGE_ICON ? window.FORGE_ICON(earned.includes(b.id) ? b.icon : "lock") : ""}</div>
-        <b>${b.name}</b><span>${b.desc}</span>
-      </div>`
-    ).join("") +
+    `<h3>Achievements</h3><p class="muted" style="font-size:13px;margin-bottom:12px">${earnedIds.length} of ${BADGES.length} earned. Keep training to unlock the rest.</p><div class="badge-grid">` +
+    BADGES.map(b => {
+      const has = !!earned[b.id];
+      let when = "";
+      if (has && earned[b.id]) {
+        try {
+          when = new Date(earned[b.id]).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          });
+        } catch (e) {}
+      }
+      return `
+      <div class="badge-card ${has ? "earned" : "locked"}">
+        <div class="badge-icon" style="font-size:30px;line-height:1">${has ? esc(b.icon) : "🔒"}</div>
+        <b>${esc(b.name)}</b><span>${esc(b.desc)}</span>
+        ${has && when ? `<span class="badge-date" style="font-size:11px">Earned ${esc(when)}</span>` : ""}
+      </div>`;
+    }).join("") +
     `</div>`;
+  markBadgesSeen();
 }
 
 // BODY MEASUREMENTS
@@ -1721,7 +1649,8 @@ function renderBodyTab(body) {
   $("photoCamBtn").addEventListener("click", openPhotoCapture);
 }
 
-function attachChartTip(canvas, pts, fmt) {
+function attachChartTip(canvas, pts, fmt, opts) {
+  opts = opts || {};
   const par = canvas.parentElement;
   par.style.position = "relative";
   const oldT = par.querySelector(".chart-tip");
@@ -1731,7 +1660,7 @@ function attachChartTip(canvas, pts, fmt) {
   tip.style.display = "none";
   par.appendChild(tip);
   canvas.style.cursor = "pointer";
-  function showAt(cx, cy) {
+  function nearest(cx, cy) {
     const r = canvas.getBoundingClientRect();
     const px = cx - r.left,
       py = cy - r.top;
@@ -1744,20 +1673,230 @@ function attachChartTip(canvas, pts, fmt) {
         best = p;
       }
     });
-    if (best && bd < 32) {
+    return bd < 34 ? best : null;
+  }
+  function showAt(cx, cy) {
+    const best = nearest(cx, cy);
+    if (best) {
       tip.textContent = fmt(best);
       tip.style.left = best.x + "px";
       tip.style.top = best.y + "px";
       tip.style.display = "block";
     } else tip.style.display = "none";
   }
-  canvas.addEventListener("pointerdown", e => showAt(e.clientX, e.clientY));
+  canvas.addEventListener("pointerdown", e => {
+    const p = nearest(e.clientX, e.clientY);
+    if (p && typeof opts.onTap === "function") opts.onTap(p, e);
+    showAt(e.clientX, e.clientY);
+  });
   canvas.addEventListener("pointermove", e => {
     if (e.pointerType === "mouse") showAt(e.clientX, e.clientY);
   });
   canvas.addEventListener("pointerleave", () => {
     tip.style.display = "none";
   });
+}
+
+// Rich popup for tapped chart points. html is trusted app-generated markup.
+// Works without extra CSS: all styling is inline (dark theme, --volt accent).
+function closeChartPopup() {
+  document.querySelectorAll(".chart-pop-veil").forEach(v => v.remove());
+}
+
+function showChartPopup(canvas, point, html) {
+  closeChartPopup();
+  const par = canvas.parentElement;
+  par.style.position = "relative";
+  const r = canvas.getBoundingClientRect();
+  const left = point && point.x != null ? Math.max(8, Math.min(r.width - 268, point.x - 130)) : 8;
+  const top = point && point.y != null ? Math.max(8, point.y - 20) : 8;
+  const veil = document.createElement("div");
+  veil.className = "chart-pop-veil";
+  veil.innerHTML = `<div class="chart-pop" role="dialog" aria-modal="true" style="position:absolute;left:${left.toFixed(0)}px;top:${top.toFixed(0)}px;width:260px;max-width:calc(100% - 16px);background:var(--surface,#14161d);border:1px solid var(--volt);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.55);z-index:20;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)">
+      <b style="font-size:13px;color:var(--volt)">Workout details</b>
+      <button class="chart-pop-x" aria-label="Close" style="background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px">×</button>
+    </div>
+    <div class="chart-pop-body" style="padding:12px;font-size:13px">${html}</div>
+  </div>`;
+  par.appendChild(veil);
+  veil.addEventListener("click", e => {
+    if (e.target === veil || e.target.closest(".chart-pop-x")) closeChartPopup();
+  });
+}
+
+// Build the popup content for one logged workout: date, exercises with key
+// stats, totals, and a button that opens the full workout in the history tab.
+function workoutPopupHtml(w) {
+  const dstr = new Date(w.date + "T12:00:00").toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+  let sets = 0,
+    reps = 0,
+    vol = 0;
+  const rows = (w.exercises || [])
+    .map(x => {
+      const ex = byId(x.id);
+      const name = ex ? ex.name : x.id;
+      const nSets = (x.sets || []).length;
+      const nReps = (x.sets || []).reduce((a, s) => a + (s.reps || 0), 0);
+      const topW = Math.max(0, ...(x.sets || []).map(s => s.weight || 0));
+      const xv = (x.sets || []).reduce((a, s) => a + setVolumeKg(x.id, s), 0);
+      sets += nSets;
+      reps += nReps;
+      vol += xv;
+      return `<div style="padding:6px 0;border-bottom:1px solid var(--line)">
+        <div style="font-weight:700">${esc(name)}</div>
+        <div class="muted" style="font-size:12px">${nSets} sets · ${nReps} reps${topW ? " · top " + fmtW(topW) : ""} · ${Math.round(fromKg(xv)).toLocaleString()} ${unitLabel()} vol</div>
+      </div>`;
+    })
+    .join("");
+  const title = esc(w.programName || "Workout") + (w.dayName ? ` <span class="muted">· ${esc(w.dayName)}</span>` : "");
+  return `<p style="margin:0 0 2px;font-size:15px"><b>${esc(dstr)}</b></p>
+    <p class="muted" style="margin:0 0 8px">${title}</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div class="stat-card" style="flex:1;padding:8px"><b>${sets}</b><span>sets</span></div>
+      <div class="stat-card" style="flex:1;padding:8px"><b>${reps}</b><span>reps</span></div>
+      <div class="stat-card" style="flex:1;padding:8px"><b>${Math.round(fromKg(vol)).toLocaleString()}</b><span>${unitLabel()} vol</span></div>
+    </div>
+    <div style="max-height:180px;overflow:auto;margin-bottom:10px">${rows || '<p class="muted">No exercises.</p>'}</div>
+    <button class="btn btn-primary btn-sm" data-goto-wo="${esc(w.date)}" style="width:100%">View workout details</button>`;
+}
+
+// Jump to the history tab and expand every workout logged on dateKey.
+function gotoWorkoutDetail(dateKey) {
+  closeChartPopup();
+  try {
+    localStorage.setItem("forge-progress-tab", "history");
+  } catch (e) {}
+  const reveal = () => {
+    setTimeout(() => {
+      const blocks = document.querySelectorAll('#progressBody .hist-day[data-wdate="' + dateKey + '"]');
+      blocks.forEach(b => {
+        const d = b.querySelector(".hist-detail");
+        if (d) d.classList.remove("hidden");
+      });
+      if (blocks.length) blocks[0].scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 90);
+  };
+  if (location.hash !== "#/progress") {
+    location.hash = "#/progress";
+    reveal();
+  } else {
+    renderProgress("history");
+    reveal();
+  }
+}
+
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-goto-wo]");
+  if (g) gotoWorkoutDetail(g.dataset.gotoWo);
+});
+
+// Tappable per-workout volume chart on the Progress overview tab.
+// Each point is one logged workout; tapping opens a details popup.
+function renderSessionVolumeChart() {
+  const el = $("sessVolChart");
+  if (!el) return;
+  const log = getLog().slice(-20);
+  if (log.length < 2) {
+    el.innerHTML = `<p class="muted">Log two workouts to see your session volume trend.</p>`;
+    return;
+  }
+  const accent = currentAccent().color;
+  const vals = log.map(w =>
+    (w.exercises || []).reduce((a, x) => a + (x.sets || []).reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0)
+  );
+  const canvas = document.createElement("canvas");
+  el.appendChild(canvas);
+  const dpr = window.devicePixelRatio || 1;
+  const cw = Math.max(280, el.clientWidth || 320),
+    ch = 210;
+  canvas.width = cw * dpr;
+  canvas.height = ch * dpr;
+  canvas.style.width = cw + "px";
+  canvas.style.height = ch + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const padL = 48,
+    padR = 12,
+    padT = 12,
+    padB = 26;
+  const iw = cw - padL - padR,
+    ih = ch - padT - padB;
+  const max = Math.max.apply(null, vals.concat([1]));
+  const X = i => padL + (i / (vals.length - 1)) * iw;
+  const Y = v => padT + (1 - v / max) * ih;
+  // gridlines + y labels
+  ctx.font = "11px sans-serif";
+  ctx.textAlign = "right";
+  for (let g = 0; g <= 3; g++) {
+    const gv = (max * g) / 3,
+      gy = Y(gv);
+    ctx.strokeStyle = "rgba(255,255,255,0.07)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, gy);
+    ctx.lineTo(cw - padR, gy);
+    ctx.stroke();
+    ctx.fillStyle = "#8a93a6";
+    ctx.fillText(Math.round(fromKg(gv)).toLocaleString(), padL - 8, gy + 4);
+  }
+  // area fill
+  const grad = ctx.createLinearGradient(0, padT, 0, ch - padB);
+  grad.addColorStop(0, accent + "55");
+  grad.addColorStop(1, accent + "00");
+  ctx.beginPath();
+  vals.forEach((v, i) => {
+    i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(0), Y(v));
+  });
+  ctx.lineTo(X(vals.length - 1), ch - padB);
+  ctx.lineTo(X(0), ch - padB);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // line
+  ctx.beginPath();
+  vals.forEach((v, i) => {
+    i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(0), Y(v));
+  });
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.stroke();
+  // dots (generous hit targets for taps)
+  vals.forEach((v, i) => {
+    ctx.beginPath();
+    ctx.arc(X(i), Y(v), 5, 0, 7);
+    ctx.fillStyle = "#0b0d12";
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = accent;
+    ctx.stroke();
+  });
+  // date labels
+  const fmtD = w => {
+    try {
+      return new Date(w.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    } catch (e) {
+      return "";
+    }
+  };
+  ctx.fillStyle = "#8a93a6";
+  ctx.textAlign = "left";
+  ctx.fillText(fmtD(log[0]), padL, ch - 8);
+  ctx.textAlign = "right";
+  ctx.fillText(fmtD(log[log.length - 1]), cw - padR, ch - 8);
+  attachChartTip(
+    canvas,
+    vals.map((v, i) => ({ x: X(i), y: Y(v), i })),
+    p => `${fmtD(log[p.i])}: ${Math.round(fromKg(vals[p.i])).toLocaleString()} ${unitLabel()}`,
+    { onTap: p => showChartPopup(canvas, p, workoutPopupHtml(log[p.i])) }
+  );
 }
 
 let mChartSpan = 0;
@@ -2179,7 +2318,10 @@ function renderProgress(tab) {
     ${checkDeload() ? `<div class="onerm-box warn"><b>${window.FORGE_ICON ? window.FORGE_ICON("triangle-alert") : ""} Deload suggested:</b> <span class="muted">Volume dropping, consider a light week.</span></div>` : ""}
     <h3 style="margin-top:20px">Last 16 weeks</h3>
     ${streakCalendar(log)}
-    <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>`;
+    <p class="muted">Volume = weight × reps across every logged set (bodyweight included for bodyweight moves).</p>
+    <h3 style="margin-top:20px">Session volume</h3>
+    <p class="muted" style="font-size:13px;margin-bottom:12px">Volume per workout, most recent last. Tap any point for that workout's details.</p>
+    <div class="chart-wrap" id="sessVolChart"></div>`;
       body.querySelectorAll("[data-cu]").forEach(b => {
         const v = parseFloat(b.dataset.cu),
           f = b.dataset.cufmt;
@@ -2193,6 +2335,7 @@ function renderProgress(tab) {
               : undefined
         );
       });
+      renderSessionVolumeChart();
     } else if (tab === "history") {
       const byDate = {};
       log.forEach(w => {
@@ -2233,7 +2376,7 @@ function renderProgress(tab) {
                 (w.notes ? `<p class="muted" style="font-style:italic;margin:8px 0">Note: ${esc(w.notes)}</p>` : "")
             )
             .join("");
-          return `<div class="hist-day"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
+          return `<div class="hist-day" data-wdate="${dt}"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
         })
         .join("");
       body.querySelectorAll(".hist-toggle").forEach(tg =>

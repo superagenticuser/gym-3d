@@ -319,5 +319,540 @@ const PROGRAMS = [
         ]
       }
     ]
+  },
+  {
+    id: "kettlebell-foundations",
+    name: "Kettlebell Foundations",
+    tagline: "Swing, clean, press and carry your way to full-body power.",
+    level: "beginner",
+    daysPerWeek: 3,
+    weeks: 6,
+    equipment: "Kettlebells",
+    days: [
+      {
+        name: "Day 1 · Hinge Power",
+        exercises: [
+          {
+            id: "kettlebell-deadlift",
+            sets: 3,
+            reps: "10"
+          },
+          {
+            id: "kettlebell-swing",
+            sets: 4,
+            reps: "15"
+          },
+          {
+            id: "kettlebell-single-leg-deadlift",
+            sets: 3,
+            reps: "8 / side"
+          },
+          {
+            id: "plank",
+            sets: 3,
+            reps: "30s"
+          }
+        ]
+      },
+      {
+        name: "Day 2 · Press + Carry",
+        exercises: [
+          {
+            id: "kettlebell-press",
+            sets: 3,
+            reps: "8 / side"
+          },
+          {
+            id: "kettlebell-halo",
+            sets: 2,
+            reps: "8 / side"
+          },
+          {
+            id: "kettlebell-farmer-carry",
+            sets: 3,
+            reps: "40m"
+          },
+          {
+            id: "band-pull-apart",
+            sets: 2,
+            reps: "15"
+          }
+        ]
+      },
+      {
+        name: "Day 3 · Clean + Squat",
+        exercises: [
+          {
+            id: "kettlebell-clean",
+            sets: 4,
+            reps: "6 / side"
+          },
+          {
+            id: "kettlebell-front-squat",
+            sets: 3,
+            reps: "8"
+          },
+          {
+            id: "kettlebell-gorilla-row",
+            sets: 3,
+            reps: "8 / side"
+          },
+          {
+            id: "dead-bug",
+            sets: 2,
+            reps: "10 / side"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "cable-hypertrophy",
+    name: "Cable-Only Hypertrophy",
+    tagline: "One cable station, complete muscle coverage across four days.",
+    level: "intermediate",
+    daysPerWeek: 4,
+    weeks: 8,
+    equipment: "Cable machine",
+    days: [
+      {
+        name: "Push",
+        exercises: [
+          {
+            id: "cable-chest-press",
+            sets: 4,
+            reps: "10"
+          },
+          {
+            id: "low-to-high-cable-fly",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "cable-upright-row",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "tricep-rope-pushdown",
+            sets: 3,
+            reps: "12"
+          }
+        ]
+      },
+      {
+        name: "Pull",
+        exercises: [
+          {
+            id: "seated-cable-row",
+            sets: 4,
+            reps: "10"
+          },
+          {
+            id: "lat-pulldown",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "cable-hammer-curl",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "face-pull",
+            sets: 3,
+            reps: "15"
+          }
+        ]
+      },
+      {
+        name: "Legs",
+        exercises: [
+          {
+            id: "cable-split-squat",
+            sets: 3,
+            reps: "10 / side"
+          },
+          {
+            id: "cable-hip-extension",
+            sets: 3,
+            reps: "12 / side"
+          },
+          {
+            id: "cable-single-leg-rdl",
+            sets: 3,
+            reps: "10 / side"
+          },
+          {
+            id: "standing-cable-crunch",
+            sets: 3,
+            reps: "15"
+          }
+        ]
+      },
+      {
+        name: "Arms + Core",
+        exercises: [
+          {
+            id: "bayesian-cable-curl",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "cross-body-cable-extension",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "cable-oblique-twist",
+            sets: 3,
+            reps: "12 / side"
+          },
+          {
+            id: "cable-side-bend",
+            sets: 2,
+            reps: "12 / side"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "bodyweight-progression",
+    name: "Bodyweight Progression",
+    tagline: "From wall push-ups to clapping push-ups and skater squats.",
+    level: "beginner",
+    daysPerWeek: 3,
+    weeks: 8,
+    equipment: "Bodyweight only",
+    days: [
+      {
+        name: "Day 1 · Push",
+        exercises: [
+          {
+            id: "wall-push-up",
+            sets: 3,
+            reps: "15"
+          },
+          {
+            id: "push-up",
+            sets: 4,
+            reps: "10"
+          },
+          {
+            id: "scapular-push-up",
+            sets: 2,
+            reps: "12"
+          },
+          {
+            id: "hindu-push-up",
+            sets: 3,
+            reps: "8"
+          },
+          {
+            id: "bench-dip",
+            sets: 3,
+            reps: "10"
+          }
+        ]
+      },
+      {
+        name: "Day 2 · Pull + Legs",
+        exercises: [
+          {
+            id: "inverted-row",
+            sets: 4,
+            reps: "8"
+          },
+          {
+            id: "dead-hang",
+            sets: 3,
+            reps: "30s"
+          },
+          {
+            id: "reverse-lunge",
+            sets: 3,
+            reps: "10 / side"
+          },
+          {
+            id: "bulgarian-split-squat",
+            sets: 3,
+            reps: "8 / side"
+          },
+          {
+            id: "wall-sit",
+            sets: 3,
+            reps: "45s"
+          }
+        ]
+      },
+      {
+        name: "Day 3 · Core + Skills",
+        exercises: [
+          {
+            id: "tuck-up",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "hollow-rock",
+            sets: 3,
+            reps: "20s"
+          },
+          {
+            id: "spiderman-push-up",
+            sets: 3,
+            reps: "6 / side"
+          },
+          {
+            id: "jumping-lunge",
+            sets: 3,
+            reps: "10"
+          },
+          {
+            id: "bird-dog",
+            sets: 2,
+            reps: "8 / side"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "mobility-reset",
+    name: "Daily Mobility Reset",
+    tagline: "Ten focused minutes a day to move better and ache less.",
+    level: "beginner",
+    daysPerWeek: 5,
+    weeks: 4,
+    equipment: "Bodyweight only",
+    days: [
+      {
+        name: "Day 1 · Hips",
+        exercises: [
+          {
+            id: "90-90-hip-switch",
+            sets: 2,
+            reps: "8 / side"
+          },
+          {
+            id: "pigeon-stretch",
+            sets: 2,
+            reps: "60s / side"
+          },
+          {
+            id: "deep-squat-hold",
+            sets: 3,
+            reps: "30s"
+          },
+          {
+            id: "couch-stretch",
+            sets: 2,
+            reps: "60s / side"
+          }
+        ]
+      },
+      {
+        name: "Day 2 · Spine",
+        exercises: [
+          {
+            id: "cat-cow",
+            sets: 2,
+            reps: "10"
+          },
+          {
+            id: "prone-t-spine-rotation",
+            sets: 2,
+            reps: "8 / side"
+          },
+          {
+            id: "world-greatest-stretch",
+            sets: 2,
+            reps: "5 / side"
+          },
+          {
+            id: "dead-hang",
+            sets: 3,
+            reps: "20s"
+          }
+        ]
+      },
+      {
+        name: "Day 3 · Full Flow",
+        exercises: [
+          {
+            id: "inchworm",
+            sets: 3,
+            reps: "6"
+          },
+          {
+            id: "world-greatest-stretch",
+            sets: 2,
+            reps: "5 / side"
+          },
+          {
+            id: "band-pass-through",
+            sets: 2,
+            reps: "10"
+          },
+          {
+            id: "scapular-push-up",
+            sets: 2,
+            reps: "10"
+          }
+        ]
+      },
+      {
+        name: "Day 4 · Hips + Hamstrings",
+        exercises: [
+          {
+            id: "couch-stretch",
+            sets: 2,
+            reps: "60s / side"
+          },
+          {
+            id: "pigeon-stretch",
+            sets: 2,
+            reps: "60s / side"
+          },
+          {
+            id: "inchworm",
+            sets: 3,
+            reps: "6"
+          },
+          {
+            id: "deep-squat-hold",
+            sets: 3,
+            reps: "30s"
+          }
+        ]
+      },
+      {
+        name: "Day 5 · Upper Body",
+        exercises: [
+          {
+            id: "band-pass-through",
+            sets: 2,
+            reps: "10"
+          },
+          {
+            id: "prone-t-spine-rotation",
+            sets: 2,
+            reps: "8 / side"
+          },
+          {
+            id: "cat-cow",
+            sets: 2,
+            reps: "10"
+          },
+          {
+            id: "wall-push-up",
+            sets: 2,
+            reps: "12"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "band-home-workout",
+    name: "Band-Only Home Workout",
+    tagline: "A full training split with nothing but resistance bands.",
+    level: "beginner",
+    daysPerWeek: 3,
+    weeks: 6,
+    equipment: "Resistance bands",
+    days: [
+      {
+        name: "Full Body A",
+        exercises: [
+          {
+            id: "band-pass-through",
+            sets: 2,
+            reps: "10"
+          },
+          {
+            id: "band-chest-press",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "band-row",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "banded-glute-bridge",
+            sets: 3,
+            reps: "15"
+          },
+          {
+            id: "band-curl",
+            sets: 2,
+            reps: "15"
+          }
+        ]
+      },
+      {
+        name: "Full Body B",
+        exercises: [
+          {
+            id: "band-shoulder-press",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "band-row",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "banded-glute-bridge",
+            sets: 3,
+            reps: "15"
+          },
+          {
+            id: "band-pushdown",
+            sets: 2,
+            reps: "15"
+          },
+          {
+            id: "band-pull-apart",
+            sets: 2,
+            reps: "15"
+          }
+        ]
+      },
+      {
+        name: "Full Body C",
+        exercises: [
+          {
+            id: "band-chest-press",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "band-shoulder-press",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "band-row",
+            sets: 3,
+            reps: "12"
+          },
+          {
+            id: "band-curl",
+            sets: 2,
+            reps: "15"
+          },
+          {
+            id: "band-pushdown",
+            sets: 2,
+            reps: "15"
+          }
+        ]
+      }
+    ]
   }
 ];

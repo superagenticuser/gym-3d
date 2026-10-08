@@ -557,6 +557,147 @@ document.addEventListener("click", e => {
   }
 });
 
+// VOICE COMMANDS - hands-free control of the workout player
+// (voice LOGGING lives in views.js; this is the command side)
+let voiceCmdRec = null;
+
+function setVoiceCmdBtn(listening) {
+  const b = $("voiceCmdBtn");
+  if (!b) return;
+  b.innerHTML =
+    `<span class="btn-ic">` +
+    (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") +
+    `</span>` +
+    (listening ? " Stop" : " Voice commands");
+  b.classList.toggle("listening", !!listening);
+  b.setAttribute("aria-label", listening ? "Stop voice commands" : "Voice commands");
+  b.title = listening ? 'Listening… say "next set", "start timer", "stop timer", or "next exercise"' : "Voice commands";
+}
+
+// first exercise that still has incomplete sets
+function firstOpenExerciseIndex() {
+  if (!currentWorkout || !currentWorkout.exercises) return -1;
+  for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
+    const total = currentWorkout.exercises[xi].sets || 0;
+    const doneCt = document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).length;
+    if (doneCt < total) return xi;
+  }
+  return -1;
+}
+
+// "next set" / "complete set": click the same button the user would tap
+function completeNextSetByVoice() {
+  const xi = firstOpenExerciseIndex();
+  if (xi < 0) return false;
+  const btn = document.querySelector(`.wo-ex .set-done[data-x="${xi}"]:not(.hit):not(.warmup-done)`);
+  if (btn) {
+    btn.click(); // runs the exact on-screen set-done handler
+    return true;
+  }
+  return false;
+}
+
+// "start timer" / "start rest": same rest math as the auto-rest after a set
+function startRestByVoice() {
+  const s = getSettings();
+  let sec = s.restShort;
+  const xi = firstOpenExerciseIndex();
+  if (xi >= 0) {
+    const woEx = currentWorkout.exercises[xi];
+    const ex = byId(woEx.id);
+    sec = getRestFor(woEx.id) || getRestSeconds(ex);
+    // linked groups (supersets / giant sets) get short rest, same as auto-rest
+    if (currentWorkout._pairs && (currentWorkout._pairs.has(xi) || currentWorkout._pairs.has(xi - 1))) sec = 30;
+  }
+  startTimer(sec);
+}
+
+// "finish exercise" / "next exercise": scroll to the next incomplete exercise
+function scrollToNextExerciseByVoice() {
+  const xi = firstOpenExerciseIndex();
+  if (xi < 0) {
+    appAlert("All exercises are complete.");
+    return false;
+  }
+  const el = document.querySelectorAll(".wo-ex")[xi];
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.remove("set-flash");
+    void el.offsetWidth;
+    el.classList.add("set-flash");
+    return true;
+  }
+  return false;
+}
+
+function handleVoiceCommand(text) {
+  const status = $("voiceStatus");
+  const say = m => {
+    if (status) status.textContent = m;
+  };
+  if (text.indexOf("next set") >= 0 || text.indexOf("complete set") >= 0 || text.indexOf("set done") >= 0) {
+    say(completeNextSetByVoice() ? `Set logged: "${text}"` : "No open sets left.");
+  } else if (text.indexOf("start timer") >= 0 || text.indexOf("start rest") >= 0) {
+    startRestByVoice();
+    say(`Rest timer started: "${text}"`);
+  } else if (text.indexOf("stop timer") >= 0) {
+    const stop = $("timerStop");
+    if (stop) stop.click(); // runs the exact on-screen stop handler
+    say(`Timer stopped: "${text}"`);
+  } else if (text.indexOf("next exercise") >= 0 || text.indexOf("finish exercise") >= 0) {
+    say(scrollToNextExerciseByVoice() ? `Next exercise: "${text}"` : "All exercises are complete.");
+  } else {
+    say(`Heard: "${text}". Try "next set", "start timer", "stop timer", or "next exercise"`);
+  }
+}
+
+function toggleVoiceCmd() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    appAlert("Voice commands are not supported in this browser.");
+    return;
+  }
+  if (voiceCmdRec) {
+    voiceCmdRec.stop();
+    voiceCmdRec = null;
+    setVoiceCmdBtn(false);
+    return;
+  }
+  voiceCmdRec = new SR();
+  voiceCmdRec.lang = "en-US";
+  voiceCmdRec.continuous = true;
+  voiceCmdRec.interimResults = false;
+  voiceCmdRec.onresult = e => {
+    const text = e.results[e.resultIndex][0].transcript.toLowerCase().trim();
+    handleVoiceCommand(text);
+  };
+  voiceCmdRec.onend = () => {
+    voiceCmdRec = null;
+    setVoiceCmdBtn(false);
+  };
+  voiceCmdRec.onerror = () => {};
+  voiceCmdRec.start();
+  setVoiceCmdBtn(true);
+  const status = $("voiceStatus");
+  if (status) status.textContent = 'Listening… say "next set", "start timer", "stop timer", or "next exercise"';
+}
+
+function ensureVoiceCmdButton() {
+  if ($("voiceCmdBtn")) return;
+  const anchor = $("voiceBtn");
+  if (!anchor || !anchor.parentNode) return;
+  const b = document.createElement("button");
+  b.className = "btn btn-ghost btn-sm";
+  b.id = "voiceCmdBtn";
+  b.style.marginTop = "8px";
+  b.style.marginLeft = "8px";
+  anchor.parentNode.insertBefore(b, anchor.nextSibling);
+  b.addEventListener("click", toggleVoiceCmd);
+  setVoiceCmdBtn(false);
+}
+
+ensureVoiceCmdButton();
+
 function showLevelUp(lvl) {
   const veil = document.createElement("div");
   veil.className = "pr-veil";
@@ -760,6 +901,10 @@ $("woFinish").addEventListener("click", () => {
     if (lvl > _oldLvl) setTimeout(() => showLevelUp(lvl), 600);
   })();
   checkBadges();
+  if (typeof getNewBadges === "function") {
+    const _newBadges = getNewBadges();
+    if (_newBadges.length && typeof showBadgeCelebration === "function") showBadgeCelebration(_newBadges);
+  }
   window._lastEntry = entry;
   done[key] = done[key] || [];
   done[key].push(today);
