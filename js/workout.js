@@ -777,8 +777,10 @@ function showLevelUp(lvl) {
   const veil = document.createElement("div");
   veil.className = "pr-veil";
   veil.innerHTML = `<div class="pr-card lvl-card">
-    <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : ""}</div>
-    <div class="lvl-num">${lvl}</div>
+    <div class="lvl-hero">
+      <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : ""}</div>
+      <div class="lvl-num">${lvl}</div>
+    </div>
     <h2>Level up!</h2>
     <p class="muted">Your training is compounding.</p>
     <button class="btn btn-primary" id="lvlClose">Keep going</button>
