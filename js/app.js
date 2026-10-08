@@ -68,14 +68,23 @@ function router() {
   if (window._refreshTimerMini) setTimeout(window._refreshTimerMini, 60);
 }
 
-// ALL top-level wiring wrapped: a single bad element must never kill init.
-try {
-  $("search").addEventListener("input", e => {
-    filters.q = e.target.value;
-    renderExercises();
-  });
+// Safe event wiring: each registration is independent. A missing element
+// logs a warning but never prevents later wiring or router() from running.
+function safeOn(id, evt, fn) {
+  try {
+    const el = $(id);
+    if (el) el.addEventListener(evt, fn);
+    else console.warn("safeOn: missing element #" + id);
+  } catch (e) {
+    console.error("safeOn failed for #" + id, e);
+  }
+}
+safeOn("search", "input", e => {
+  filters.q = e.target.value;
+  renderExercises();
+});
 
-  $("muscleChips").addEventListener("click", e => {
+  safeOn("muscleChips", "click", e => {
     const c = e.target.closest("[data-m]");
     if (!c) return;
     filters.muscle = c.dataset.m;
@@ -83,29 +92,29 @@ try {
     renderExercises();
   });
 
-  $("eqFilter").addEventListener("change", e => {
+  safeOn("eqFilter", "change", e => {
     filters.eq = e.target.value;
     renderExercises();
   });
 
-  $("lvlFilter").addEventListener("change", e => {
+  safeOn("lvlFilter", "change", e => {
     filters.lvl = e.target.value;
     renderExercises();
   });
 
-  $("myEqToggle").addEventListener("change", e => {
+  safeOn("myEqToggle", "change", e => {
     filters.myEq = e.target.checked;
     renderExercises();
   });
 
-  $("dFav").addEventListener("click", () => {
+  safeOn("dFav", "click", () => {
     const id = $("dFav").dataset.id;
     favs.has(id) ? favs.delete(id) : favs.add(id);
     saveFavs();
     syncDetailFav(byId(id));
   });
 
-  $("dPyramid").addEventListener("click", () => {
+  safeOn("dPyramid", "click", () => {
     const id = $("dPyramid").dataset.id;
     if (id) openPyramid(id);
   });
@@ -129,7 +138,7 @@ try {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 
-  $("settingsBtn").addEventListener("click", openSettings);
+  safeOn("settingsBtn", "click", openSettings);
 
   $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
 
@@ -137,9 +146,9 @@ try {
     if (window.FORGE_ICON) el.innerHTML = window.FORGE_ICON(el.dataset.icon);
   });
 
-  $("settingsClose").addEventListener("click", closeSettings);
+  safeOn("settingsClose", "click", closeSettings);
 
-  $("settingsVeil").addEventListener("click", e => {
+  safeOn("settingsVeil", "click", e => {
     if (e.target.id === "settingsVeil") closeSettings();
   });
 
@@ -150,12 +159,12 @@ try {
     }
   });
 
-  $("accentGrid").addEventListener("click", e => {
+  safeOn("accentGrid", "click", e => {
     const b = e.target.closest("[data-accent]");
     if (b) applyAccent(b.dataset.accent);
   });
 
-  $("unitSeg").addEventListener("click", e => {
+  safeOn("unitSeg", "click", e => {
     const b = e.target.closest("[data-unit]");
     if (!b) return;
     const s = getSettings();
@@ -164,7 +173,7 @@ try {
     syncSettingsUI();
   });
 
-  $("speedSeg").addEventListener("click", e => {
+  safeOn("speedSeg", "click", e => {
     const b = e.target.closest("[data-speed]");
     if (!b) return;
     const s = getSettings();
@@ -173,7 +182,7 @@ try {
     syncSettingsUI();
   });
 
-  $("langSeg").addEventListener("click", e => {
+  safeOn("langSeg", "click", e => {
     const b = e.target.closest("[data-lang]");
     if (!b) return;
     const s = getSettings();
@@ -183,7 +192,7 @@ try {
     applyI18n();
   });
 
-  $("eqGrid").addEventListener("click", e => {
+  safeOn("eqGrid", "click", e => {
     const b = e.target.closest("[data-eq]");
     if (!b) return;
     const s = getSettings();
@@ -194,13 +203,13 @@ try {
     syncSettingsUI();
   });
 
-  $("reminderTime").addEventListener("change", e => {
+  safeOn("reminderTime", "change", e => {
     const s = getSettings();
     s.reminder = e.target.value || "";
     saveSettings(s);
   });
 
-  $("reminderClear").addEventListener("click", () => {
+  safeOn("reminderClear", "click", () => {
     const s = getSettings();
     s.reminder = "";
     saveSettings(s);
@@ -250,7 +259,7 @@ try {
     localStorage.removeItem("forge-body-finish");
   } catch (e) {}
 
-  $("goalSeg").addEventListener("click", e => {
+  safeOn("goalSeg", "click", e => {
     const b = e.target.closest("[data-goal]");
     if (b) {
       const s = getSettings();
@@ -260,7 +269,7 @@ try {
     }
   });
 
-  $("finishSeg").addEventListener("click", e => {
+  safeOn("finishSeg", "click", e => {
     const b = e.target.closest("[data-finish]");
     if (b) {
       const st = getSettings();
@@ -274,7 +283,7 @@ try {
     }
   });
 
-  $("exportData").addEventListener("click", () => {
+  safeOn("exportData", "click", () => {
     const data = {
       favs: [...favs],
       log: getLog(),
@@ -293,11 +302,11 @@ try {
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   });
 
-  $("csvExport").addEventListener("click", exportCSV);
+  safeOn("csvExport", "click", exportCSV);
 
-  $("backupData").addEventListener("click", backupData);
+  safeOn("backupData", "click", backupData);
 
-  $("restoreData").addEventListener("change", async e => {
+  safeOn("restoreData", "change", async e => {
     const file = e.target.files[0];
     if (!file) return;
     if (
@@ -334,7 +343,7 @@ try {
     reader.readAsText(file);
   });
 
-  $("resetData").addEventListener("click", async () => {
+  safeOn("resetData", "click", async () => {
     if (
       await appConfirm("Delete all favorites, workout history, records and settings? This cannot be undone.", {
         okText: "Delete everything",
@@ -346,7 +355,7 @@ try {
     }
   });
 
-  $("progTabs").addEventListener("click", e => {
+  safeOn("progTabs", "click", e => {
     const c = e.target.closest("[data-ptab]");
     if (!c) return;
     c.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
@@ -354,14 +363,14 @@ try {
   });
 
   // builder events
-  $("bAddDay").addEventListener("click", () => {
+  safeOn("bAddDay", "click", () => {
     builder.days.push({ name: "Day " + (builder.days.length + 1), exercises: [] });
     renderBuilder();
   });
 
-  $("bSave").addEventListener("click", saveBuilder);
+  safeOn("bSave", "click", saveBuilder);
 
-  $("bDays").addEventListener("click", e => {
+  safeOn("bDays", "click", e => {
     const delD = e.target.closest("[data-bdel-day]");
     if (delD) {
       const di = parseInt(delD.dataset.bdelDay, 10);
@@ -438,7 +447,7 @@ try {
     }
   });
 
-  $("bDays").addEventListener("input", e => {
+  safeOn("bDays", "input", e => {
     const dn = e.target.closest("[data-bday]");
     if (dn) {
       builder.days[parseInt(dn.dataset.bday, 10)].name = dn.value;
@@ -545,15 +554,15 @@ try {
     wrap.addEventListener("pointercancel", endDrag);
   })();
 
-  $("pickerClose").addEventListener("click", closePicker);
+  safeOn("pickerClose", "click", closePicker);
 
-  $("pickerVeil").addEventListener("click", e => {
+  safeOn("pickerVeil", "click", e => {
     if (e.target.id === "pickerVeil") closePicker();
   });
 
-  $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
+  safeOn("pickerSearch", "input", e => renderPicker(e.target.value));
 
-  $("pickerList").addEventListener("click", async e => {
+  safeOn("pickerList", "click", async e => {
     const tDel = e.target.closest("[data-tpl-del]");
     if (tDel) {
       if (!(await appConfirm("Delete this template?", { okText: "Delete", danger: true }))) return;
@@ -582,7 +591,7 @@ try {
     }
   });
 
-  $("travelBtn").addEventListener("click", () => {
+  safeOn("travelBtn", "click", () => {
     window._travelOn = !window._travelOn;
     $("travelBtn").classList.toggle("on", !!window._travelOn);
     $("travelBtn").textContent = window._travelOn ? "Travel mode: on" : "Travel mode";
@@ -597,28 +606,28 @@ try {
 
   if (_duBtn) _duBtn.addEventListener("click", startDungeon);
 
-  $("gymModeBtn").addEventListener("click", () => {
+  safeOn("gymModeBtn", "click", () => {
     const on = document.body.classList.toggle("gym-mode");
     $("gymModeBtn").textContent = on ? "Exit gym mode" : "Gym mode";
   });
 
-  $("mirrorBtn").addEventListener("click", openMirror);
+  safeOn("mirrorBtn", "click", openMirror);
 
-  $("plateBtn").addEventListener("click", openPlates);
+  safeOn("plateBtn", "click", openPlates);
 
-  $("voiceBtn").addEventListener("click", toggleVoiceLog);
+  safeOn("voiceBtn", "click", toggleVoiceLog);
 
-  $("plateClose").addEventListener("click", () => $("plateVeil").classList.add("hidden"));
+  safeOn("plateClose", "click", () => $("plateVeil").classList.add("hidden"));
 
-  $("plateVeil").addEventListener("click", e => {
+  safeOn("plateVeil", "click", e => {
     if (e.target.id === "plateVeil") $("plateVeil").classList.add("hidden");
   });
 
-  $("plateBar").addEventListener("input", calcPlates);
+  safeOn("plateBar", "input", calcPlates);
 
-  $("plateTarget").addEventListener("input", calcPlates);
+  safeOn("plateTarget", "input", calcPlates);
 
-  $("coachBtn").addEventListener("click", generateCoachProgram);
+  safeOn("coachBtn", "click", generateCoachProgram);
 
   /* ---------- custom exercises: modal + delete wiring ---------- */
   $("customPrimary").innerHTML = Object.keys(MUSCLE_INFO)
@@ -635,19 +644,19 @@ try {
 
   $("customClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
 
-  $("addCustomBtn").addEventListener("click", openCustomModal);
+  safeOn("addCustomBtn", "click", openCustomModal);
 
-  $("customCancel").addEventListener("click", closeCustomModal);
+  safeOn("customCancel", "click", closeCustomModal);
 
-  $("customClose").addEventListener("click", closeCustomModal);
+  safeOn("customClose", "click", closeCustomModal);
 
-  $("customVeil").addEventListener("click", e => {
+  safeOn("customVeil", "click", e => {
     if (e.target.id === "customVeil") closeCustomModal();
   });
 
-  $("customSave").addEventListener("click", saveCustomExercise);
+  safeOn("customSave", "click", saveCustomExercise);
 
-  $("dDelete").addEventListener("click", async () => {
+  safeOn("dDelete", "click", async () => {
     const id = $("dDelete").dataset.id;
     const ex = byId(id);
     if (!ex || !ex.custom) return;
@@ -720,18 +729,18 @@ try {
   }
 
   // ALL top-level wiring wrapped: a single bad element must never kill init.
-  $("dlgOk").addEventListener("click", () => {
+  safeOn("dlgOk", "click", () => {
     if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);
     else _closeDlg(true);
   });
 
-  $("dlgCancel").addEventListener("click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
+  safeOn("dlgCancel", "click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
 
-  $("dlgVeil").addEventListener("click", e => {
+  safeOn("dlgVeil", "click", e => {
     if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false);
   });
 
-  $("dlgInput").addEventListener("keydown", e => {
+  safeOn("dlgInput", "keydown", e => {
     if (_dlgMode !== "prompt") return;
     if (e.key === "Enter") $("dlgOk").click();
   });
@@ -742,23 +751,23 @@ try {
 
   initCheckin();
 
-  $("checkinBtn").addEventListener("click", openCheckin);
+  safeOn("checkinBtn", "click", openCheckin);
 
   applyA11y();
 
   applyAdvanced();
 
-  $("formCheckBtn").addEventListener("click", openFormCheck);
+  safeOn("formCheckBtn", "click", openFormCheck);
 
-  $("formClose").addEventListener("click", stopFormCheck);
+  safeOn("formClose", "click", stopFormCheck);
 
-  $("formVeil").addEventListener("click", e => {
+  safeOn("formVeil", "click", e => {
     if (e.target.id === "formVeil") stopFormCheck();
   });
 
-  $("formStart").addEventListener("click", startFormCheck);
+  safeOn("formStart", "click", startFormCheck);
 
-  $("formStop").addEventListener("click", stopFormCheck);
+  safeOn("formStop", "click", stopFormCheck);
 
   // quiz
   document.addEventListener("click", e => {
@@ -802,9 +811,6 @@ try {
   window.addEventListener("offline", syncOffline);
 
   syncOffline();
-} catch (e) {
-  console.error("app.js wiring failed:", e);
-}
 
-// router() must always run, even if wiring above threw.
+// router() always runs; safeOn already isolated each wiring step.
 router();
