@@ -1222,6 +1222,15 @@ footer::before {
   gap: 8px;
 }
 
+.detail-main h3 {
+  margin: 24px 0 12px;
+  font-size: 18px;
+}
+
+.detail-main h3:first-of-type {
+  margin-top: 20px;
+}
+
 .cues-list li {
   background: var(--surface);
   border: 1px solid var(--line);
