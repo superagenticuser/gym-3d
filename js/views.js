@@ -317,32 +317,46 @@ function renderHome() {
     };
     render();
   })();
-  const counts = {};
-  EXERCISES.forEach(e => (counts[e.primary] = (counts[e.primary] || 0) + 1));
-  $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO)
-    .map(
-      id =>
-        `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
-    )
-    .join("");
-  const v = createBodyViewer($("hero3d"), { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
-  if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
-  viewers.push(v);
-  const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
-  let i = 0;
-  const cyc = setInterval(() => {
-    if (!document.body.contains($("hero3d"))) {
-      clearInterval(cyc);
-      return;
+  try {
+    const counts = {};
+    EXERCISES.forEach(e => (counts[e.primary] = (counts[e.primary] || 0) + 1));
+    const mg = $("muscleGrid");
+    if (mg) {
+      mg.innerHTML = Object.keys(MUSCLE_INFO)
+        .map(
+          id =>
+            `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
+        )
+        .join("");
     }
-    v.highlight(expandMuscles(groups[i++ % groups.length]), []);
-  }, 2400);
-  v.highlight(expandMuscles("chest"), []);
-  const origDispose = v.dispose.bind(v);
-  v.dispose = () => {
-    clearInterval(cyc);
-    origDispose();
-  };
+  } catch (e) {
+    console.error("muscleGrid render failed:", e);
+  }
+  try {
+    const heroEl = $("hero3d");
+    if (heroEl && typeof createBodyViewer === "function") {
+      const v = createBodyViewer(heroEl, { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
+      if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
+      viewers.push(v);
+      const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
+      let i = 0;
+      const cyc = setInterval(() => {
+        if (!document.body.contains($("hero3d"))) {
+          clearInterval(cyc);
+          return;
+        }
+        v.highlight(expandMuscles(groups[i++ % groups.length]), []);
+      }, 2400);
+      v.highlight(expandMuscles("chest"), []);
+      const origDispose = v.dispose.bind(v);
+      v.dispose = () => {
+        clearInterval(cyc);
+        origDispose();
+      };
+    }
+  } catch (e) {
+    console.error("hero3d render failed:", e);
+  }
 }
 
 // EXERCISES
@@ -580,23 +594,33 @@ function renderDetail(id) {
       ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>`
       : "";
   }
-  const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
-  if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
-  viewers.push(v);
-  if (window.FORGE_DEMO) {
-    const demo = window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps);
-    if (demo && demo.controls) demo.controls($("demoControls"));
-    demos.push(demo);
+  const detailEl = $("detail3d");
+  let v = null;
+  if (detailEl && typeof createBodyViewer === "function") {
+    try {
+      v = createBodyViewer(detailEl, { autoRotate: !getSettings().reduceMotion });
+      if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
+      viewers.push(v);
+    } catch (e) {
+      console.error("detail3d render failed:", e);
+    }
   }
-  const full = ex.primary === "full-body" || ex.primary === "cardio";
-  v.highlight(full ? [] : expandMuscles(ex.primary), full ? [] : ex.secondary.flatMap(expandMuscles), full);
-  const setV = front => {
-    v.setView(front ? "front" : "back");
-    $("dFront").classList.toggle("on", front);
-    $("dBack").classList.toggle("on", !front);
-  };
-  $("dFront").onclick = () => setV(true);
-  $("dBack").onclick = () => setV(false);
+  if (v) {
+    if (window.FORGE_DEMO) {
+      const demo = window.FORGE_DEMO.createDemo($("demoBox"), ex.pattern, ex.steps);
+      if (demo && demo.controls) demo.controls($("demoControls"));
+      demos.push(demo);
+    }
+    const full = ex.primary === "full-body" || ex.primary === "cardio";
+    v.highlight(full ? [] : expandMuscles(ex.primary), full ? [] : ex.secondary.flatMap(expandMuscles), full);
+    const setV = front => {
+      v.setView(front ? "front" : "back");
+      $("dFront").classList.toggle("on", front);
+      $("dBack").classList.toggle("on", !front);
+    };
+    $("dFront").onclick = () => setV(true);
+    $("dBack").onclick = () => setV(false);
+  }
 }
 
 document.addEventListener("click", e => {
@@ -680,41 +704,50 @@ function openMuscleSheet(mid) {
 }
 
 function renderBody(selected) {
-  const v = createBodyViewer($("body3d"), {
-    autoRotate: !getSettings().reduceMotion,
-    dist: 6.1,
-    onMuscleHold: mid => openMuscleSheet(mid),
-    onMuscleClick: mid => {
-      const g = groupOf(mid);
-      if (window._bodyMode === "soreness") {
-        const today = fmtDate(new Date());
-        const m = getSoreness();
-        const todayMap = (m[today] = m[today] || {});
-        const SORE_LEVELS = ["mild", "sore", "very-sore", "injured"];
-        const cur = SORE_LEVELS.indexOf(todayMap[g]);
-        if (cur === SORE_LEVELS.length - 1) delete todayMap[g];
-        else todayMap[g] = SORE_LEVELS[cur + 1];
-        saveSoreness(m);
-        paintSoreness();
-        return;
-      }
-      selectMuscle(g);
-      const backSide = [
-        "back",
-        "lats",
-        "traps",
-        "lower-back",
-        "rear-delt",
-        "triceps",
-        "glutes",
-        "hamstrings",
-        "calves"
-      ].includes(mid);
-      v.setView(backSide ? "back" : "front");
-      $("bFront").classList.toggle("on", !backSide);
-      $("bBack").classList.toggle("on", backSide);
+  let v = null;
+  try {
+    const bodyEl = $("body3d");
+    if (bodyEl && typeof createBodyViewer === "function") {
+      v = createBodyViewer(bodyEl, {
+        autoRotate: !getSettings().reduceMotion,
+        dist: 6.1,
+        onMuscleHold: mid => openMuscleSheet(mid),
+        onMuscleClick: mid => {
+          const g = groupOf(mid);
+          if (window._bodyMode === "soreness") {
+            const today = fmtDate(new Date());
+            const m = getSoreness();
+            const todayMap = (m[today] = m[today] || {});
+            const SORE_LEVELS = ["mild", "sore", "very-sore", "injured"];
+            const cur = SORE_LEVELS.indexOf(todayMap[g]);
+            if (cur === SORE_LEVELS.length - 1) delete todayMap[g];
+            else todayMap[g] = SORE_LEVELS[cur + 1];
+            saveSoreness(m);
+            paintSoreness();
+            return;
+          }
+          selectMuscle(g);
+          const backSide = [
+            "back",
+            "lats",
+            "traps",
+            "lower-back",
+            "rear-delt",
+            "triceps",
+            "glutes",
+            "hamstrings",
+            "calves"
+          ].includes(mid);
+          v.setView(backSide ? "back" : "front");
+          $("bFront").classList.toggle("on", !backSide);
+          $("bBack").classList.toggle("on", backSide);
+        }
+      });
     }
-  });
+  } catch (e) {
+    console.error("body3d render failed:", e);
+  }
+  if (!v) return;
   viewers.push(v);
   const setV = front => {
     v.setView(front ? "front" : "back");
