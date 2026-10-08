@@ -1,14 +1,25 @@
-const CACHE = "forge-v11.35";
+const CACHE = "forge-v11.36";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./demo.js",
-  "./icons.js",
-  "./exercises.js",
-  "./programs.js",
-  "./three.min.js",
+  "./css/base.css",
+  "./css/components.css",
+  "./css/views.css",
+  "./css/workout.css",
+  "./css/progress.css",
+  "./css/camera.css",
+  "./js/core.js",
+  "./js/views.js",
+  "./js/progress.js",
+  "./js/programs.js",
+  "./js/workout.js",
+  "./js/camera.js",
+  "./js/app.js",
+  "./js/demo.js",
+  "./js/icons.js",
+  "./js/data-exercises.js",
+  "./js/data-programs.js",
+  "./js/vendor/three.min.js",
   "./manifest.json"
 ];
 self.addEventListener("install", e => {
