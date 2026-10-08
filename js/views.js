@@ -411,9 +411,6 @@ function renderDetail(id) {
   syncDetailFav(ex);
   $("dPyramid").dataset.id = ex.id;
   $("dSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
-  const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
-  $("dSteps").innerHTML +=
-    `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
   // Exercise-specific cues
   const exCues = ex.cues || [];
   $("dCues").innerHTML = exCues.length
