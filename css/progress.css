@@ -1561,3 +1561,123 @@ body:not(.rm) .sheet {
   justify-content: center;
   flex-shrink: 0;
 }
+
+/* Achievement badges */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.badge-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-card.earned {
+  border-color: var(--volt);
+  box-shadow:
+    0 0 0 1px var(--volt),
+    0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.badge-card.earned b {
+  color: var(--volt);
+}
+
+.badge-card.locked {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.badge-card .badge-icon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.badge-card b {
+  font-size: 14px;
+}
+
+.badge-card span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.badge-card .badge-date {
+  font-size: 11px;
+  color: var(--volt);
+}
+
+/* Badge celebration popup */
+.badge-celebrate-veil {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.badge-celebrate {
+  background: var(--surface);
+  border: 1px solid var(--volt);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.badge-celebrate-icon {
+  font-size: 48px;
+}
+
+.badge-celebrate h3 {
+  margin: 0;
+  color: var(--volt);
+}
+
+.badge-celebrate-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.badge-celebrate-item .badge-icon {
+  font-size: 28px;
+}
+
+.badge-celebrate-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge-celebrate-item b {
+  font-size: 14px;
+}
+
+.badge-celebrate-item span {
+  font-size: 12px;
+  color: var(--muted);
+}

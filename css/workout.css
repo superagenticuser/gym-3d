@@ -970,3 +970,23 @@ body.gym-mode #view-workout .wo-ex-head b {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Voice command button listening state */
+#voiceCmdBtn.listening {
+  border-color: var(--volt);
+  color: var(--volt);
+}
+
+#voiceCmdBtn.listening .btn-ic {
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

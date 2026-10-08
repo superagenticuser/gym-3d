@@ -1153,3 +1153,348 @@ footer::before {
   background: var(--muted);
   transition: all 0.18s;
 }
+
+/* Demo controls - scrubbable timeline */
+.demo-controls-wrap {
+  margin-top: 10px;
+}
+
+.demo-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.demo-scrub {
+  flex: 1;
+  accent-color: var(--volt);
+  cursor: pointer;
+}
+
+.demo-frames {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.demo-speeds {
+  display: flex;
+  gap: 6px;
+}
+
+.demo-speeds button {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.demo-speeds button.on {
+  background: var(--volt);
+  border-color: var(--volt);
+  color: var(--volt-ink);
+}
+
+@media (max-width: 700px) {
+  .demo-controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* Exercise detail - cues, mistakes, variations */
+.cues-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cues-list li {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.mistake-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--warn);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.mistake-m {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.mistake-fix {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.var-group {
+  margin-bottom: 12px;
+}
+
+.var-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 8px;
+}
+
+.var-label:first-child {
+  margin-top: 0;
+}
+
+/* My Workouts builder */
+.mw-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 16px;
+}
+
+@media (max-width: 760px) {
+  .mw-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mw-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+}
+
+.mw-lib {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.mw-lib-item {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: grab;
+  background: var(--surface2);
+}
+
+.mw-lib-item:hover {
+  border-color: var(--volt);
+}
+
+.mw-lib-item:active {
+  cursor: grabbing;
+}
+
+.mw-lib-name {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mw-lib-meta {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.mw-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+  padding: 8px;
+  border: 1px dashed var(--line2);
+  border-radius: 12px;
+}
+
+.mw-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.mw-slot.mw-over {
+  border-color: var(--volt);
+  box-shadow: 0 0 0 1px var(--volt);
+}
+
+.mw-slot-empty {
+  border-style: dashed;
+}
+
+.mw-dragging {
+  opacity: 0.4;
+}
+
+.mw-grip {
+  cursor: grab;
+  color: var(--muted);
+}
+
+.mw-slot-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mw-slot-name {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mw-slot-meta {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.mw-slot-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mw-num {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.mw-num input {
+  width: 56px;
+}
+
+.mw-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mw-sub {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.mw-saved {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface2);
+}
+
+.mw-saved-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.mw-saved-names {
+  margin: 0;
+  font-size: 13px;
+}
+
+.mw-saved-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Soreness mode + enhanced muscle sheet */
+.sore-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 4px;
+}
+
+.sore-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sore-chip:active {
+  transform: scale(0.96);
+}
+
+.sore-chip.on[data-sore-log="mild"] {
+  background: #ffe135;
+  border-color: #ffe135;
+  color: #1a1a00;
+}
+
+.sore-chip.on[data-sore-log="sore"] {
+  background: #ff8c1a;
+  border-color: #ff8c1a;
+  color: #1a0d00;
+}
+
+.sore-chip.on[data-sore-log="very-sore"] {
+  background: #ff3b1f;
+  border-color: #ff3b1f;
+  color: #fff;
+}
+
+.sore-chip.on[data-sore-log="none"] {
+  background: var(--volt);
+  border-color: var(--volt);
+  color: #0b0d12;
+}
+
+.muscle-fn {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.seg#bSoreness.on {
+  background: var(--volt);
+  color: #0b0d12;
+}
