@@ -142,6 +142,8 @@ function renderHome() {
   }
   $("statEx").textContent = EXERCISES.length;
   $("footEx").textContent = EXERCISES.length;
+  const fp = $("footProg");
+  if (fp && typeof PROGRAMS !== "undefined") fp.textContent = PROGRAMS.length;
   // weekly progress ring + streak flame
   (function () {
     const hp = $("heroProgress");
@@ -639,15 +641,15 @@ function openMuscleSheet(mid) {
       <button class="modal-x sheet-close" aria-label="Close"></button>
     </div>
     <p class="muted muscle-fn">${esc(info.function || info.desc)}</p>
-    <p class="muted" style="font-size:13px;margin:0 0 10px">Top 5 exercises - tap one to open it</p>
-    ${ranked.length ? `<div class="mini-cards">${ranked.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
-    <p class="muted" style="font-size:13px;margin:14px 0 8px">How sore is it today?</p>
-    <div class="sore-chips">
+    <p class="muted sheet-label">How sore is it today?</p>
+    <div class="sore-chips sheet-center">
       ${chip("mild", "Mild")}
       ${chip("sore", "Sore")}
       ${chip("very-sore", "Very sore")}
       ${chip("none", "Clear")}
     </div>
+    <p class="muted sheet-label">Top 5 exercises - tap one to open it</p>
+    ${ranked.length ? `<div class="mini-cards">${ranked.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
   </div>`;
   veil.querySelector(".sheet-close").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   const closeSheet = () => veil.remove();
@@ -665,6 +667,7 @@ function openMuscleSheet(mid) {
       saveSoreness(m);
       cur = lvl;
       veil.querySelectorAll("[data-sore-log]").forEach(c => c.classList.toggle("on", c.dataset.soreLog === lvl));
+      if (window._paintSoreness) window._paintSoreness();
       return;
     }
     if (e.target === veil || e.target.closest("[data-ex]") || e.target.closest(".sheet-close")) closeSheet();
@@ -736,6 +739,7 @@ function renderBody(selected) {
     const n = Object.keys(todayMap).length;
     $("soreCount").textContent = n ? n + " logged today" : "Tap a muscle to log soreness";
   };
+  window._paintSoreness = paintSoreness;
   const syncMode = () => {
     const mode = window._bodyMode || "muscles";
     $("bMuscles").classList.toggle("on", mode === "muscles");

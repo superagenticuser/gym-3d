@@ -119,18 +119,19 @@ function renderSlots() {
   host.innerHTML = mwSlots
     .map((sl, i) => {
       const ex = sl.exId ? byId(sl.exId) : null;
-      return `<div class="mw-slot${ex ? "" : " mw-slot-empty"}" draggable="true" data-slot="${i}">
+      if (!ex) {
+        return `<div class="mw-slot mw-slot-empty" data-slot="${i}">
+      <span class="mw-slot-hint">Drop an exercise here</span>
+    </div>`;
+      }
+      return `<div class="mw-slot" draggable="true" data-slot="${i}">
       <span class="mw-grip" title="Drag to reorder" aria-hidden="true">⠿</span>
       <div class="mw-slot-body">
-        ${
-          ex
-            ? `<span class="mw-slot-name">${esc(ex.name)}</span>
-             <span class="mw-slot-meta">${esc(ex.primary || "")}${ex.equipment ? " · " + esc(ex.equipment) : ""}</span>`
-            : `<span class="mw-slot-hint">Drop an exercise here</span>`
-        }
+        <span class="mw-slot-name">${esc(ex.name)}</span>
+        <span class="mw-slot-meta">${esc(ex.primary || "")}${ex.equipment ? " · " + esc(ex.equipment) : ""}</span>
       </div>
-      <label class="mw-num">Sets <input type="number" min="1" max="20" value="${sl.sets}" data-f="sets" data-slot="${i}" aria-label="Sets"></label>
-      <label class="mw-num">Reps <input type="number" min="1" max="999" value="${sl.reps}" data-f="reps" data-slot="${i}" aria-label="Reps"></label>
+      <label class="mw-num">Sets <input type="number" class="text-input mw-num-input" min="1" max="20" value="${sl.sets}" data-f="sets" data-slot="${i}" aria-label="Sets"></label>
+      <label class="mw-num">Reps <input type="number" class="text-input mw-num-input" min="1" max="999" value="${sl.reps}" data-f="reps" data-slot="${i}" aria-label="Reps"></label>
       <button class="btn btn-ghost btn-sm mw-remove" data-slot="${i}" title="Remove slot" aria-label="Remove slot">✕</button>
     </div>`;
     })
