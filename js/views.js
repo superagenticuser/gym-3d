@@ -341,24 +341,37 @@ function renderHome() {
   try {
     const heroEl = $("hero3d");
     if (heroEl && typeof createBodyViewer === "function") {
-      const v = createBodyViewer(heroEl, { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
-      if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
-      viewers.push(v);
-      const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
-      let i = 0;
-      const cyc = setInterval(() => {
-        if (!document.body.contains($("hero3d"))) {
-          clearInterval(cyc);
+      // Wait for the element to have dimensions (cold-load race condition)
+      const initHero = () => {
+        if (heroEl.clientWidth === 0 || heroEl.clientHeight === 0) {
+          // Layout not ready yet, retry shortly
+          setTimeout(initHero, 100);
           return;
         }
-        v.highlight(expandMuscles(groups[i++ % groups.length]), []);
-      }, 2400);
-      v.highlight(expandMuscles("chest"), []);
-      const origDispose = v.dispose.bind(v);
-      v.dispose = () => {
-        clearInterval(cyc);
-        origDispose();
+        try {
+          const v = createBodyViewer(heroEl, { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
+          if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
+          viewers.push(v);
+          const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
+          let i = 0;
+          const cyc = setInterval(() => {
+            if (!document.body.contains($("hero3d"))) {
+              clearInterval(cyc);
+              return;
+            }
+            v.highlight(expandMuscles(groups[i++ % groups.length]), []);
+          }, 2400);
+          v.highlight(expandMuscles("chest"), []);
+          const origDispose = v.dispose.bind(v);
+          v.dispose = () => {
+            clearInterval(cyc);
+            origDispose();
+          };
+        } catch (e) {
+          console.error("hero3d init failed:", e);
+        }
       };
+      initHero();
     }
   } catch (e) {
     console.error("hero3d render failed:", e);

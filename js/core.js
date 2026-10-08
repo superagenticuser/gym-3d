@@ -1473,6 +1473,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.50", "fix cold-load hero, footer count, program plural"],
   ["v11.49", "fix renderHome null element crash"],
   ["v11.48", "defensive error handling for 3D viewers"],
   ["v11.47", "dynamic exercise counts on homepage"],

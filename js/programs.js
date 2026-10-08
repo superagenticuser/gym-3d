@@ -247,7 +247,7 @@ function renderPrograms() {
         <span class="tag">${p.daysPerWeek} days/wk</span>
         <span class="tag">${p.weeks} weeks</span>
       </div>
-      <p class="muted" style="margin-top:10px;font-size:13px">${p.days.length} workouts · ${n} exercises · ${esc(p.equipment)}</p>
+      <p class="muted" style="margin-top:10px;font-size:13px">${p.days.length} workout${p.days.length === 1 ? "" : "s"} · ${n} exercises · ${esc(p.equipment)}</p>
     </div>`;
     })
     .join("");
