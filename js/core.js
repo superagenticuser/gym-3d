@@ -1473,6 +1473,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.52", "isolate all homepage sections"],
   ["v11.51", "fix first-load race, footer program count"],
   ["v11.50", "fix cold-load hero, footer count, program plural"],
   ["v11.49", "fix renderHome null element crash"],

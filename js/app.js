@@ -797,19 +797,4 @@ window.addEventListener("offline", syncOffline);
 
 syncOffline();
 
-// Defer initial render until DOM and all resources are ready.
-// Fixes cold-load race where hero 3D and muscle grid render empty.
-let _routerRan = false;
-const runRouter = () => {
-  if (_routerRan) return;
-  _routerRan = true;
-  router();
-};
-
-if (document.readyState === "complete") {
-  runRouter();
-} else {
-  window.addEventListener("load", runRouter, { once: true });
-  // Fallback: if load event is delayed, try after a short timeout
-  setTimeout(runRouter, 1500);
-}
+router();

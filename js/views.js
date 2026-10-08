@@ -153,37 +153,38 @@ function renderHome() {
     console.error("renderHome header failed:", e);
   }
   // weekly progress ring + streak flame
-  (function () {
-    const hp = $("heroProgress");
-    if (!hp) return;
-    const log = getLog();
-    const now = new Date();
-    const monday = new Date(now);
-    monday.setHours(0, 0, 0, 0);
-    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    const lastMon = new Date(monday);
-    lastMon.setDate(monday.getDate() - 7);
-    const nextMon = new Date(monday);
-    nextMon.setDate(monday.getDate() + 7);
-    const vol = (from, to) =>
-      log
-        .filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
-        .reduce(
-          (a, w) =>
-            a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0),
-          0
-        );
-    const thisW = vol(monday, nextMon),
-      lastW = vol(lastMon, monday);
-    const streak = workoutStreak();
-    if (!log.length || (thisW === 0 && lastW === 0)) {
-      hp.innerHTML = "";
-      return;
-    }
-    const pct = lastW > 0 ? Math.min(100, Math.round((thisW / lastW) * 100)) : thisW > 0 ? 100 : 0;
-    const circ = 2 * Math.PI * 34,
-      off = circ * (1 - pct / 100);
-    hp.innerHTML = `<div class="ring-wrap">
+  try {
+    (function () {
+      const hp = $("heroProgress");
+      if (!hp) return;
+      const log = getLog();
+      const now = new Date();
+      const monday = new Date(now);
+      monday.setHours(0, 0, 0, 0);
+      monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      const lastMon = new Date(monday);
+      lastMon.setDate(monday.getDate() - 7);
+      const nextMon = new Date(monday);
+      nextMon.setDate(monday.getDate() + 7);
+      const vol = (from, to) =>
+        log
+          .filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
+          .reduce(
+            (a, w) =>
+              a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0),
+            0
+          );
+      const thisW = vol(monday, nextMon),
+        lastW = vol(lastMon, monday);
+      const streak = workoutStreak();
+      if (!log.length || (thisW === 0 && lastW === 0)) {
+        hp.innerHTML = "";
+        return;
+      }
+      const pct = lastW > 0 ? Math.min(100, Math.round((thisW / lastW) * 100)) : thisW > 0 ? 100 : 0;
+      const circ = 2 * Math.PI * 34,
+        off = circ * (1 - pct / 100);
+      hp.innerHTML = `<div class="ring-wrap">
       <div class="ring-holder">
         <svg viewBox="0 0 84 84" width="84" height="84" class="prog-ring">
           <circle cx="42" cy="42" r="34" fill="none" stroke="var(--line)" stroke-width="8"/>
@@ -195,25 +196,33 @@ function renderHome() {
       <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} kg vs ${Math.round(lastW).toLocaleString()} kg last week</span>
       ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
     </div>`;
-  })();
+    })();
+  } catch (e) {
+    console.error("heroProgress failed:", e);
+  }
   // Home: compact recovery suggestion only
-  (function () {
-    const el = $("recoveryDash");
-    if (!el) return;
-    const r = getRecoveryStats();
-    if (!r || !r.best) {
-      el.innerHTML = "";
-      return;
-    }
-    el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p></div>`;
-  })();
+  try {
+    (function () {
+      const el = $("recoveryDash");
+      if (!el) return;
+      const r = getRecoveryStats();
+      if (!r || !r.best) {
+        el.innerHTML = "";
+        return;
+      }
+      el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p></div>`;
+    })();
+  } catch (e) {
+    console.error("recoveryDash failed:", e);
+  }
   // goal tracker
-  (function () {
-    const el = $("goalsDash");
-    if (!el) return;
-    const render = () => {
-      const goals = getGoals();
-      el.innerHTML = `<div class="goal-dash">
+  try {
+    (function () {
+      const el = $("goalsDash");
+      if (!el) return;
+      const render = () => {
+        const goals = getGoals();
+        el.innerHTML = `<div class="goal-dash">
         <h3>Goals <button class="btn btn-ghost btn-sm" id="goalAddBtn">+ Add goal</button></h3>
         <div id="goalForm" class="hidden"></div>
         ${
@@ -269,16 +278,16 @@ function renderHome() {
             : `<p class="muted" style="font-size:13px">No goals yet. Set a strength target or a training frequency goal.</p>`
         }
       </div>`;
-      const addBtn = $("goalAddBtn");
-      if (addBtn)
-        addBtn.onclick = () => {
-          const f = $("goalForm");
-          const exOpts = EXERCISES.filter(e => e.equipment !== "bodyweight")
-            .slice(0, 60)
-            .map(e => `<option value="${e.id}">${esc(e.name)}</option>`)
-            .join("");
-          f.classList.remove("hidden");
-          f.innerHTML = `<div class="goal-form">
+        const addBtn = $("goalAddBtn");
+        if (addBtn)
+          addBtn.onclick = () => {
+            const f = $("goalForm");
+            const exOpts = EXERCISES.filter(e => e.equipment !== "bodyweight")
+              .slice(0, 60)
+              .map(e => `<option value="${e.id}">${esc(e.name)}</option>`)
+              .join("");
+            f.classList.remove("hidden");
+            f.innerHTML = `<div class="goal-form">
           <select id="ngType"><option value="weight">Strength goal</option><option value="frequency">Frequency goal</option></select>
           <span id="ngExWrap"><select id="ngEx">${exOpts}</select></span>
           <input id="ngTarget" type="number" min="1" placeholder="Target kg" style="width:100px">
@@ -286,43 +295,46 @@ function renderHome() {
           <span id="ngWeeksWrap" class="hidden"><input id="ngWeeks" type="number" min="1" max="52" value="8" style="width:70px" placeholder="Weeks"></span>
           <button class="btn btn-primary btn-sm" id="ngSave">Save</button>
         </div>`;
-          $("ngType").onchange = e => {
-            const isW = e.target.value === "weight";
-            $("ngExWrap").classList.toggle("hidden", !isW);
-            $("ngDateWrap").classList.toggle("hidden", !isW);
-            $("ngWeeksWrap").classList.toggle("hidden", isW);
-            $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+            $("ngType").onchange = e => {
+              const isW = e.target.value === "weight";
+              $("ngExWrap").classList.toggle("hidden", !isW);
+              $("ngDateWrap").classList.toggle("hidden", !isW);
+              $("ngWeeksWrap").classList.toggle("hidden", isW);
+              $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+            };
+            $("ngSave").onclick = () => {
+              const type = $("ngType").value;
+              const target = parseFloat($("ngTarget").value);
+              if (!target || target <= 0) {
+                appAlert("Enter a valid target.");
+                return;
+              }
+              const g = { id: "g" + Date.now().toString(36), type, target, created: fmtDate(new Date()) };
+              if (type === "weight") {
+                g.exerciseId = $("ngEx").value;
+                g.targetDate = $("ngDate").value || fmtDate(new Date(Date.now() + 90 * 864e5));
+              } else {
+                g.weeks = parseInt($("ngWeeks").value) || 8;
+              }
+              const gs = getGoals();
+              gs.push(g);
+              saveGoals(gs);
+              render();
+            };
           };
-          $("ngSave").onclick = () => {
-            const type = $("ngType").value;
-            const target = parseFloat($("ngTarget").value);
-            if (!target || target <= 0) {
-              appAlert("Enter a valid target.");
-              return;
-            }
-            const g = { id: "g" + Date.now().toString(36), type, target, created: fmtDate(new Date()) };
-            if (type === "weight") {
-              g.exerciseId = $("ngEx").value;
-              g.targetDate = $("ngDate").value || fmtDate(new Date(Date.now() + 90 * 864e5));
-            } else {
-              g.weeks = parseInt($("ngWeeks").value) || 8;
-            }
-            const gs = getGoals();
-            gs.push(g);
-            saveGoals(gs);
-            render();
-          };
-        };
-      el.querySelectorAll("[data-goal-del]").forEach(
-        b =>
-          (b.onclick = () => {
-            saveGoals(getGoals().filter(g => g.id !== b.dataset.goalDel));
-            render();
-          })
-      );
-    };
-    render();
-  })();
+        el.querySelectorAll("[data-goal-del]").forEach(
+          b =>
+            (b.onclick = () => {
+              saveGoals(getGoals().filter(g => g.id !== b.dataset.goalDel));
+              render();
+            })
+        );
+      };
+      render();
+    })();
+  } catch (e) {
+    console.error("goalsDash failed:", e);
+  }
   try {
     const counts = {};
     EXERCISES.forEach(e => (counts[e.primary] = (counts[e.primary] || 0) + 1));
