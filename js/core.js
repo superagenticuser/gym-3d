@@ -661,7 +661,10 @@ function createBodyViewer(container, opts) {
     if (dead) return;
     raf = requestAnimationFrame(loop);
     const idle = !dragging && pointers.size === 0 && Date.now() - lastAct > 3000;
-    if (opts.autoRotate && !getSettings().reduceMotion && idle) {
+    // Don't auto-rotate while a Front/Back view transition is still in progress,
+    // or it overwrites the target angle and the button appears broken.
+    const settling = Math.abs(targetRotY - rotY) > 0.02;
+    if (opts.autoRotate && !getSettings().reduceMotion && idle && !settling) {
       rotY += 0.004;
       targetRotY = rotY;
     }
@@ -1479,6 +1482,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.61", "fix auto-rotate fighting front/back"],
   ["v11.60", "fix front/back viewer disposal"],
   ["v11.59", "body map soreness fixes"],
   ["v11.58", "remove My Workouts"],
