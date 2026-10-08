@@ -1473,6 +1473,12 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.48", "defensive error handling for 3D viewers"],
+  ["v11.47", "dynamic exercise counts on homepage"],
+  ["v11.46", "richer calendar day detail with stat cards"],
+  ["v11.45", "fix chart popup overflowing viewport"],
+  ["v11.44", "level up dialog: trophy and level number side by side"],
+  ["v11.43", "merge voice log and voice commands into one smart voice button"],
   ["v11.42", "merge pain into soreness as injured level, remove separate pain mode"],
   [
     "v11.41",
