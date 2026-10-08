@@ -1281,7 +1281,7 @@ footer::before {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 0 0 4px;
+  margin: 0 0 16px;
 }
 
 .sore-chip {
@@ -1314,6 +1314,12 @@ footer::before {
 .sore-chip.on[data-sore-log="very-sore"] {
   background: #ff3b1f;
   border-color: #ff3b1f;
+  color: #fff;
+}
+
+.sore-chip.on[data-sore-log="injured"] {
+  background: #dc2626;
+  border-color: #dc2626;
   color: #fff;
 }
 
