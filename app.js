@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.35", "Fix Clips button navigating to exercise page"],
     ["v11.34", "Fix mirror rest timer, uniform action buttons"],
     ["v11.33", "Camera fixes: icon action bar, camera switch, mirror sets, toasts"],
     ["v11.32", "Camera features: form recorder, mirror mode, photo capture"],
@@ -4324,7 +4325,7 @@
           <button class="ex-act tempo-toggle" data-tempo="${xi}" title="Tempo coach" aria-label="Tempo coach">${window.FORGE_ICON("timer")}<span>Tempo</span></button>
           ${!isBW && lw ? `<button class="ex-act warmup-toggle" data-warmup="${xi}" title="Warm up" aria-label="Warm up">${window.FORGE_ICON("flame")}<span>Warm up</span></button>` : ""}
           <button class="ex-act rec-toggle" data-rec="${xi}" title="Record set" aria-label="Record set">${window.FORGE_ICON("video")}<span>Record</span></button>
-          <button class="ex-act clips-toggle hidden" data-clips="${xi}" data-ex="${x.id}" title="Form clips" aria-label="Form clips">${window.FORGE_ICON("film")}<span>Clips</span></button>
+          <button class="ex-act clips-toggle hidden" data-clips="${xi}" data-clip-ex="${x.id}" title="Form clips" aria-label="Form clips">${window.FORGE_ICON("film")}<span>Clips</span></button>
         </div>
         <div class="warmup-box hidden" id="warmup-${xi}"></div>
         <div class="tempo-box hidden" id="tempo-${xi}">
@@ -4414,8 +4415,9 @@
     }
     const cc = e.target.closest(".clips-toggle");
     if (cc) {
-      const ex = byId(cc.dataset.ex);
-      openClipLibrary(cc.dataset.ex, ex ? ex.name : "Exercise");
+      e.stopPropagation();
+      const ex = byId(cc.dataset.clipEx);
+      openClipLibrary(cc.dataset.clipEx, ex ? ex.name : "Exercise");
       return;
     }
     const sf = e.target.closest(".set-fail");
@@ -5067,7 +5069,7 @@
     const counts = {};
     all.forEach(c => { counts[c.exId] = (counts[c.exId] || 0) + 1; });
     document.querySelectorAll(".clips-toggle").forEach(b => {
-      const n = counts[b.dataset.ex] || 0;
+      const n = counts[b.dataset.clipEx] || 0;
       b.classList.toggle("hidden", n === 0);
       let badge = b.querySelector(".ex-count");
       if (n > 0 && !badge) {
