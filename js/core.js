@@ -1479,6 +1479,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.60", "fix front/back viewer disposal"],
   ["v11.59", "body map soreness fixes"],
   ["v11.58", "remove My Workouts"],
   ["v11.57", "independent event wiring with safeOn"],

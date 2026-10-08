@@ -735,6 +735,11 @@ function openMuscleSheet(mid) {
 }
 
 function renderBody(selected) {
+  // Dispose the previous viewer so multiple animation loops don't fight.
+  try {
+    if (window._bodyViewer && window._bodyViewer.dispose) window._bodyViewer.dispose();
+  } catch (e) {}
+  window._bodyViewer = null;
   let v = null;
   try {
     const bodyEl = $("body3d");
@@ -806,8 +811,23 @@ function renderBody(selected) {
   };
   window._syncBodyMode = syncMode;
   window._bodyMode = "muscles";
-  $("bFront").onclick = () => setV(true);
-  $("bBack").onclick = () => setV(false);
+  // Use the stored viewer reference so the buttons work even if renderBody re-runs.
+  $("bFront").onclick = () => {
+    const bv = window._bodyViewer;
+    if (bv && bv.setView) {
+      bv.setView("front");
+      $("bFront").classList.add("on");
+      $("bBack").classList.remove("on");
+    }
+  };
+  $("bBack").onclick = () => {
+    const bv = window._bodyViewer;
+    if (bv && bv.setView) {
+      bv.setView("back");
+      $("bBack").classList.add("on");
+      $("bFront").classList.remove("on");
+    }
+  };
   $("bMuscles").onclick = () => {
     window._bodyMode = "muscles";
     syncMode();
