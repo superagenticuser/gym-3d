@@ -714,87 +714,94 @@ function appPrompt(msg, defVal, title) {
   return _showDlg({ msg, title: title || "FORGE", okText: "OK", cancelText: "Cancel", mode: "prompt", defVal });
 }
 
-$("dlgOk").addEventListener("click", () => {
-  if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);
-  else _closeDlg(true);
-});
+// Top-level wiring is wrapped so a single failing element can never
+// prevent router() from running (which left the homepage blank on first load).
+try {
+  $("dlgOk").addEventListener("click", () => {
+    if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);
+    else _closeDlg(true);
+  });
 
-$("dlgCancel").addEventListener("click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
+  $("dlgCancel").addEventListener("click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
 
-$("dlgVeil").addEventListener("click", e => {
-  if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false);
-});
+  $("dlgVeil").addEventListener("click", e => {
+    if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false);
+  });
 
-$("dlgInput").addEventListener("keydown", e => {
-  if (_dlgMode !== "prompt") return;
-  if (e.key === "Enter") $("dlgOk").click();
-});
+  $("dlgInput").addEventListener("keydown", e => {
+    if (_dlgMode !== "prompt") return;
+    if (e.key === "Enter") $("dlgOk").click();
+  });
 
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false);
-});
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false);
+  });
 
-initCheckin();
+  initCheckin();
 
-$("checkinBtn").addEventListener("click", openCheckin);
+  $("checkinBtn").addEventListener("click", openCheckin);
 
-applyA11y();
+  applyA11y();
 
-applyAdvanced();
+  applyAdvanced();
 
-$("formCheckBtn").addEventListener("click", openFormCheck);
+  $("formCheckBtn").addEventListener("click", openFormCheck);
 
-$("formClose").addEventListener("click", stopFormCheck);
+  $("formClose").addEventListener("click", stopFormCheck);
 
-$("formVeil").addEventListener("click", e => {
-  if (e.target.id === "formVeil") stopFormCheck();
-});
+  $("formVeil").addEventListener("click", e => {
+    if (e.target.id === "formVeil") stopFormCheck();
+  });
 
-$("formStart").addEventListener("click", startFormCheck);
+  $("formStart").addEventListener("click", startFormCheck);
 
-$("formStop").addEventListener("click", stopFormCheck);
+  $("formStop").addEventListener("click", stopFormCheck);
 
-// quiz
-document.addEventListener("click", e => {
-  if (e.target.closest("#quizBtn")) {
-    openQuiz();
-    return;
-  }
-  if (e.target.closest("#quizClose") || e.target.id === "quizVeil") {
-    closeQuiz();
-    return;
-  }
-  const qv = e.target.closest("[data-qv]");
-  if (qv && quizState) {
-    const q = QUIZ_QUESTIONS[quizState.step];
-    quizState.answers[q.key] = q.key === "days" ? parseInt(qv.dataset.qv, 10) : qv.dataset.qv;
-    quizState.step++;
-    if (quizState.step < QUIZ_QUESTIONS.length) renderQuizStep();
-    else renderQuizResult();
-    return;
-  }
-  if (e.target.closest("#quizBack") && quizState) {
-    quizState.step--;
-    renderQuizStep();
-    return;
-  }
-  if (e.target.closest("#quizAgain")) {
-    quizState = { step: 0, answers: {} };
-    renderQuizStep();
-    return;
-  }
-  if (e.target.closest("#quizGo")) {
-    closeQuiz();
-    return;
-  }
-});
+  // quiz
+  document.addEventListener("click", e => {
+    if (e.target.closest("#quizBtn")) {
+      openQuiz();
+      return;
+    }
+    if (e.target.closest("#quizClose") || e.target.id === "quizVeil") {
+      closeQuiz();
+      return;
+    }
+    const qv = e.target.closest("[data-qv]");
+    if (qv && quizState) {
+      const q = QUIZ_QUESTIONS[quizState.step];
+      quizState.answers[q.key] = q.key === "days" ? parseInt(qv.dataset.qv, 10) : qv.dataset.qv;
+      quizState.step++;
+      if (quizState.step < QUIZ_QUESTIONS.length) renderQuizStep();
+      else renderQuizResult();
+      return;
+    }
+    if (e.target.closest("#quizBack") && quizState) {
+      quizState.step--;
+      renderQuizStep();
+      return;
+    }
+    if (e.target.closest("#quizAgain")) {
+      quizState = { step: 0, answers: {} };
+      renderQuizStep();
+      return;
+    }
+    if (e.target.closest("#quizGo")) {
+      closeQuiz();
+      return;
+    }
+  });
 
-const syncOffline = () => $("offlineBar").classList.toggle("hidden", navigator.onLine);
+  const syncOffline = () => $("offlineBar").classList.toggle("hidden", navigator.onLine);
 
-window.addEventListener("online", syncOffline);
+  window.addEventListener("online", syncOffline);
 
-window.addEventListener("offline", syncOffline);
+  window.addEventListener("offline", syncOffline);
 
-syncOffline();
+  syncOffline();
+} catch (e) {
+  console.error("app.js wiring failed:", e);
+}
 
+// router() must always run, even if wiring above threw.
 router();
