@@ -801,6 +801,7 @@ function renderBody(selected) {
     $("bSoreness").classList.toggle("on", mode === "soreness");
     $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "soreness");
     $("soreHint").classList.toggle("hidden", mode !== "soreness");
+    $("soreCount").classList.toggle("hidden", mode !== "soreness");
     if (mode === "soreness") paintSoreness();
   };
   window._syncBodyMode = syncMode;
@@ -882,11 +883,7 @@ function selectMuscle(groupId) {
   $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
     <p style="margin-top:8px;font-size:14px">${recHTML}</p>
     ${soreLabel ? `<p style="font-size:14px;margin-top:4px">${soreLabel}</p>` : ""}
-    <div style="display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" data-sore="sore" data-g="${groupId}">Feeling sore</button>
-      <button class="btn btn-ghost btn-sm" data-sore="injured" data-g="${groupId}">Injured</button>
-      ${soreState ? `<button class="btn btn-ghost btn-sm" data-sore="clear" data-g="${groupId}">Clear</button>` : ""}
-    </div>`;
+    ${soreState ? `<div style="display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-sore="clear" data-g="${groupId}">Clear</button></div>` : ""}`;
   const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
   $("bodyExercises").innerHTML = list.length
     ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
