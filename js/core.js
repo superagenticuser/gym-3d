@@ -1479,6 +1479,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.58", "remove My Workouts"],
   ["v11.57", "independent event wiring with safeOn"],
   ["v11.56", "fix hero text, settings open"],
   ["v11.55", "protect all top-level wiring from first element"],
