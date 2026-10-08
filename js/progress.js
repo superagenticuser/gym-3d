@@ -1708,16 +1708,26 @@ function showChartPopup(canvas, point, html) {
   const par = canvas.parentElement;
   par.style.position = "relative";
   const r = canvas.getBoundingClientRect();
-  const left = point && point.x != null ? Math.max(8, Math.min(r.width - 268, point.x - 130)) : 8;
-  const top = point && point.y != null ? Math.max(8, point.y - 20) : 8;
+  const pr = par.getBoundingClientRect();
+  // Estimate popup height: header (~45px) + body content. Use 320 as safe estimate.
+  const estH = 320;
+  const popW = 260;
+  let left = point && point.x != null ? point.x - popW / 2 : 8;
+  left = Math.max(8, Math.min(pr.width - popW - 8, left));
+  let top = point && point.y != null ? point.y + 16 : 8;
+  // If popup would overflow bottom, show it above the point instead
+  if (top + estH > pr.height) {
+    top = Math.max(8, (point ? point.y : estH) - estH - 12);
+  }
+  top = Math.max(8, top);
   const veil = document.createElement("div");
   veil.className = "chart-pop-veil";
-  veil.innerHTML = `<div class="chart-pop" role="dialog" aria-modal="true" style="position:absolute;left:${left.toFixed(0)}px;top:${top.toFixed(0)}px;width:260px;max-width:calc(100% - 16px);background:var(--surface,#14161d);border:1px solid var(--volt);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.55);z-index:20;overflow:hidden">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)">
+  veil.innerHTML = `<div class="chart-pop" role="dialog" aria-modal="true" style="position:absolute;left:${left.toFixed(0)}px;top:${top.toFixed(0)}px;width:260px;max-width:calc(100% - 16px);max-height:${Math.max(200, pr.height - top - 16)}px;display:flex;flex-direction:column;background:var(--surface,#14161d);border:1px solid var(--volt);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.55);z-index:20;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);flex-shrink:0">
       <b style="font-size:13px;color:var(--volt)">Workout details</b>
       <button class="chart-pop-x" aria-label="Close" style="background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px">×</button>
     </div>
-    <div class="chart-pop-body" style="padding:12px;font-size:13px">${html}</div>
+    <div class="chart-pop-body" style="padding:12px;font-size:13px;overflow-y:auto">${html}</div>
   </div>`;
   par.appendChild(veil);
   veil.addEventListener("click", e => {
