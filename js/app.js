@@ -716,6 +716,21 @@ function appPrompt(msg, defVal, title) {
 
 // Top-level wiring is wrapped so a single failing element can never
 // prevent router() from running (which left the homepage blank on first load).
+// TEMPORARY v11.54 diagnostic: show errors visibly on page
+window._forgeErrors = [];
+window.addEventListener("error", e => {
+  window._forgeErrors.push(e.message + " @ " + (e.filename || "").split("/").pop() + ":" + e.lineno);
+  const d = document.getElementById("forge-err");
+  if (d) d.textContent = window._forgeErrors.join(" | ");
+  else {
+    const b = document.createElement("div");
+    b.id = "forge-err";
+    b.style.cssText =
+      "position:fixed;top:0;left:0;right:0;background:#f00;color:#fff;padding:8px;z-index:99999;font-size:12px;";
+    b.textContent = window._forgeErrors.join(" | ");
+    document.body.appendChild(b);
+  }
+});
 try {
   $("dlgOk").addEventListener("click", () => {
     if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);

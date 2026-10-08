@@ -1473,6 +1473,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.54", "on-page error display for diagnosis"],
   ["v11.53", "ensure router always runs even if wiring throws"],
   ["v11.52", "isolate all homepage sections"],
   ["v11.51", "fix first-load race, footer program count"],
