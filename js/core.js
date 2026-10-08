@@ -817,15 +817,21 @@ function applyAccent(id, save) {
 let finishPreviewViewer = null;
 
 function openSettings() {
-  const grid = $("accentGrid");
-  const cur = currentAccent().id;
-  grid.innerHTML = ACCENTS.map(
-    a =>
-      `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
-      `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`
-  ).join("");
-  syncSettingsUI();
-  $("settingsVeil").classList.remove("hidden");
+  try {
+    const grid = $("accentGrid");
+    if (!grid) return;
+    const cur = currentAccent().id;
+    grid.innerHTML = ACCENTS.map(
+      a =>
+        `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
+        `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`
+    ).join("");
+    syncSettingsUI();
+    const veil = $("settingsVeil");
+    if (veil) veil.classList.remove("hidden");
+  } catch (e) {
+    console.error("openSettings failed:", e);
+  }
   // live 3D preview for the finish selector
   try {
     const pc = $("finishPreview");
@@ -892,7 +898,7 @@ const STRINGS = {
     nav_progress: "Progress",
     home_kicker: "3D GYM TRAINING",
     home_title: "Every muscle. Every exercise. In 3D.",
-    home_lede: "193 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.",
+    home_lede: "243 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.",
     home_cta_body: "Explore the 3D body",
     home_cta_ex: "Browse exercises",
     stat_exercises: "exercises",
@@ -962,7 +968,7 @@ const STRINGS = {
     home_kicker: "MUSCULATION 3D",
     home_title: "Chaque muscle. Chaque exercice. En 3D.",
     home_lede:
-      "193 exercices sur un corps 3D interactif. Touchez un muscle, voyez-le s'illuminer, apprenez le mouvement.",
+      "243 exercices sur un corps 3D interactif. Touchez un muscle, voyez-le s'illuminer, apprenez le mouvement.",
     home_cta_body: "Explorer le corps 3D",
     home_cta_ex: "Voir les exercices",
     stat_exercises: "exercices",
@@ -1473,6 +1479,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.56", "fix hero text, settings open"],
   ["v11.55", "protect all top-level wiring from first element"],
   ["v11.54", "on-page error display for diagnosis"],
   ["v11.53", "ensure router always runs even if wiring throws"],
