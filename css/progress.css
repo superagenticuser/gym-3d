@@ -1025,8 +1025,23 @@ body:not(.rm) .timer-btns button {
   text-align: center;
 }
 
+.lvl-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.lvl-hero .pr-trophy {
+  margin: 0;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
 .pr-card .lvl-num {
-  font-size: 56px;
+  font-size: 64px;
   font-weight: 800;
   color: var(--volt);
   line-height: 1;
