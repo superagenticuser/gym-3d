@@ -646,6 +646,7 @@ function openMuscleSheet(mid) {
       ${chip("mild", "Mild")}
       ${chip("sore", "Sore")}
       ${chip("very-sore", "Very sore")}
+      ${chip("injured", "Injured")}
       ${chip("none", "Clear")}
     </div>
     <p class="muted sheet-label">Top 5 exercises - tap one to open it</p>
@@ -683,19 +684,11 @@ function renderBody(selected) {
     onMuscleHold: mid => openMuscleSheet(mid),
     onMuscleClick: mid => {
       const g = groupOf(mid);
-      if (window._bodyMode === "pain") {
-        const pain = getPain();
-        if (pain[g]) delete pain[g];
-        else pain[g] = Date.now();
-        savePain(pain);
-        paintPain();
-        return;
-      }
       if (window._bodyMode === "soreness") {
         const today = fmtDate(new Date());
         const m = getSoreness();
         const todayMap = (m[today] = m[today] || {});
-        const SORE_LEVELS = ["mild", "sore", "very-sore"];
+        const SORE_LEVELS = ["mild", "sore", "very-sore", "injured"];
         const cur = SORE_LEVELS.indexOf(todayMap[g]);
         if (cur === SORE_LEVELS.length - 1) delete todayMap[g];
         else todayMap[g] = SORE_LEVELS[cur + 1];
@@ -726,12 +719,6 @@ function renderBody(selected) {
     $("bFront").classList.toggle("on", front);
     $("bBack").classList.toggle("on", !front);
   };
-  const paintPain = () => {
-    const marked = Object.keys(getPain());
-    v.setPain(marked.flatMap(g => expandMuscles(g)));
-    const n = marked.length;
-    $("painCount").textContent = n ? n + " marked" : "Tap a muscle to mark pain";
-  };
   const paintSoreness = () => {
     const today = fmtDate(new Date());
     const todayMap = getSoreness()[today] || {};
@@ -745,12 +732,9 @@ function renderBody(selected) {
     $("bMuscles").classList.toggle("on", mode === "muscles");
     $("bRecovery").classList.toggle("on", mode === "recovery");
     $("bFatigue").classList.toggle("on", mode === "fatigue");
-    $("bPain").classList.toggle("on", mode === "pain");
     $("bSoreness").classList.toggle("on", mode === "soreness");
-    $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "pain" || mode === "soreness");
-    $("painHint").classList.toggle("hidden", mode !== "pain");
+    $("heatLegend").classList.toggle("hidden", mode === "muscles" || mode === "soreness");
     $("soreHint").classList.toggle("hidden", mode !== "soreness");
-    if (mode === "pain") paintPain();
     if (mode === "soreness") paintSoreness();
   };
   window._syncBodyMode = syncMode;
@@ -772,16 +756,27 @@ function renderBody(selected) {
     syncMode();
     v.setHeat(muscleFatigue());
   };
-  $("bPain").onclick = () => {
-    window._bodyMode = "pain";
-    syncMode();
-  };
   $("bSoreness").onclick = () => {
     window._bodyMode = "soreness";
     syncMode();
   };
   window._bodyViewer = v;
   v.setFinish(getSettings().bodyFinish || "standard");
+  // Migrate old pain marks to injured soreness (one-time)
+  try {
+    const oldPain = getPain();
+    const keys = Object.keys(oldPain);
+    if (keys.length) {
+      const today = fmtDate(new Date());
+      const sm = getSoreness();
+      sm[today] = sm[today] || {};
+      keys.forEach(g => {
+        if (!sm[today][g]) sm[today][g] = "injured";
+      });
+      saveSoreness(sm);
+      localStorage.removeItem("forge-pain");
+    }
+  } catch (e) {}
   selectMuscle(selected || "chest");
   renderBodyRecovery();
 }

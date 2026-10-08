@@ -710,6 +710,10 @@ function createBodyViewer(container, opts) {
         mats[id].emissive.setHex(0xff3b1f);
         mats[id].emissiveIntensity = 1.1;
         mats[id].color.setHex(0xff5c47);
+      } else if (lvl === "injured") {
+        mats[id].emissive.setHex(0xb537ff);
+        mats[id].emissiveIntensity = 1.2;
+        mats[id].color.setHex(0xc26bff);
       }
     }
   }
@@ -1469,7 +1473,16 @@ if (fa) {
 }
 
 const CHANGELOG = [
-  ["v11.39", "interactive upgrades: scrubbable demos, form cues/mistakes, workout builder, variations, tappable charts, badges, soreness overlay, voice commands, anatomy deep-dives; 50 new exercises, 5 new programs"],
+  ["v11.42", "merge pain into soreness as injured level, remove separate pain mode"],
+  [
+    "v11.41",
+    "my workouts fixes: clean empty slot, styled inputs, no text wrap, nav next to programs, dynamic footer counts; muscle sheet: soreness on top, centered, live 3D update"
+  ],
+  ["v11.40", "fix duplicate form cues, improve section spacing"],
+  [
+    "v11.39",
+    "interactive upgrades: scrubbable demos, form cues/mistakes, workout builder, variations, tappable charts, badges, soreness overlay, voice commands, anatomy deep-dives; 50 new exercises, 5 new programs"
+  ],
   ["v11.38", "prettier formatting across js, css, html; fixed stray div tag"],
   ["v11.37", "code formatting: 2 blank lines between functions, 1 declaration per line in CSS, fixed split brace bugs"],
   ["v11.36", "Refactor: split codebase into js and css modules"],
