@@ -128,24 +128,30 @@ function renderBodyRecovery() {
 }
 
 function renderHome() {
-  const _rs = getSettings().reminder;
-  const _rb = $("reminderBanner");
-  if (_rb) {
-    const today = fmtDate(new Date());
-    const trainedToday = getLog().some(w => w.date === today);
-    const now = new Date(),
-      hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
-    if (_rs && !trainedToday && hm >= _rs) {
-      _rb.classList.remove("hidden");
-      _rb.innerHTML = `<div class="reminder-top">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""}<b>Time to train!</b></div><p class="muted">Your reminder was set for ${_rs}.</p><a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
-    } else _rb.classList.add("hidden");
+  try {
+    const _rs = getSettings().reminder;
+    const _rb = $("reminderBanner");
+    if (_rb) {
+      const today = fmtDate(new Date());
+      const trainedToday = getLog().some(w => w.date === today);
+      const now = new Date(),
+        hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      if (_rs && !trainedToday && hm >= _rs) {
+        _rb.classList.remove("hidden");
+        _rb.innerHTML = `<div class="reminder-top">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""}<b>Time to train!</b></div><p class="muted">Your reminder was set for ${_rs}.</p><a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
+      } else _rb.classList.add("hidden");
+    }
+    const se = $("statEx");
+    if (se) se.textContent = EXERCISES.length;
+    const fe = $("footEx");
+    if (fe) fe.textContent = EXERCISES.length;
+    const heroCount = $("heroExCount");
+    if (heroCount) heroCount.textContent = EXERCISES.length;
+    const fp = $("footProg");
+    if (fp && typeof PROGRAMS !== "undefined") fp.textContent = PROGRAMS.length;
+  } catch (e) {
+    console.error("renderHome header failed:", e);
   }
-  $("statEx").textContent = EXERCISES.length;
-  $("footEx").textContent = EXERCISES.length;
-  const heroCount = $("heroExCount");
-  if (heroCount) heroCount.textContent = EXERCISES.length;
-  const fp = $("footProg");
-  if (fp && typeof PROGRAMS !== "undefined") fp.textContent = PROGRAMS.length;
   // weekly progress ring + streak flame
   (function () {
     const hp = $("heroProgress");
