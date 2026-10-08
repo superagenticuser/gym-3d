@@ -568,10 +568,10 @@ function setVoiceCmdBtn(listening) {
     `<span class="btn-ic">` +
     (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") +
     `</span>` +
-    (listening ? " Stop" : " Voice commands");
+    (listening ? " Stop" : " Voice");
   b.classList.toggle("listening", !!listening);
-  b.setAttribute("aria-label", listening ? "Stop voice commands" : "Voice commands");
-  b.title = listening ? 'Listening… say "next set", "start timer", "stop timer", or "next exercise"' : "Voice commands";
+  b.setAttribute("aria-label", listening ? "Stop voice control" : "Voice control");
+  b.title = listening ? 'Listening… say "next set", "start timer", or "10 reps 60 kilos"' : "Voice control";
 }
 
 // first exercise that still has incomplete sets
@@ -642,13 +642,92 @@ function handleVoiceCommand(text) {
     say(`Rest timer started: "${text}"`);
   } else if (text.indexOf("stop timer") >= 0) {
     const stop = $("timerStop");
-    if (stop) stop.click(); // runs the exact on-screen stop handler
+    if (stop) stop.click();
     say(`Timer stopped: "${text}"`);
   } else if (text.indexOf("next exercise") >= 0 || text.indexOf("finish exercise") >= 0) {
     say(scrollToNextExerciseByVoice() ? `Next exercise: "${text}"` : "All exercises are complete.");
+  } else if (tryVoiceLog(text)) {
+    // tryVoiceLog returns true and updates status if it parsed reps/weight
   } else {
-    say(`Heard: "${text}". Try "next set", "start timer", "stop timer", or "next exercise"`);
+    say(`Heard: "${text}". Try "next set", "start timer", or "10 reps 60 kilos"`);
   }
+}
+
+// Parse "10 reps 60 kilos" style input and fill the next open set row. Returns true if parsed.
+function tryVoiceLog(text) {
+  const WORDS = {
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+    eleven: 11,
+    twelve: 12,
+    thirteen: 13,
+    fourteen: 14,
+    fifteen: 15,
+    sixteen: 16,
+    seventeen: 17,
+    eighteen: 18,
+    nineteen: 19,
+    twenty: 20,
+    thirty: 30,
+    forty: 40,
+    fifty: 50,
+    sixty: 60,
+    seventy: 70,
+    eighty: 80,
+    ninety: 90,
+    hundred: 100
+  };
+  text = text.replace(
+    /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b/g,
+    w => WORDS[w]
+  );
+  text = text.replace(/(\d+)\s+(\d+)\b/g, (m, a, b) =>
+    parseInt(a) >= 20 && parseInt(b) < 10 ? String(parseInt(a) + parseInt(b)) : m
+  );
+  const repsM = text.match(/(\d+)\s*reps?/);
+  const wM = text.match(/(\d+(?:\.\d+)?)\s*(kg|kilos?|lb|lbs|pounds?)/);
+  let reps = repsM ? repsM[1] : null,
+    weight = wM ? wM[1] : null;
+  if (!reps && !weight) {
+    const nums = text.match(/\d+(?:\.\d+)?/g);
+    if (nums && nums.length >= 2) {
+      reps = nums[0];
+      weight = nums[1];
+    } else if (nums && nums.length === 1) {
+      reps = nums[0];
+    }
+  }
+  if (!reps && !weight) return false;
+  const rows = document.querySelectorAll(".set-row2:not(.voiced)");
+  if (!rows.length) return false;
+  const row = rows[0];
+  row.classList.add("voiced");
+  if (reps) {
+    const inp = row.querySelector('input[data-f="reps"]');
+    if (inp) {
+      inp.value = reps;
+      inp.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+  if (weight) {
+    const inp = row.querySelector('input[data-f="weight"]');
+    if (inp) {
+      inp.value = weight;
+      inp.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+  const status = $("voiceStatus");
+  if (status)
+    status.textContent = `Logged: ${reps ? reps + " reps" : ""}${reps && weight ? " " : ""}${weight ? weight + " kg" : ""}`;
+  return true;
 }
 
 function toggleVoiceCmd() {
@@ -679,21 +758,17 @@ function toggleVoiceCmd() {
   voiceCmdRec.start();
   setVoiceCmdBtn(true);
   const status = $("voiceStatus");
-  if (status) status.textContent = 'Listening… say "next set", "start timer", "stop timer", or "next exercise"';
+  if (status) status.textContent = 'Listening… say "next set", "start timer", or "10 reps 60 kilos"';
 }
 
 function ensureVoiceCmdButton() {
-  if ($("voiceCmdBtn")) return;
-  const anchor = $("voiceBtn");
-  if (!anchor || !anchor.parentNode) return;
-  const b = document.createElement("button");
-  b.className = "btn btn-ghost btn-sm";
-  b.id = "voiceCmdBtn";
-  b.style.marginTop = "8px";
-  b.style.marginLeft = "8px";
-  anchor.parentNode.insertBefore(b, anchor.nextSibling);
+  const b = $("voiceCmdBtn");
+  if (!b || b.dataset.wired) return;
+  b.dataset.wired = "1";
   b.addEventListener("click", toggleVoiceCmd);
   setVoiceCmdBtn(false);
+  const status = $("voiceStatus");
+  if (status) status.textContent = 'Tap Voice, then say "next set", "start timer", or "10 reps 60 kilos"';
 }
 
 ensureVoiceCmdButton();
