@@ -27,7 +27,7 @@
   border-radius: 999px;
   border-bottom: none;
   white-space: nowrap;
-  transition: all .15s;
+  transition: all 0.15s;
 }
 
 .nav a svg {
@@ -52,7 +52,10 @@
   bottom: 4px;
   background: var(--volt);
   border-radius: 999px;
-  transition: left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1), opacity .2s;
+  transition:
+    left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s;
   pointer-events: none;
   z-index: 0;
 }
@@ -96,9 +99,7 @@ footer {
   position: relative;
   margin-top: 0;
   border-top: 1px solid var(--line);
-  background:
-  radial-gradient(600px 200px at 50% 0%, rgba(255,255,255,0.04), transparent 70%),
-  var(--bg);
+  background: radial-gradient(600px 200px at 50% 0%, rgba(255, 255, 255, 0.04), transparent 70%), var(--bg);
 }
 
 footer::before {
@@ -106,7 +107,7 @@ footer::before {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.5px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.5px);
   background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(520px 220px at 50% 20%, black, transparent 75%);
   mask-image: radial-gradient(520px 220px at 50% 20%, black, transparent 75%);
@@ -174,10 +175,11 @@ footer::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
-.cmp-grip::before, .cmp-grip::after {
+.cmp-grip::before,
+.cmp-grip::after {
   content: "";
   border: solid #111;
   border-width: 0 2.5px 2.5px 0;
@@ -201,7 +203,7 @@ footer::before {
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 20px;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0, 0, 0, 0.65);
   color: #fff;
   pointer-events: none;
 }
@@ -370,7 +372,9 @@ footer::before {
   border-radius: 999px;
   z-index: 200;
   opacity: 0;
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
   pointer-events: none;
 }
 
@@ -462,7 +466,9 @@ footer::before {
   opacity: 0;
   transform: translateY(12px);
   pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
 }
 
 .to-top.show {
@@ -497,13 +503,14 @@ footer::before {
 
 .detail-cols {
   display: grid;
-  grid-template-columns: 1.25fr .75fr;
+  grid-template-columns: 1.25fr 0.75fr;
   gap: 28px;
   margin-top: 28px;
   align-items: start;
 }
 
-.detail-main h3, .detail-side h3 {
+.detail-main h3,
+.detail-side h3 {
   font-size: 20px;
   margin-bottom: 14px;
   color: var(--volt);
@@ -567,7 +574,11 @@ footer::before {
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
-  background: linear-gradient(120deg, color-mix(in srgb, var(--volt) 14%, transparent), color-mix(in srgb, var(--volt) 5%, transparent));
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--volt) 14%, transparent),
+    color-mix(in srgb, var(--volt) 5%, transparent)
+  );
   border: 1px solid var(--volt);
   border-radius: var(--radius);
   padding: 18px 22px;
@@ -608,31 +619,32 @@ footer::before {
 }
 
 @media (max-width: 900px) {
-    .detail-cols {
-      grid-template-columns: 1fr;
-    }
+  .detail-cols {
+    grid-template-columns: 1fr;
+  }
 
-    .detail-3d .stage {
-      height: 360px;
-    }
+  .detail-3d .stage {
+    height: 360px;
+  }
 
-    .detail-head h2 {
-      font-size: 26px;
-    }
+  .detail-head h2 {
+    font-size: 26px;
+  }
 
-    .nav a {
-      padding: 8px 12px;
-      font-size: 13px;
-    }
+  .nav a {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 
-    .nav a svg {
-      width: 14px;
-      height: 14px;
-    }
+  .nav a svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* ================= v4: flat 3D viewport backgrounds, readable steps ================= */
-.stage, .hero-3d {
+.stage,
+.hero-3d {
   background: var(--surface);
 }
 
@@ -741,9 +753,9 @@ footer::before {
 }
 
 @media (max-width: 700px) {
-    .demo-player {
-      grid-template-columns: 1fr;
-    }
+  .demo-player {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ================= v5: icon library + settings + accents ================= */
@@ -820,7 +832,7 @@ footer::before {
 .guide-toggle .ic {
   width: 16px;
   height: 16px;
-  transition: transform .18s;
+  transition: transform 0.18s;
 }
 
 .guide-toggle.open .ic {
@@ -881,7 +893,7 @@ footer::before {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(4, 6, 10, .66);
+  background: rgba(4, 6, 10, 0.66);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: flex-start;
@@ -899,7 +911,7 @@ footer::before {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 22px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
 }
@@ -1032,7 +1044,7 @@ footer::before {
   height: 22px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, .25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .accent-pick.on {
@@ -1128,7 +1140,7 @@ footer::before {
   background: var(--surface2);
   border: 1px solid var(--line);
   position: relative;
-  transition: background .18s;
+  transition: background 0.18s;
 }
 
 .toggle .knob {
@@ -1139,5 +1151,5 @@ footer::before {
   height: 22px;
   border-radius: 50%;
   background: var(--muted);
-  transition: all .18s;
+  transition: all 0.18s;
 }

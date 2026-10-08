@@ -71,7 +71,7 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 14px 28px;
-  background: rgba(11,13,18,.88);
+  background: rgba(11, 13, 18, 0.88);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
@@ -81,7 +81,7 @@ a {
   align-items: center;
   gap: 10px;
   font-weight: 800;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   font-size: 20px;
 }
 
@@ -111,10 +111,11 @@ a {
   padding: 6px 2px;
   border-bottom: 2px solid transparent;
   position: relative;
-  transition: color .2s;
+  transition: color 0.2s;
 }
 
-.nav a.active, .nav a:hover {
+.nav a.active,
+.nav a:hover {
   color: var(--ink);
 }
 
@@ -170,7 +171,7 @@ main {
 /* hero */
 .hero {
   display: grid;
-  grid-template-columns: 1.05fr .95fr;
+  grid-template-columns: 1.05fr 0.95fr;
   gap: 32px;
   align-items: center;
   padding: 40px 0 30px;
@@ -179,7 +180,7 @@ main {
 .kicker {
   color: var(--volt);
   font-weight: 700;
-  letter-spacing: .3em;
+  letter-spacing: 0.3em;
   font-size: 13px;
   margin-bottom: 18px;
 }
@@ -215,7 +216,7 @@ main {
   padding: 15px 30px;
   border-radius: 999px;
   font-size: 16px;
-  transition: transform .15s;
+  transition: transform 0.15s;
   vertical-align: middle;
   border: none;
   cursor: pointer;
@@ -266,7 +267,8 @@ main {
   background: var(--surface);
 }
 
-.btn-danger, .btn.danger {
+.btn-danger,
+.btn.danger {
   border: 1px solid #f87171;
   color: #f87171;
   background: transparent;
@@ -353,7 +355,9 @@ input[type="file"].file-styled::file-selector-button:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 20px;
-  transition: border-color .15s, transform .15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .muscle-card:hover {

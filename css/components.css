@@ -13,7 +13,10 @@
   border-radius: var(--radius);
   padding: 20px;
   cursor: pointer;
-  transition: border-color .15s, transform .15s, background .15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s,
+    background 0.15s;
   position: relative;
 }
 
@@ -262,7 +265,7 @@
 /* body map */
 .body-layout {
   display: grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: 1.2fr 0.8fr;
   gap: 28px;
   align-items: start;
   margin-top: 8px;
@@ -297,29 +300,30 @@ footer {
 }
 
 @media (max-width: 900px) {
-    .hero {
-      grid-template-columns: 1fr;
-    }
+  .hero {
+    grid-template-columns: 1fr;
+  }
 
-    .hero-3d {
-      height: 380px;
-    }
+  .hero-3d {
+    height: 380px;
+  }
 
-    .detail-layout, .body-layout {
-      grid-template-columns: 1fr;
-    }
+  .detail-layout,
+  .body-layout {
+    grid-template-columns: 1fr;
+  }
 
-    .stage {
-      height: 420px;
-    }
+  .stage {
+    height: 420px;
+  }
 
-    .nav {
-      gap: 14px;
-    }
+  .nav {
+    gap: 14px;
+  }
 
-    .nav a {
-      font-size: 14px;
-    }
+  .nav a {
+    font-size: 14px;
+  }
 }
 
 /* ---------- programs ---------- */
@@ -336,7 +340,9 @@ footer {
   border-radius: var(--radius);
   padding: 20px;
   cursor: pointer;
-  transition: border-color .15s, transform .15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .prog-card:hover {
@@ -508,89 +514,89 @@ footer {
 
 /* ---------- mobile ---------- */
 @media (max-width: 900px) {
-    .topbar {
-      padding: 12px 16px;
-    }
+  .topbar {
+    padding: 12px 16px;
+  }
 
-    .nav {
-      gap: 12px;
-      overflow-x: auto;
-    }
+  .nav {
+    gap: 12px;
+    overflow-x: auto;
+  }
 
-    .nav a {
-      font-size: 13px;
-      white-space: nowrap;
-    }
+  .nav a {
+    font-size: 13px;
+    white-space: nowrap;
+  }
 
-    main {
-      padding: 0 16px 60px;
-    }
+  main {
+    padding: 0 16px 60px;
+  }
 
-    .hero {
-      padding: 24px 0 20px;
-    }
+  .hero {
+    padding: 24px 0 20px;
+  }
 
-    .hero-3d {
-      height: 340px;
-    }
+  .hero-3d {
+    height: 340px;
+  }
 
-    .hero-stats {
-      gap: 26px;
-    }
+  .hero-stats {
+    gap: 26px;
+  }
 
-    .stage {
-      height: 400px;
-    }
+  .stage {
+    height: 400px;
+  }
 
-    .stage.tall {
-      height: 480px;
-    }
+  .stage.tall {
+    height: 480px;
+  }
 
-    .detail-info h2 {
-      font-size: 26px;
-    }
+  .detail-info h2 {
+    font-size: 26px;
+  }
 
-    .timer {
-      top: 58px;
-      padding: 16px;
-    }
+  .timer {
+    top: 58px;
+    padding: 16px;
+  }
 
-    .timer-display {
-      font-size: 42px;
-    }
+  .timer-display {
+    font-size: 42px;
+  }
 
-    .selects {
-      flex-direction: column;
-    }
+  .selects {
+    flex-direction: column;
+  }
 
-    .selects select {
-      width: 100%;
-    }
+  .selects select {
+    width: 100%;
+  }
 
-    .day-head {
-      align-items: flex-start;
-    }
+  .day-head {
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 480px) {
-    .hero-3d {
-      height: 300px;
-    }
+  .hero-3d {
+    height: 300px;
+  }
 
-    .stage {
-      height: 340px;
-      border-radius: 16px;
-    }
+  .stage {
+    height: 340px;
+    border-radius: 16px;
+  }
 
-    .stage.tall {
-      height: 420px;
-    }
+  .stage.tall {
+    height: 420px;
+  }
 
-    .cards {
-      grid-template-columns: 1fr;
-    }
+  .cards {
+    grid-template-columns: 1fr;
+  }
 
-    .muscle-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .muscle-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

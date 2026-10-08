@@ -32,25 +32,25 @@
 }
 
 @media (max-width: 480px) {
-    .set-row2 {
-      gap: 10px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
+  .set-row2 {
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
 
-    .set-row2::-webkit-scrollbar {
-      display: none;
-    }
+  .set-row2::-webkit-scrollbar {
+    display: none;
+  }
 
-    .set-row2 > * {
-      flex-shrink: 0;
-    }
+  .set-row2 > * {
+    flex-shrink: 0;
+  }
 
-    .set-reps {
-      flex-shrink: 0;
-    }
+  .set-reps {
+    flex-shrink: 0;
+  }
 }
 
 .set-done {
@@ -117,7 +117,8 @@
   text-align: center;
 }
 
-.set-weight:focus, .set-reps input:focus {
+.set-weight:focus,
+.set-reps input:focus {
   outline: none;
   border-color: var(--volt);
 }
@@ -226,63 +227,65 @@
 
 /* chart entrance animations */
 @keyframes chart-draw {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
 
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes bar-grow {
-    from {
-      transform: scaleY(0);
-    }
+  from {
+    transform: scaleY(0);
+  }
 
-    to {
-      transform: scaleY(1);
-    }
+  to {
+    transform: scaleY(1);
+  }
 }
 
 @keyframes cell-fade {
-    from {
-      opacity: 0;
-    }
+  from {
+    opacity: 0;
+  }
 
-    to {
-      opacity: 1;
-    }
+  to {
+    opacity: 1;
+  }
 }
 
 .chart-wrap svg {
-  animation: chart-draw .5s cubic-bezier(.2,.8,.3,1);
+  animation: chart-draw 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
   transform-origin: center;
 }
 
 .chart-bar {
-  animation: bar-grow .45s cubic-bezier(.2,.8,.3,1);
+  animation: bar-grow 0.45s cubic-bezier(0.2, 0.8, 0.3, 1);
   transform-origin: bottom;
 }
 
 .heat-cell {
-  animation: cell-fade .4s ease-out;
+  animation: cell-fade 0.4s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .chart-wrap svg, .chart-bar, .heat-cell {
-      animation: none;
-    }
+  .chart-wrap svg,
+  .chart-bar,
+  .heat-cell {
+    animation: none;
+  }
 
-    .nav-pill {
-      transition: none;
-    }
+  .nav-pill {
+    transition: none;
+  }
 
-    .btn {
-      transition: none;
-    }
+  .btn {
+    transition: none;
+  }
 }
 
 .warmup-box {
@@ -312,11 +315,17 @@
 }
 
 /* gym mode: distraction-free, big touch targets */
-body.gym-mode #view-workout .timer, body.gym-mode #view-workout .guide-toggle,
-body.gym-mode #view-workout .tempo-toggle, body.gym-mode #view-workout .tempo-box,
-body.gym-mode #view-workout .warmup-toggle, body.gym-mode #view-workout .warmup-box,
-body.gym-mode #view-workout .ex-note-input, body.gym-mode #view-workout .wo-muscle,
-body.gym-mode #view-workout .superset-badge, body.gym-mode #view-workout .giant-badge, body.gym-mode #woSub {
+body.gym-mode #view-workout .timer,
+body.gym-mode #view-workout .guide-toggle,
+body.gym-mode #view-workout .tempo-toggle,
+body.gym-mode #view-workout .tempo-box,
+body.gym-mode #view-workout .warmup-toggle,
+body.gym-mode #view-workout .warmup-box,
+body.gym-mode #view-workout .ex-note-input,
+body.gym-mode #view-workout .wo-muscle,
+body.gym-mode #view-workout .superset-badge,
+body.gym-mode #view-workout .giant-badge,
+body.gym-mode #woSub {
   display: none;
 }
 
@@ -340,7 +349,8 @@ body.gym-mode #view-workout .set-fail {
   height: 48px;
 }
 
-body.gym-mode #view-workout .set-reps input, body.gym-mode #view-workout .set-weight {
+body.gym-mode #view-workout .set-reps input,
+body.gym-mode #view-workout .set-weight {
   font-size: 18px;
   padding: 12px 8px;
 }
@@ -601,7 +611,7 @@ body.gym-mode #view-workout .wo-ex-head b {
   height: 100%;
   border-radius: 3px;
   background: var(--volt);
-  transition: width .6s cubic-bezier(.2,.8,.3,1);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
 .rec-days {
@@ -664,7 +674,7 @@ body.gym-mode #view-workout .wo-ex-head b {
   height: 100%;
   border-radius: 4px;
   background: var(--volt);
-  transition: width .6s cubic-bezier(.2,.8,.3,1);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
 .goal-pct {
@@ -710,7 +720,8 @@ body.gym-mode #view-workout .wo-ex-head b {
   align-items: center;
 }
 
-.goal-form select, .goal-form input {
+.goal-form select,
+.goal-form input {
   background: var(--surface2);
   border: 1px solid var(--line);
   color: var(--ink);
@@ -719,7 +730,8 @@ body.gym-mode #view-workout .wo-ex-head b {
   font-size: 13px;
 }
 
-.goal-form select:focus, .goal-form input:focus {
+.goal-form select:focus,
+.goal-form input:focus {
   border-color: var(--volt);
   outline: none;
 }
@@ -831,7 +843,7 @@ body.gym-mode #view-workout .wo-ex-head b {
 /* post-workout rating */
 #woStars span {
   color: var(--line2);
-  transition: color .15s;
+  transition: color 0.15s;
   user-select: none;
 }
 
@@ -882,20 +894,20 @@ body.gym-mode #view-workout .wo-ex-head b {
 
 /* nav scroll on small screens */
 @media (max-width: 760px) {
-    .nav {
-      max-width: 56vw;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
+  .nav {
+    max-width: 56vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
 
-    .nav::-webkit-scrollbar {
-      display: none;
-    }
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
 
-    .nav a {
-      font-size: 13px;
-      padding: 8px 12px;
-    }
+  .nav a {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
 }
 
 /* ================= v7: program smarts ================= */
