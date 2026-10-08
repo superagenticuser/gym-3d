@@ -1574,10 +1574,19 @@ function renderCalDetail(el, key) {
     (a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + setVolumeKg(x.id, s), 0), 0),
     0
   );
+  const totalMin = ws.reduce((a, w) => a + (w.durationMin || 0), 0);
+  const stats = [
+    { icon: "dumbbell", val: ws.length, label: ws.length === 1 ? "workout" : "workouts" },
+    { icon: "repeat", val: sets, label: "sets" },
+    { icon: "zap", val: fmtW(vol), label: "volume" }
+  ];
+  if (totalMin) stats.push({ icon: "timer", val: totalMin + "m", label: "duration" });
   const detail = ws
-    .map(
-      w =>
-        `<div class="cal-wo"><p class="cal-wo-title"><b>${esc(w.programName)}</b>${w.dayName ? `<span class="muted"> · ${esc(w.dayName)}</span>` : ""}</p>` +
+    .map(w => {
+      const stars = w.rating ? `<span class="cal-stars">${"★".repeat(w.rating)}${"☆".repeat(5 - w.rating)}</span>` : "";
+      const dur = w.durationMin ? `<span class="muted"> · ${w.durationMin} min</span>` : "";
+      return (
+        `<div class="cal-wo-card"><div class="cal-wo-head"><span class="cal-wo-ic">${window.FORGE_ICON ? window.FORGE_ICON("dumbbell") : ""}</span><div><p class="cal-wo-title"><b>${esc(w.programName)}</b>${w.dayName ? `<span class="muted"> · ${esc(w.dayName)}</span>` : ""}</p><p style="margin:2px 0 0">${stars}${dur}</p></div></div>` +
         w.exercises
           .map(x => {
             const ex = byId(x.id);
@@ -1591,9 +1600,12 @@ function renderCalDetail(el, key) {
           })
           .join("") +
         `</div>`
-    )
+      );
+    })
     .join("");
-  el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3><p class="muted">${ws.length} workout${ws.length > 1 ? "s" : ""} · ${sets} sets · ${fmtW(vol)} volume</p>${detail}`;
+  el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3>
+    <div class="cal-stats">${stats.map(s => `<div class="cal-stat"><span class="cal-stat-ic">${window.FORGE_ICON ? window.FORGE_ICON(s.icon) : ""}</span><b>${s.val}</b><span>${s.label}</span></div>`).join("")}</div>
+    ${detail}`;
 }
 
 function renderBodyTab(body) {
