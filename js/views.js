@@ -142,6 +142,8 @@ function renderHome() {
   }
   $("statEx").textContent = EXERCISES.length;
   $("footEx").textContent = EXERCISES.length;
+  const heroCount = $("heroExCount");
+  if (heroCount) heroCount.textContent = EXERCISES.length;
   const fp = $("footProg");
   if (fp && typeof PROGRAMS !== "undefined") fp.textContent = PROGRAMS.length;
   // weekly progress ring + streak flame
