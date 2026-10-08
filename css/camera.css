@@ -1,60 +1,455 @@
 /* FORGE - camera features, clip library, action bar, toast */
 
 /* camera features */
-.cam-overlay { position: fixed; inset: 0; z-index: 200; background: #000; display: flex; flex-direction: column; }
-.cam-overlay.hidden { display: none; }
-#camVideo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cam-ghost { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; pointer-events: none; }
-.cam-topbar { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: linear-gradient(rgba(0,0,0,0.65), transparent); }
-.cam-close { width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.18); color: #fff; font-size: 24px; line-height: 1; cursor: pointer; flex-shrink: 0; }
-.cam-title { color: #fff; font-weight: 700; font-size: 17px; flex: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-.cam-timer { color: #fff; font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
-.cam-hud { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px; padding: 8px 16px; }
-.cam-hud b { color: #fff; font-size: 20px; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
-.cam-hud span { color: rgba(255,255,255,0.85); font-size: 14px; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
-.cam-hud .cam-rest { color: #ffd60a; font-weight: 700; font-size: 16px; }
-.cam-controls { position: relative; z-index: 2; margin-top: auto; padding: 16px 16px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: linear-gradient(transparent, rgba(0,0,0,0.75)); }
-.cam-pose-tabs { display: flex; gap: 8px; background: rgba(255,255,255,0.14); border-radius: 999px; padding: 4px; }
-.cam-pose-tabs button { border: none; background: transparent; color: #fff; font-weight: 600; font-size: 14px; padding: 8px 18px; border-radius: 999px; cursor: pointer; }
-.cam-pose-tabs button.on { background: var(--volt); color: #111; }
-.cam-shutter { width: 74px; height: 74px; border-radius: 50%; border: 5px solid #fff; background: rgba(255,255,255,0.25); cursor: pointer; }
-.cam-shutter:active { background: rgba(255,255,255,0.5); }
-.cam-hint { color: rgba(255,255,255,0.75); font-size: 13px; text-align: center; margin: 0; max-width: 300px; }
-.cam-rep-row { display: flex; align-items: center; gap: 24px; }
-.cam-rep-count { text-align: center; min-width: 110px; }
-.cam-rep-count b { display: block; font-size: 72px; font-weight: 800; color: #fff; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.6); font-variant-numeric: tabular-nums; }
-.cam-rep-count span { color: rgba(255,255,255,0.8); font-size: 14px; }
-.cam-rep-plus, .cam-rep-minus { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.14); color: #fff; font-size: 34px; font-weight: 700; cursor: pointer; line-height: 1; }
-.cam-rep-plus:active, .cam-rep-minus:active { background: rgba(255,255,255,0.35); }
-.cam-rec-btn { display: inline-flex; align-items: center; gap: 10px; border: none; border-radius: 999px; padding: 14px 28px; font-size: 16px; font-weight: 700; background: var(--volt); color: #111; cursor: pointer; }
-.cam-rec-btn.on { background: #ff453a; color: #fff; }
-.cam-rec-dot { width: 14px; height: 14px; border-radius: 50%; background: currentColor; display: inline-block; }
-.cam-rec-btn.on .cam-rec-dot { animation: recPulse 1.2s infinite; }
-@keyframes recPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.cam-flip { border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.14); color: #fff; border-radius: 999px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.cam-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.cam-overlay.hidden {
+  display: none;
+}
+
+#camVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cam-ghost {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.cam-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(rgba(0,0,0,0.65), transparent);
+}
+
+.cam-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cam-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  flex: 1;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+.cam-timer {
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+.cam-hud {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px;
+}
+
+.cam-hud b {
+  color: #fff;
+  font-size: 20px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+}
+
+.cam-hud span {
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+}
+
+.cam-hud .cam-rest {
+  color: #ffd60a;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.cam-controls {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 16px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.75));
+}
+
+.cam-pose-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.14);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.cam-pose-tabs button {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cam-pose-tabs button.on {
+  background: var(--volt);
+  color: #111;
+}
+
+.cam-shutter {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+}
+
+.cam-shutter:active {
+  background: rgba(255,255,255,0.5);
+}
+
+.cam-hint {
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+  max-width: 300px;
+}
+
+.cam-rep-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.cam-rep-count {
+  text-align: center;
+  min-width: 110px;
+}
+
+.cam-rep-count b {
+  display: block;
+  font-size: 72px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  font-variant-numeric: tabular-nums;
+}
+
+.cam-rep-count span {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+}
+
+.cam-rep-plus, .cam-rep-minus {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cam-rep-plus:active, .cam-rep-minus:active {
+  background: rgba(255,255,255,0.35);
+}
+
+.cam-rec-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--volt);
+  color: #111;
+  cursor: pointer;
+}
+
+.cam-rec-btn.on {
+  background: #ff453a;
+  color: #fff;
+}
+
+.cam-rec-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+.cam-rec-btn.on .cam-rec-dot {
+  animation: recPulse 1.2s infinite;
+}
+
+@keyframes recPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.3;
+    }
+}
+
+.cam-flip {
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* clip library sheet */
-.clip-backdrop { position: fixed; inset: 0; z-index: 205; background: rgba(0,0,0,0.55); }
-.clip-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 210; background: var(--surface); border-radius: 20px 20px 0 0; max-height: 86vh; overflow-y: auto; padding: 20px 20px 32px; }
-.clip-sheet h3 { margin-bottom: 4px; }
-.clip-item { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-top: 12px; }
-.clip-item video { width: 100%; border-radius: 12px; background: #000; max-height: 300px; }
-.clip-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-.clip-meta .muted { font-size: 13px; }
-.clip-speed { display: flex; gap: 6px; }
-.clip-speed button { border: 1px solid var(--line); background: var(--surface2); color: var(--ink); border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.clip-speed button.on { background: var(--volt); color: #111; border-color: var(--volt); }
-.clip-del { margin-left: auto; border: none; background: none; color: var(--danger, #ff5a5a); font-size: 13px; font-weight: 600; cursor: pointer; }
-.photo-pose-tag { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; text-transform: capitalize; }
+.clip-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 205;
+  background: rgba(0,0,0,0.55);
+}
+
+.clip-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 210;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 20px 20px 32px;
+}
+
+.clip-sheet h3 {
+  margin-bottom: 4px;
+}
+
+.clip-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.clip-item video {
+  width: 100%;
+  border-radius: 12px;
+  background: #000;
+  max-height: 300px;
+}
+
+.clip-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.clip-meta .muted {
+  font-size: 13px;
+}
+
+.clip-speed {
+  display: flex;
+  gap: 6px;
+}
+
+.clip-speed button {
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clip-speed button.on {
+  background: var(--volt);
+  color: #111;
+  border-color: var(--volt);
+}
+
+.clip-del {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--danger, #ff5a5a);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.photo-pose-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
 /* exercise action bar */
-.ex-actions { display: flex; gap: 8px; margin: 10px 0; overflow-x: auto; padding-bottom: 2px; }
-.ex-act { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 68px; height: 68px; padding: 6px 4px; border: 1px solid var(--line); background: var(--surface2); border-radius: 14px; color: var(--ink); cursor: pointer; flex-shrink: 0; }
-.ex-act .ic { width: 22px; height: 22px; flex-shrink: 0; }
-.ex-act span { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; line-height: 1.2; }
-.ex-act.open { border-color: var(--volt); }
-.ex-act.open .ic { color: var(--volt); transform: none; }
-.ex-count { position: absolute; top: 4px; right: 6px; background: var(--volt); color: #111; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+.ex-actions {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ex-act {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 68px;
+  height: 68px;
+  padding: 6px 4px;
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  border-radius: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ex-act .ic {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.ex-act span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.ex-act.open {
+  border-color: var(--volt);
+}
+
+.ex-act.open .ic {
+  color: var(--volt);
+  transform: none;
+}
+
+.ex-count {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: var(--volt);
+  color: #111;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
 /* toast */
-.cam-toast { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(20px); z-index: 300; background: var(--surface2); border: 1px solid var(--line); color: var(--ink); font-size: 14px; font-weight: 600; padding: 12px 20px; border-radius: 999px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; display: flex; align-items: center; gap: 10px; max-width: 90vw; }
-.cam-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.cam-toast img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
-.cam-toast .ic { width: 18px; height: 18px; color: var(--volt); }
+.cam-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 300;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 90vw;
+}
+
+.cam-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.cam-toast img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.cam-toast .ic {
+  width: 18px;
+  height: 18px;
+  color: var(--volt);
+}
