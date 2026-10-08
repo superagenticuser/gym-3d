@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.33", "Camera fixes: icon action bar, camera switch, mirror sets, toasts"],
     ["v11.32", "Camera features: form recorder, mirror mode, photo capture"],
     ["v11.31", "Align all card padding to documented system"],
     ["v11.30", "Volume count-up shows whole numbers only"],
@@ -4317,12 +4318,12 @@
         </div>
         ${(() => { const ls = lastSessionFull(x.id); return ls ? `<p class="last-time-line" style="font-size:13px;margin:6px 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="muted">Last time:</span> <b>${esc(lastSessionSummary(ls))}</b><span class="beat-badge hidden" id="beat-${xi}"></span></p>` : ""; })()}
         <input class="ex-note-input" data-x="${xi}" placeholder="Note for next time…" value="${esc(note)}" aria-label="Exercise note">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
-          <button class="guide-toggle" data-guide="${xi}">Form guide ${window.FORGE_ICON("chevron-down")}</button>
-          <button class="btn btn-ghost btn-sm tempo-toggle" data-tempo="${xi}">Tempo coach</button>
-          ${!isBW && lw ? `<button class="btn btn-ghost btn-sm warmup-toggle" data-warmup="${xi}">Warm up</button>` : ""}
-          <button class="btn btn-ghost btn-sm rec-toggle" data-rec="${xi}">Record set</button>
-          <button class="btn btn-ghost btn-sm clips-toggle hidden" data-clips="${xi}" data-ex="${x.id}">Clips</button>
+        <div class="ex-actions">
+          <button class="ex-act guide-toggle" data-guide="${xi}" title="Form guide" aria-label="Form guide">${window.FORGE_ICON("book-open")}<span>Guide</span></button>
+          <button class="ex-act tempo-toggle" data-tempo="${xi}" title="Tempo coach" aria-label="Tempo coach">${window.FORGE_ICON("timer")}<span>Tempo</span></button>
+          ${!isBW && lw ? `<button class="ex-act warmup-toggle" data-warmup="${xi}" title="Warm up" aria-label="Warm up">${window.FORGE_ICON("flame")}<span>Warm up</span></button>` : ""}
+          <button class="ex-act rec-toggle" data-rec="${xi}" title="Record set" aria-label="Record set">${window.FORGE_ICON("video")}<span>Record</span></button>
+          <button class="ex-act clips-toggle hidden" data-clips="${xi}" data-ex="${x.id}" title="Form clips" aria-label="Form clips">${window.FORGE_ICON("film")}<span>Clips</span></button>
         </div>
         <div class="warmup-box hidden" id="warmup-${xi}"></div>
         <div class="tempo-box hidden" id="tempo-${xi}">
@@ -4825,7 +4826,7 @@
   });
 
   /* ---------- CAMERA FEATURES ---------- */
-  let _camStream = null, _recState = null, _mirrorInt = null, _photoPose = "front";
+  let _camStream = null, _recState = null, _mirrorInt = null, _photoPose = "front", _camFacing = "environment";
 
   async function camGet(facing) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -4833,7 +4834,9 @@
       return null;
     }
     try {
-      return await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing || "environment" }, audio: false });
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing || "environment" }, audio: false });
+      _camFacing = facing || "environment";
+      return s;
     } catch (e) {
       const n = e && e.name;
       if (n === "NotAllowedError" || n === "SecurityError")
@@ -4849,6 +4852,40 @@
     if (_camStream) { _camStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); _camStream = null; }
     const v = $("camVideo");
     if (v) v.srcObject = null;
+  }
+  async function camFlip(mirrored) {
+    const track = _camStream && _camStream.getVideoTracks()[0];
+    const curId = track ? track.getSettings().deviceId : null;
+    let devices = [];
+    try {
+      devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
+    } catch (e) {}
+    if (devices.length < 2) {
+      // fall back to facingMode toggle
+      const want = _camFacing === "user" ? "environment" : "user";
+      camStop();
+      const s = await camGet(want);
+      if (s) {
+        _camStream = s; _camFacing = want;
+        const v = $("camVideo");
+        v.style.transform = (want === "user" && mirrored !== false) ? "scaleX(-1)" : "";
+        v.srcObject = s;
+      }
+      return;
+    }
+    const curIdx = Math.max(0, devices.findIndex(d => d.deviceId === curId));
+    const next = devices[(curIdx + 1) % devices.length];
+    camStop();
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: next.deviceId } }, audio: false });
+      _camStream = s;
+      _camFacing = (next.label || "").toLowerCase().includes("front") ? "user" : "environment";
+      const v = $("camVideo");
+      v.style.transform = (_camFacing === "user" && mirrored !== false) ? "scaleX(-1)" : "";
+      v.srcObject = s;
+    } catch (e) {
+      appAlert("Could not switch camera.");
+    }
   }
   function camShell() {
     let ov = $("camOverlay");
@@ -4897,6 +4934,20 @@
     const v = $("camVideo"); if (v) v.style.transform = "";
   }
 
+  function camToast(msg, imgSrc) {
+    let t = $("camToast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "camToast";
+      t.className = "cam-toast";
+      t.setAttribute("role", "status");
+      document.body.appendChild(t);
+    }
+    t.innerHTML = `${imgSrc ? `<img src="${imgSrc}" alt="">` : (window.FORGE_ICON ? window.FORGE_ICON("check") : "")}<span>${esc(msg)}</span>`;
+    requestAnimationFrame(() => t.classList.add("show"));
+    clearTimeout(t._hideT);
+    t._hideT = setTimeout(() => t.classList.remove("show"), 2600);
+  }
   /* ----- progress photo capture ----- */
   function photoGhost() {
     const gh = $("camGhost");
@@ -4914,6 +4965,9 @@
         ${["front", "side", "back"].map(p => `<button data-pp="${p}" class="${p === _photoPose ? "on" : ""}" role="tab">${p[0].toUpperCase() + p.slice(1)}</button>`).join("")}
       </div>
       <button class="cam-shutter" id="camShutter" aria-label="Take photo"></button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="cam-flip" id="camPhotoFlip">Switch camera</button>
+      </div>
       <p class="cam-hint">Line up with the ghost of your last photo for consistent framing.</p>`;
     ctl.querySelectorAll("[data-pp]").forEach(b => b.addEventListener("click", () => {
       _photoPose = b.dataset.pp;
@@ -4921,6 +4975,7 @@
       photoGhost();
     }));
     $("camShutter").addEventListener("click", photoSnap);
+    $("camPhotoFlip").addEventListener("click", () => camFlip(true));
     const s = await camGet("user");
     if (!s) { camHide(); return; }
     _camStream = s;
@@ -4937,8 +4992,10 @@
     canvas.width = Math.round(v.videoWidth * scale);
     canvas.height = Math.round(v.videoHeight * scale);
     const ctx = canvas.getContext("2d");
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    if (v.style.transform.includes("scaleX(-1)")) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
     if (dataUrl.length > 1500000) { appAlert("Photo too large, try again."); return; }
@@ -4948,7 +5005,7 @@
     const pose = _photoPose;
     camHide();
     renderPhotos();
-    appAlert("Photo saved (" + pose + ").");
+    camToast(`Photo saved (${pose}).`, dataUrl);
   }
 
   /* ----- form clip storage (IndexedDB) ----- */
@@ -5011,7 +5068,13 @@
     document.querySelectorAll(".clips-toggle").forEach(b => {
       const n = counts[b.dataset.ex] || 0;
       b.classList.toggle("hidden", n === 0);
-      b.textContent = `Clips (${n})`;
+      let badge = b.querySelector(".ex-count");
+      if (n > 0 && !badge) {
+        badge = document.createElement("b");
+        badge.className = "ex-count";
+        b.appendChild(badge);
+      }
+      if (badge) badge.textContent = n;
     });
   }
 
@@ -5032,11 +5095,15 @@
         <button class="cam-rep-plus" id="camRepPlus" aria-label="Count a rep">+</button>
       </div>
       <div><button class="cam-rec-btn" id="camRecBtn"><span class="cam-rec-dot"></span>Record</button></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="cam-flip" id="camRecFlip">Switch camera</button>
+      </div>
       <p class="cam-hint">Tap + for each rep, or tap the video. Stop recording to save the clip.</p>`;
     $("camRepPlus").addEventListener("click", ev => { ev.stopPropagation(); recBump(1); });
     $("camRepMinus").addEventListener("click", ev => { ev.stopPropagation(); recBump(-1); });
     $("camVideo").addEventListener("click", () => recBump(1));
     $("camRecBtn").addEventListener("click", recToggle);
+    $("camRecFlip").addEventListener("click", () => camFlip(false));
   }
   function recBump(d) {
     if (!_recState) return;
@@ -5096,11 +5163,11 @@
       inp.value = st.reps;
       inp.dispatchEvent(new Event("input", { bubbles: true }));
       inp.dispatchEvent(new Event("change", { bubbles: true }));
-      appAlert(`Set ${targetSet} reps set to ${st.reps}. Clip saved.`);
+      camToast(`Set ${targetSet}: ${st.reps} reps logged. Clip saved.`);
     } else if (st.reps > 0) {
-      appAlert(`Clip saved with ${st.reps} reps.`);
+      camToast(`Clip saved with ${st.reps} reps.`);
     } else {
-      appAlert("Clip saved.");
+      camToast("Clip saved.");
     }
   }
   async function openClipLibrary(exId, exName) {
@@ -5166,12 +5233,25 @@
     const hud = $("camHud");
     hud.classList.remove("hidden");
     const ctl = $("camControls");
-    ctl.innerHTML = `<button class="cam-flip" id="camFlip">Switch camera</button>
-      <p class="cam-hint">Front camera mirror. Your current exercise and rest timer stay on screen.</p>`;
-    $("camFlip").addEventListener("click", async () => {
-      camStop();
-      const s2 = await camGet("environment");
-      if (s2) { _camStream = s2; v.style.transform = ""; v.srcObject = s2; }
+    ctl.innerHTML = `
+      <button class="cam-rec-btn" id="camSetDone"><span class="cam-rec-dot" style="background:currentColor"></span>Set done</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="cam-flip" id="camFlip">Switch camera</button>
+      </div>
+      <p class="cam-hint">Tap Set done to log the set and move on. Your rest timer keeps running.</p>`;
+    $("camFlip").addEventListener("click", () => camFlip(true));
+    $("camSetDone").addEventListener("click", () => {
+      if (!currentWorkout) return;
+      for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
+        const x = currentWorkout.exercises[xi];
+        const done = document.querySelectorAll(`.set-done[data-x="${xi}"].hit`).length;
+        if (done < x.sets) {
+          const btn = document.querySelector(`.set-done[data-x="${xi}"][data-s="${done}"]`);
+          if (btn) btn.click();
+          buzz(20);
+          return;
+        }
+      }
     });
     const upd = () => {
       if (!currentWorkout) { hud.innerHTML = `<b>No active workout</b>`; return; }
