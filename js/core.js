@@ -1,86 +1,113 @@
 /* FORGE - core utilities, settings, state, metadata, 3D viewer */
-'use strict';
-
+"use strict";
 
 /* ---------- muscle metadata ---------- */
 const MUSCLE_INFO = {
-  chest:      { name: "Chest",        desc: "Pectorals. The pushing muscles behind every press, push-up and dip." },
-  back:       { name: "Back",         desc: "Rhomboids and mid-traps. A thick upper back built with rows and deadlifts." },
-  lats:       { name: "Lats",         desc: "Latissimus dorsi, the wings. Pull-ups and pulldowns build width." },
-  traps:      { name: "Traps",        desc: "Trapezius. Shrugs and carries build the upper-back shelf." },
+  chest: { name: "Chest", desc: "Pectorals. The pushing muscles behind every press, push-up and dip." },
+  back: { name: "Back", desc: "Rhomboids and mid-traps. A thick upper back built with rows and deadlifts." },
+  lats: { name: "Lats", desc: "Latissimus dorsi, the wings. Pull-ups and pulldowns build width." },
+  traps: { name: "Traps", desc: "Trapezius. Shrugs and carries build the upper-back shelf." },
   "lower-back": { name: "Lower Back", desc: "Erector spinae. Keeps your spine strong under load." },
-  shoulders:  { name: "Shoulders",    desc: "Deltoids. Pressing and raising builds capped shoulders." },
-  biceps:     { name: "Biceps",       desc: "Front of the upper arm. Curls of every kind." },
-  triceps:    { name: "Triceps",      desc: "Back of the upper arm. About two thirds of your arm size." },
-  forearms:   { name: "Forearms",     desc: "Grip strength. Carries, hangs and wrist work." },
-  abs:        { name: "Abs",          desc: "Rectus abdominis, the six-pack wall. Train it with resistance." },
-  obliques:   { name: "Obliques",     desc: "Side core. Rotation and anti-rotation strength." },
-  glutes:     { name: "Glutes",       desc: "The powerhouse. Hip thrusts, swings and lunges." },
-  quads:      { name: "Quads",        desc: "Front of the thigh. Squats, presses and lunges." },
-  hamstrings: { name: "Hamstrings",   desc: "Back of the thigh. Hinges, curls and Nordics." },
-  calves:     { name: "Calves",       desc: "Lower leg. Raises with a full stretch and squeeze." },
-  "full-body":{ name: "Full Body",    desc: "Compound conditioning. Multiple muscles, maximum output." },
-  cardio:     { name: "Cardio",       desc: "Engine building. Heart, lungs and work capacity." }
+  shoulders: { name: "Shoulders", desc: "Deltoids. Pressing and raising builds capped shoulders." },
+  biceps: { name: "Biceps", desc: "Front of the upper arm. Curls of every kind." },
+  triceps: { name: "Triceps", desc: "Back of the upper arm. About two thirds of your arm size." },
+  forearms: { name: "Forearms", desc: "Grip strength. Carries, hangs and wrist work." },
+  abs: { name: "Abs", desc: "Rectus abdominis, the six-pack wall. Train it with resistance." },
+  obliques: { name: "Obliques", desc: "Side core. Rotation and anti-rotation strength." },
+  glutes: { name: "Glutes", desc: "The powerhouse. Hip thrusts, swings and lunges." },
+  quads: { name: "Quads", desc: "Front of the thigh. Squats, presses and lunges." },
+  hamstrings: { name: "Hamstrings", desc: "Back of the thigh. Hinges, curls and Nordics." },
+  calves: { name: "Calves", desc: "Lower leg. Raises with a full stretch and squeeze." },
+  "full-body": { name: "Full Body", desc: "Compound conditioning. Multiple muscles, maximum output." },
+  cardio: { name: "Cardio", desc: "Engine building. Heart, lungs and work capacity." }
 };
-
 
 /* ---------- custom exercises (user-created, stored locally) ---------- */
 function getCustomExercises() {
   try {
     const v = JSON.parse(localStorage.getItem("forge-custom-exercises") || "[]");
     return Array.isArray(v) ? v : [];
-  } catch (e) { return []; }
+  } catch (e) {
+    return [];
+  }
 }
-
 
 function saveCustomExercises(list) {
-  try { localStorage.setItem("forge-custom-exercises", JSON.stringify(list)); } catch (e) {}
+  try {
+    localStorage.setItem("forge-custom-exercises", JSON.stringify(list));
+  } catch (e) {}
 }
-
 
 EXERCISES.push(...getCustomExercises());
 
-
 function openCustomModal() {
   $("customName").value = "";
-  $("customSecondary").querySelectorAll("input:checked").forEach(c => { c.checked = false; });
+  $("customSecondary")
+    .querySelectorAll("input:checked")
+    .forEach(c => {
+      c.checked = false;
+    });
   $("customVeil").classList.remove("hidden");
   setTimeout(() => $("customName").focus(), 60);
 }
 
-
-function closeCustomModal() { $("customVeil").classList.add("hidden"); }
-
+function closeCustomModal() {
+  $("customVeil").classList.add("hidden");
+}
 
 function saveCustomExercise() {
   const name = $("customName").value.trim();
-  if (!name) { appAlert("Give your exercise a name first."); return; }
+  if (!name) {
+    appAlert("Give your exercise a name first.");
+    return;
+  }
   const primary = $("customPrimary").value;
-  const secondary = Array.from($("customSecondary").querySelectorAll("input:checked")).map(c => c.value).filter(v => v !== primary);
+  const secondary = Array.from($("customSecondary").querySelectorAll("input:checked"))
+    .map(c => c.value)
+    .filter(v => v !== primary);
   const ex = {
     id: "custom-" + Date.now().toString(36),
-    name, primary, secondary,
+    name,
+    primary,
+    secondary,
     equipment: $("customEquipment").value,
     level: $("customLevel").value,
-    custom: true, steps: [], pattern: "custom"
+    custom: true,
+    steps: [],
+    pattern: "custom"
   };
   const list = getCustomExercises();
-  list.push(ex); saveCustomExercises(list);
+  list.push(ex);
+  saveCustomExercises(list);
   EXERCISES.push(ex);
   closeCustomModal();
-  initExercises(); renderExercises();
+  initExercises();
+  renderExercises();
 }
 
-
-const MANNEQUIN_IDS = ["chest","back","lats","traps","lower-back","front-delt","side-delt","rear-delt",
-  "biceps","triceps","forearms","abs","obliques","glutes","quads","hamstrings","calves"];
-
+const MANNEQUIN_IDS = [
+  "chest",
+  "back",
+  "lats",
+  "traps",
+  "lower-back",
+  "front-delt",
+  "side-delt",
+  "rear-delt",
+  "biceps",
+  "triceps",
+  "forearms",
+  "abs",
+  "obliques",
+  "glutes",
+  "quads",
+  "hamstrings",
+  "calves"
+];
 
 const DELT_TO_GROUP = { "front-delt": "shoulders", "side-delt": "shoulders", "rear-delt": "shoulders" };
 
-
-const groupOf = (mid) => DELT_TO_GROUP[mid] || mid;
-
+const groupOf = mid => DELT_TO_GROUP[mid] || mid;
 
 function expandMuscles(groupId) {
   if (groupId === "shoulders") return ["front-delt", "side-delt", "rear-delt"];
@@ -88,40 +115,20 @@ function expandMuscles(groupId) {
   return [groupId];
 }
 
-
 /* ---------- accent colors ---------- */
 const ACCENTS = [
-  { id: "volt",    name: "Volt",    color: "#d4ff3f", ink: "#0b0d12" }
-
-
-,
-  { id: "ember",   name: "Ember",   color: "#ff7847", ink: "#0b0d12" }
-
-
-,
-  { id: "aqua",    name: "Aqua",    color: "#38e1ff", ink: "#0b0d12" }
-
-
-,
-  { id: "violet",  name: "Violet",  color: "#b49aff", ink: "#0b0d12" }
-
-
-,
-  { id: "crimson", name: "Crimson", color: "#ff4d6d", ink: "#ffffff" }
-
-
-,
-  { id: "gold",    name: "Gold",    color: "#ffd23f", ink: "#0b0d12" }
-
-
+  { id: "volt", name: "Volt", color: "#d4ff3f", ink: "#0b0d12" },
+  { id: "ember", name: "Ember", color: "#ff7847", ink: "#0b0d12" },
+  { id: "aqua", name: "Aqua", color: "#38e1ff", ink: "#0b0d12" },
+  { id: "violet", name: "Violet", color: "#b49aff", ink: "#0b0d12" },
+  { id: "crimson", name: "Crimson", color: "#ff4d6d", ink: "#ffffff" },
+  { id: "gold", name: "Gold", color: "#ffd23f", ink: "#0b0d12" }
 ];
-
 
 function currentAccent() {
   const id = localStorage.getItem("forge-accent") || "volt";
   return ACCENTS.find(a => a.id === id) || ACCENTS[0];
 }
-
 
 /* ---------- 3D body viewer ---------- */
 function createBodyViewer(container, opts) {
@@ -143,9 +150,15 @@ function createBodyViewer(container, opts) {
   camera.lookAt(0, 1.85, 0);
 
   scene.add(new THREE.HemisphereLight(0xaab4d4, 0x0b0d12, 1.0));
-  const key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(3, 6, 4); scene.add(key);
-  const rim = new THREE.DirectionalLight(0x7c8cff, 0.85); rim.position.set(-4, 3, -4); scene.add(rim);
-  const fill = new THREE.DirectionalLight(0xdde4ff, 0.35); fill.position.set(0, 2, 6); scene.add(fill);
+  const key = new THREE.DirectionalLight(0xffffff, 1.25);
+  key.position.set(3, 6, 4);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x7c8cff, 0.85);
+  rim.position.set(-4, 3, -4);
+  scene.add(rim);
+  const fill = new THREE.DirectionalLight(0xdde4ff, 0.35);
+  fill.position.set(0, 2, 6);
+  scene.add(fill);
 
   const BODY_FINISHES = {
     standard: { base: 0x3b4356, neutral: 0x222836, roughness: 0.45, metalness: 0.08, opacity: 1 },
@@ -157,30 +170,50 @@ function createBodyViewer(container, opts) {
   const vTheme = VTHEME;
 
   // soft blob shadow under feet
-  const bc = document.createElement("canvas"); bc.width = bc.height = 128;
+  const bc = document.createElement("canvas");
+  bc.width = bc.height = 128;
   const bg = bc.getContext("2d");
   const grd = bg.createRadialGradient(64, 64, 6, 64, 64, 62);
-  grd.addColorStop(0, "rgba(0,0,0,0.6)"); grd.addColorStop(1, "rgba(0,0,0,0)");
-  bg.fillStyle = grd; bg.fillRect(0, 0, 128, 128);
-  const blob = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.5),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bc), transparent: true, depthWrite: false }));
-  blob.rotation.x = -Math.PI / 2; blob.position.y = 0.295; scene.add(blob);
-  const ring = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.63, 72),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(currentAccent().color), transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
-  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.30; scene.add(ring);
+  grd.addColorStop(0, "rgba(0,0,0,0.6)");
+  grd.addColorStop(1, "rgba(0,0,0,0)");
+  bg.fillStyle = grd;
+  bg.fillRect(0, 0, 128, 128);
+  const blob = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.3, 1.5),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(bc), transparent: true, depthWrite: false })
+  );
+  blob.rotation.x = -Math.PI / 2;
+  blob.position.y = 0.295;
+  scene.add(blob);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(1.55, 1.63, 72),
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color(currentAccent().color),
+      transparent: true,
+      opacity: 0.4,
+      side: THREE.DoubleSide
+    })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.3;
+  scene.add(ring);
 
-  const body = new THREE.Group(); scene.add(body);
+  const body = new THREE.Group();
+  scene.add(body);
   const baseMat = new THREE.MeshStandardMaterial({ color: vTheme.base, roughness: 0.45, metalness: 0.08 });
   const neutralMat = new THREE.MeshStandardMaterial({ color: vTheme.neutral, roughness: 0.55, metalness: 0.05 });
   const mats = {};
   const muscleMeshes = [];
-  const matFor = mid => (mats[mid] || (mats[mid] = baseMat.clone()));
+  const matFor = mid => mats[mid] || (mats[mid] = baseMat.clone());
   const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
   function part(geo, mid, x, y, z, parent) {
     const m = new THREE.Mesh(geo, mid ? matFor(mid) : neutralMat);
     m.position.set(x, y, z);
-    if (mid) { m.userData.muscle = mid; muscleMeshes.push(m); }
+    if (mid) {
+      m.userData.muscle = mid;
+      muscleMeshes.push(m);
+    }
     (parent || body).add(m);
     return m;
   }
@@ -189,7 +222,8 @@ function createBodyViewer(container, opts) {
     const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 18), matFor(mid));
     m.position.copy(a).lerp(b, 0.5);
     m.quaternion.setFromUnitVectors(V3(0, 1, 0), b.clone().sub(a).normalize());
-    m.userData.muscle = mid; muscleMeshes.push(m);
+    m.userData.muscle = mid;
+    muscleMeshes.push(m);
     (parent || body).add(m);
     return m;
   }
@@ -199,20 +233,32 @@ function createBodyViewer(container, opts) {
   /* ---- head & neck (anatomical) ---- */
   const skull = ball(0.185, null, 0, 3.42, 0.015);
   skull.scale.set(0.92, 1.05, 0.98);
-  const jaw = ball(0.115, null, 0, 3.315, 0.045); jaw.scale.set(0.95, 0.82, 0.9);
+  const jaw = ball(0.115, null, 0, 3.315, 0.045);
+  jaw.scale.set(0.95, 0.82, 0.9);
   // face: subtle brow, nose, chin for human read
-  const brow = ball(0.045, null, 0, 3.46, 0.155); brow.scale.set(1.6, 0.5, 0.6);
+  const brow = ball(0.045, null, 0, 3.46, 0.155);
+  brow.scale.set(1.6, 0.5, 0.6);
   part(new THREE.CylinderGeometry(0.075, 0.095, 0.18, 18), null, 0, 3.12, 0);
   // trapezius neck blend
   for (const s of [-1, 1]) {
-    const trapNeck = capMesh(0.065, V3(s * 0.04, 3.10, -0.02), V3(s * 0.12, 2.98, -0.03), "traps");
+    const trapNeck = capMesh(0.065, V3(s * 0.04, 3.1, -0.02), V3(s * 0.12, 2.98, -0.03), "traps");
   }
 
   /* ---- torso: athletic V-taper with defined musculature ---- */
   const profile = [
-    [0.012, 1.90], [0.148, 1.92], [0.188, 2.00], [0.175, 2.14], [0.162, 2.28],
-    [0.170, 2.42], [0.198, 2.56], [0.225, 2.68], [0.232, 2.76], [0.208, 2.86],
-    [0.148, 2.94], [0.094, 3.00], [0.070, 3.07]
+    [0.012, 1.9],
+    [0.148, 1.92],
+    [0.188, 2.0],
+    [0.175, 2.14],
+    [0.162, 2.28],
+    [0.17, 2.42],
+    [0.198, 2.56],
+    [0.225, 2.68],
+    [0.232, 2.76],
+    [0.208, 2.86],
+    [0.148, 2.94],
+    [0.094, 3.0],
+    [0.07, 3.07]
   ].map(p => new THREE.Vector2(p[0], p[1]));
   const torsoCore = new THREE.Mesh(new THREE.LatheGeometry(profile, 36), neutralMat);
   torsoCore.scale.set(1.12, 1, 1.0);
@@ -228,15 +274,16 @@ function createBodyViewer(container, opts) {
     const pecUpper = ball(0.145, "chest", s * 0.125, 2.74, 0.156);
     pecUpper.scale.set(1.25, 0.68, 0.52);
     pecUpper.rotation.z = s * -0.15;
-    const pecLower = ball(0.135, "chest", s * 0.135, 2.63, 0.150);
-    pecLower.scale.set(1.30, 0.62, 0.48);
-    pecLower.rotation.z = s * -0.10;
+    const pecLower = ball(0.135, "chest", s * 0.135, 2.63, 0.15);
+    pecLower.scale.set(1.3, 0.62, 0.48);
+    pecLower.rotation.z = s * -0.1;
   }
   // abs: 6-pack with defined separations
-  for (const r of [0, 1, 2]) for (const s of [-1, 1]) {
-    const ab = ball(0.080, "abs", s * 0.068, 2.48 - r * 0.112, 0.158);
-    ab.scale.set(1.20, 0.92, 0.55);
-  }
+  for (const r of [0, 1, 2])
+    for (const s of [-1, 1]) {
+      const ab = ball(0.08, "abs", s * 0.068, 2.48 - r * 0.112, 0.158);
+      ab.scale.set(1.2, 0.92, 0.55);
+    }
   // linea alba (center line) subtle
   // serratus anterior: finger-like projections on sides
   for (const s of [-1, 1]) {
@@ -248,28 +295,33 @@ function createBodyViewer(container, opts) {
   }
   // obliques: defined external obliques
   for (const s of [-1, 1]) {
-    capMesh(0.062, V3(s * 0.180, 2.52, 0.055), V3(s * 0.200, 2.26, 0.045), "obliques");
-    const obBlade = ball(0.075, "obliques", s * 0.190, 2.40, 0.050);
+    capMesh(0.062, V3(s * 0.18, 2.52, 0.055), V3(s * 0.2, 2.26, 0.045), "obliques");
+    const obBlade = ball(0.075, "obliques", s * 0.19, 2.4, 0.05);
     obBlade.scale.set(0.6, 1.3, 0.7);
   }
   // lats: wider, more flared wings
   for (const s of [-1, 1]) {
     const l = ball(0.155, "lats", s * 0.195, 2.54, -0.125);
-    l.scale.set(0.52, 1.30, 0.44); l.rotation.z = s * 0.14;
+    l.scale.set(0.52, 1.3, 0.44);
+    l.rotation.z = s * 0.14;
     const latLow = ball(0.095, "lats", s * 0.165, 2.32, -0.115);
     latLow.scale.set(0.55, 1.1, 0.45);
   }
   // upper back: rhomboids + mid traps (kept proud of the core so they stay visible)
-  const ub = ball(0.160, "back", 0, 2.72, -0.180); ub.scale.set(1.25, 0.72, 0.50);
+  const ub = ball(0.16, "back", 0, 2.72, -0.18);
+  ub.scale.set(1.25, 0.72, 0.5);
   for (const s of [-1, 1]) {
     const rhomb = ball(0.085, "back", s * 0.085, 2.68, -0.185);
     rhomb.scale.set(0.8, 1.1, 0.5);
     rhomb.rotation.z = s * 0.25;
   }
-  for (const s of [-1, 1])                                   // erector spinae: thicker
+  for (const s of [-1, 1])
+    // erector spinae: thicker
     capMesh(0.068, V3(s * 0.068, 2.24, -0.152), V3(s * 0.068, 1.96, -0.152), "lower-back");
-  const pelvis = ball(0.215, null, 0, 1.845, 0); pelvis.scale.set(1.02, 0.72, 0.82);
-  for (const s of [-1, 1]) {                                 // glutes: fuller
+  const pelvis = ball(0.215, null, 0, 1.845, 0);
+  pelvis.scale.set(1.02, 0.72, 0.82);
+  for (const s of [-1, 1]) {
+    // glutes: fuller
     const gl = ball(0.165, "glutes", s * 0.148, 1.74, -0.115);
     gl.scale.set(1, 1.12, 0.88);
     const glMed = ball(0.105, "glutes", s * 0.235, 1.84, -0.055);
@@ -286,32 +338,38 @@ function createBodyViewer(container, opts) {
     const deltF = ball(0.128, "front-delt", 0, 0.03, 0.098, g);
     deltF.scale.set(1, 1.1, 0.95);
     const deltS = ball(0.142, "side-delt", s * 0.058, 0.01, 0.0, g);
-    deltS.scale.set(0.95, 1.20, 0.95);
-    const deltR = ball(0.120, "rear-delt", 0, 0.03, -0.102, g);
+    deltS.scale.set(0.95, 1.2, 0.95);
+    const deltR = ball(0.12, "rear-delt", 0, 0.03, -0.102, g);
     deltR.scale.set(1, 1.05, 0.9);
     // upper-arm flesh core: continuous flow under the muscles (not clickable)
-    const armCore = new THREE.Mesh(new THREE.CapsuleGeometry(0.100, 0.50, 6, 18), neutralMat);
-    armCore.position.set(s * 0.038, -0.28, 0); g.add(armCore);
+    const armCore = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.5, 6, 18), neutralMat);
+    armCore.position.set(s * 0.038, -0.28, 0);
+    g.add(armCore);
     // biceps: long head + short head with peak
-    capMesh(0.108, V3(s * 0.028, -0.08, 0.055), V3(s * 0.042, -0.42, 0.060), "biceps", g);
+    capMesh(0.108, V3(s * 0.028, -0.08, 0.055), V3(s * 0.042, -0.42, 0.06), "biceps", g);
     const peak = ball(0.105, "biceps", s * 0.036, -0.22, 0.062, g);
     peak.scale.set(1, 1.35, 1.05);
     // triceps: horseshoe with lateral head
     capMesh(0.102, V3(s * 0.028, -0.08, -0.058), V3(s * 0.042, -0.42, -0.062), "triceps", g);
-    const triLat = ball(0.088, "triceps", s * 0.075, -0.20, -0.045, g);
+    const triLat = ball(0.088, "triceps", s * 0.075, -0.2, -0.045, g);
     triLat.scale.set(0.9, 1.25, 0.9);
-    ball(0.078, null, s * 0.05, -0.50, 0, g);                // elbow
+    ball(0.078, null, s * 0.05, -0.5, 0, g); // elbow
     // forearm: defined extensors/flexors
     const foreG = new THREE.Group();
-    foreG.position.set(s * 0.05, -0.50, 0);
-    const foreTop = new THREE.Mesh(new THREE.CylinderGeometry(0.098, 0.068, 0.30, 20), matFor("forearms"));
+    foreG.position.set(s * 0.05, -0.5, 0);
+    const foreTop = new THREE.Mesh(new THREE.CylinderGeometry(0.098, 0.068, 0.3, 20), matFor("forearms"));
     foreTop.position.set(s * 0.005, -0.16, 0.005);
-    foreTop.userData.muscle = "forearms"; muscleMeshes.push(foreTop); foreG.add(foreTop);
+    foreTop.userData.muscle = "forearms";
+    muscleMeshes.push(foreTop);
+    foreG.add(foreTop);
     const foreLow = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.052, 0.18, 18), matFor("forearms"));
     foreLow.position.set(s * 0.005, -0.38, 0.005);
-    foreLow.userData.muscle = "forearms"; muscleMeshes.push(foreLow); foreG.add(foreLow);
+    foreLow.userData.muscle = "forearms";
+    muscleMeshes.push(foreLow);
+    foreG.add(foreLow);
     const palm = new THREE.Mesh(new THREE.BoxGeometry(0.098, 0.124, 0.049), neutralMat);
-    palm.position.set(s * 0.013, -0.52, 0.010); foreG.add(palm);
+    palm.position.set(s * 0.013, -0.52, 0.01);
+    foreG.add(palm);
     for (let f = 0; f < 4; f++) {
       const fg = new THREE.Mesh(new THREE.CapsuleGeometry(0.018, 0.072, 4, 10), neutralMat);
       fg.position.set(s * (0.013 - 0.035 + f * 0.023), -0.615, 0.014);
@@ -320,7 +378,8 @@ function createBodyViewer(container, opts) {
     }
     const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.018, 0.058, 4, 10), neutralMat);
     thumb.position.set(s * 0.062, -0.535, 0.024);
-    thumb.rotation.z = s * -0.5; thumb.rotation.x = 0.3;
+    thumb.rotation.z = s * -0.5;
+    thumb.rotation.x = 0.3;
     foreG.add(thumb);
     foreG.rotation.x = -0.14;
     foreG.rotation.z = s * 0.05;
@@ -333,35 +392,39 @@ function createBodyViewer(container, opts) {
   for (const s of [-1, 1]) {
     // quads: rectus femoris center, vastus lateralis outer, vastus medialis teardrop
     capMesh(0.132, V3(s * 0.155, 1.64, 0.085), V3(s * 0.165, 1.12, 0.085), "quads");
-    const rectus = ball(0.118, "quads", s * 0.160, 1.42, 0.090);
+    const rectus = ball(0.118, "quads", s * 0.16, 1.42, 0.09);
     rectus.scale.set(0.95, 1.45, 0.95);
-    capMesh(0.098, V3(s * 0.208, 1.58, 0.030), V3(s * 0.218, 1.16, 0.030), "quads"); // vastus lateralis sweep
-    const tear = ball(0.118, "quads", s * 0.148, 1.20, 0.088);   // vastus medialis teardrop
+    capMesh(0.098, V3(s * 0.208, 1.58, 0.03), V3(s * 0.218, 1.16, 0.03), "quads"); // vastus lateralis sweep
+    const tear = ball(0.118, "quads", s * 0.148, 1.2, 0.088); // vastus medialis teardrop
     tear.scale.set(1, 1.35, 1.05);
     // hamstrings: biceps femoris + semitendinosus separation
-    capMesh(0.095, V3(s * 0.122, 1.62, -0.088), V3(s * 0.128, 1.10, -0.088), "hamstrings");
-    capMesh(0.095, V3(s * 0.202, 1.62, -0.088), V3(s * 0.208, 1.10, -0.088), "hamstrings");
+    capMesh(0.095, V3(s * 0.122, 1.62, -0.088), V3(s * 0.128, 1.1, -0.088), "hamstrings");
+    capMesh(0.095, V3(s * 0.202, 1.62, -0.088), V3(s * 0.208, 1.1, -0.088), "hamstrings");
     const hamMid = ball(0.085, "hamstrings", s * 0.165, 1.38, -0.088);
     hamMid.scale.set(1.1, 1.3, 0.9);
-    ball(0.088, null, s * 0.172, 1.02, 0.03);                   // knee
+    ball(0.088, null, s * 0.172, 1.02, 0.03); // knee
     // calves: two gastrocnemius heads + soleus
     const gastMed = ball(0.092, "calves", s * 0.128, 0.88, -0.058);
     gastMed.scale.set(0.95, 1.25, 0.95);
     const gastLat = ball(0.092, "calves", s * 0.216, 0.88, -0.058);
     gastLat.scale.set(0.95, 1.25, 0.95);
     const soleus = new THREE.Mesh(new THREE.CylinderGeometry(0.088, 0.055, 0.32, 20), matFor("calves"));
-    soleus.position.set(s * 0.172, 0.60, -0.048);
-    soleus.userData.muscle = "calves"; muscleMeshes.push(soleus); body.add(soleus);
-    box(0.105, 0.085, 0.13, null, s * 0.172, 0.355, -0.035);    // heel
-    const toe = box(0.10, 0.07, 0.19, null, s * 0.172, 0.345, 0.095); // forefoot
-    toe.rotation.x = -0.06; toe.rotation.y = s * 0.12;                // toes out, natural stance
+    soleus.position.set(s * 0.172, 0.6, -0.048);
+    soleus.userData.muscle = "calves";
+    muscleMeshes.push(soleus);
+    body.add(soleus);
+    box(0.105, 0.085, 0.13, null, s * 0.172, 0.355, -0.035); // heel
+    const toe = box(0.1, 0.07, 0.19, null, s * 0.172, 0.345, 0.095); // forefoot
+    toe.rotation.x = -0.06;
+    toe.rotation.y = s * 0.12; // toes out, natural stance
   }
 
   /* ---- highlight ---- */
   let hlState = { p: [], s: [], soft: false };
   function reset() {
     for (const id in mats) {
-      mats[id].emissive.setHex(0x000000); mats[id].emissiveIntensity = 0;
+      mats[id].emissive.setHex(0x000000);
+      mats[id].emissiveIntensity = 0;
       mats[id].color.setHex(vTheme.base);
     }
   }
@@ -369,14 +432,24 @@ function createBodyViewer(container, opts) {
     hlState = { p: primaryIds || [], s: secondaryIds || [], soft: !!allSoft };
     reset();
     if (allSoft) {
-      for (const id in mats) { mats[id].emissive.setHex(0xff5c1a); mats[id].emissiveIntensity = 0.38; }
+      for (const id in mats) {
+        mats[id].emissive.setHex(0xff5c1a);
+        mats[id].emissiveIntensity = 0.38;
+      }
       return;
     }
     (primaryIds || []).forEach(id => {
-      if (mats[id]) { mats[id].emissive.setHex(0xff3b1f); mats[id].emissiveIntensity = 1.1; mats[id].color.setHex(vTheme.primary); }
+      if (mats[id]) {
+        mats[id].emissive.setHex(0xff3b1f);
+        mats[id].emissiveIntensity = 1.1;
+        mats[id].color.setHex(vTheme.primary);
+      }
     });
     (secondaryIds || []).forEach(id => {
-      if (mats[id] && !(primaryIds || []).includes(id)) { mats[id].emissive.setHex(0xff9f2e); mats[id].emissiveIntensity = 0.55; }
+      if (mats[id] && !(primaryIds || []).includes(id)) {
+        mats[id].emissive.setHex(0xff9f2e);
+        mats[id].emissiveIntensity = 0.55;
+      }
     });
   }
   function setAccent(hex) {
@@ -386,16 +459,35 @@ function createBodyViewer(container, opts) {
     reset();
     for (const id in mats) {
       const h = heatByGroup[groupOf(id)] || 0;
-      if (h > 0) { mats[id].emissive.setHex(0xff2d1a); mats[id].emissiveIntensity = 0.25 + h * 0.95; }
+      if (h > 0) {
+        mats[id].emissive.setHex(0xff2d1a);
+        mats[id].emissiveIntensity = 0.25 + h * 0.95;
+      }
     }
   }
 
   /* ---- interaction: rotate + pinch zoom + tap ---- */
-  let rotY = Math.PI * 0.12, targetRotY = rotY, rotX = 0;
-  let dragging = false, px = 0, py = 0, moved = 0, tapOK = false, pinchDist = 0, lastAct = Date.now();
-  let holdTimer = 0, holdFired = false, downX = 0, downY = 0;
+  let rotY = Math.PI * 0.12,
+    targetRotY = rotY,
+    rotX = 0;
+  let dragging = false,
+    px = 0,
+    py = 0,
+    moved = 0,
+    tapOK = false,
+    pinchDist = 0,
+    lastAct = Date.now();
+  let holdTimer = 0,
+    holdFired = false,
+    downX = 0,
+    downY = 0;
   const pointers = new Map();
-  function clearHold() { if (holdTimer) { clearTimeout(holdTimer); holdTimer = 0; } }
+  function clearHold() {
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = 0;
+    }
+  }
   const clampD = d => Math.max(3.6, Math.min(9.5, d));
 
   el.addEventListener("pointerdown", e => {
@@ -404,21 +496,30 @@ function createBodyViewer(container, opts) {
     if (pointers.size === 2) {
       const p = [...pointers.values()];
       pinchDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      tapOK = false; dragging = false;
+      tapOK = false;
+      dragging = false;
     } else {
-      dragging = true; px = e.clientX; py = e.clientY; moved = 0; tapOK = true;
-      downX = e.clientX; downY = e.clientY; holdFired = false;
+      dragging = true;
+      px = e.clientX;
+      py = e.clientY;
+      moved = 0;
+      tapOK = true;
+      downX = e.clientX;
+      downY = e.clientY;
+      holdFired = false;
       clearHold();
       holdTimer = setTimeout(() => {
         if (pointers.size !== 1 || moved > 10) return;
         const r = el.getBoundingClientRect();
         const ray = new THREE.Raycaster();
-        ray.setFromCamera(new THREE.Vector2(
-          ((downX - r.left) / r.width) * 2 - 1,
-          -((downY - r.top) / r.height) * 2 + 1), camera);
+        ray.setFromCamera(
+          new THREE.Vector2(((downX - r.left) / r.width) * 2 - 1, -((downY - r.top) / r.height) * 2 + 1),
+          camera
+        );
         const hit = ray.intersectObjects(muscleMeshes, false)[0];
         if (hit && opts.onMuscleHold) {
-          holdFired = true; tapOK = false;
+          holdFired = true;
+          tapOK = false;
           buzz(25);
           opts.onMuscleHold(hit.object.userData.muscle);
         }
@@ -432,15 +533,24 @@ function createBodyViewer(container, opts) {
     if (pointers.size === 2) {
       const p = [...pointers.values()];
       const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      if (pinchDist > 0 && d > 0) { camDist = clampD(camDist * pinchDist / d); camera.position.z = camDist; }
+      if (pinchDist > 0 && d > 0) {
+        camDist = clampD((camDist * pinchDist) / d);
+        camera.position.z = camDist;
+      }
       pinchDist = d;
     } else if (dragging) {
-      const dx = e.clientX - px, dy = e.clientY - py;
+      const dx = e.clientX - px,
+        dy = e.clientY - py;
       moved += Math.abs(dx) + Math.abs(dy);
-      if (moved > 10) { tapOK = false; clearHold(); }
-      rotY += dx * 0.008; targetRotY = rotY;
+      if (moved > 10) {
+        tapOK = false;
+        clearHold();
+      }
+      rotY += dx * 0.008;
+      targetRotY = rotY;
       rotX = Math.max(-0.3, Math.min(0.5, rotX + dy * 0.004));
-      px = e.clientX; py = e.clientY;
+      px = e.clientX;
+      py = e.clientY;
     }
     lastAct = Date.now();
   });
@@ -453,9 +563,10 @@ function createBodyViewer(container, opts) {
       if (tapOK && moved < 10 && opts.onMuscleClick) {
         const r = el.getBoundingClientRect();
         const ray = new THREE.Raycaster();
-        ray.setFromCamera(new THREE.Vector2(
-          ((e.clientX - r.left) / r.width) * 2 - 1,
-          -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+        ray.setFromCamera(
+          new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1),
+          camera
+        );
         const hit = ray.intersectObjects(muscleMeshes, false)[0];
         if (hit) opts.onMuscleClick(hit.object.userData.muscle);
       }
@@ -465,22 +576,30 @@ function createBodyViewer(container, opts) {
   }
   el.addEventListener("pointerup", pointerEnd);
   el.addEventListener("pointercancel", pointerEnd);
-  el.addEventListener("wheel", e => {
-    e.preventDefault();
-    camDist = clampD(camDist + e.deltaY * 0.003);
-    camera.position.z = camDist; lastAct = Date.now();
-  }, { passive: false });
+  el.addEventListener(
+    "wheel",
+    e => {
+      e.preventDefault();
+      camDist = clampD(camDist + e.deltaY * 0.003);
+      camera.position.z = camDist;
+      lastAct = Date.now();
+    },
+    { passive: false }
+  );
 
-  let raf = 0, dead = false;
+  let raf = 0,
+    dead = false;
   (function loop() {
     if (dead) return;
     raf = requestAnimationFrame(loop);
     const idle = !dragging && pointers.size === 0 && Date.now() - lastAct > 3000;
     if (opts.autoRotate && !getSettings().reduceMotion && idle) {
-      rotY += 0.004; targetRotY = rotY;
+      rotY += 0.004;
+      targetRotY = rotY;
     }
     rotY += (targetRotY - rotY) * 0.12;
-    body.rotation.y = rotY; body.rotation.x = rotX;
+    body.rotation.y = rotY;
+    body.rotation.x = rotX;
     if (idle && !getSettings().reduceMotion) {
       const br = Math.sin(Date.now() / 900) * 0.008;
       body.scale.set(1 + br * 0.4, 1 + br, 1 + br * 0.4);
@@ -492,15 +611,21 @@ function createBodyViewer(container, opts) {
   })();
 
   const ro = new ResizeObserver(() => {
-    const w = W(), h = H();
-    renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+    const w = W(),
+      h = H();
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
   });
   ro.observe(container);
 
   function setPain(ids) {
     reset();
     (ids || []).forEach(id => {
-      if (mats[id]) { mats[id].emissive.setHex(0xff2222); mats[id].emissiveIntensity = 0.9; }
+      if (mats[id]) {
+        mats[id].emissive.setHex(0xff2222);
+        mats[id].emissiveIntensity = 0.9;
+      }
     });
   }
   function setFinish(name) {
@@ -529,22 +654,25 @@ function createBodyViewer(container, opts) {
     setPain,
     setFinish,
     setView(v, instant) {
-      let t = (v === "back") ? Math.PI : 0;
+      let t = v === "back" ? Math.PI : 0;
       t += Math.round((rotY - t) / (Math.PI * 2)) * Math.PI * 2;
       targetRotY = t;
       if (instant || getSettings().reduceMotion) rotY = targetRotY;
     },
-    dispose() { dead = true; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); el.remove(); }
+    dispose() {
+      dead = true;
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      renderer.dispose();
+      el.remove();
+    }
   };
 }
-
 
 /* ---------- favorites & completed ---------- */
 const favs = new Set(JSON.parse(localStorage.getItem("forge-favs") || "[]"));
 
-
 const done = JSON.parse(localStorage.getItem("forge-done") || "{}");
-
 
 // "progId:dayIdx" -> [dates]
 function saveFavs() {
@@ -552,29 +680,32 @@ function saveFavs() {
   document.getElementById("favCount").textContent = favs.size;
 }
 
-
-function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
-
+function saveDone() {
+  localStorage.setItem("forge-done", JSON.stringify(done));
+}
 
 const progById = id => allPrograms().find(p => p.id === id);
 
-
 function getCustomPrograms() {
-  try { const l = JSON.parse(localStorage.getItem("forge-custom-programs") || "[]"); return Array.isArray(l) ? l : []; }
-  catch (e) { return []; }
+  try {
+    const l = JSON.parse(localStorage.getItem("forge-custom-programs") || "[]");
+    return Array.isArray(l) ? l : [];
+  } catch (e) {
+    return [];
+  }
 }
 
+function saveCustomPrograms(l) {
+  localStorage.setItem("forge-custom-programs", JSON.stringify(l));
+}
 
-function saveCustomPrograms(l) { localStorage.setItem("forge-custom-programs", JSON.stringify(l)); }
-
-
-function allPrograms() { return PROGRAMS.concat(getCustomPrograms()); }
-
+function allPrograms() {
+  return PROGRAMS.concat(getCustomPrograms());
+}
 
 function deleteCustomProgram(id) {
   saveCustomPrograms(getCustomPrograms().filter(p => p.id !== id));
 }
-
 
 /* ---------- accent ---------- */
 function applyAccent(id, save) {
@@ -582,21 +713,27 @@ function applyAccent(id, save) {
   document.documentElement.style.setProperty("--volt", a.color);
   document.documentElement.style.setProperty("--volt-ink", a.ink);
   if (save !== false) localStorage.setItem("forge-accent", a.id);
-  viewers.forEach(v => { if (v.setAccent) v.setAccent(a.color); });
+  viewers.forEach(v => {
+    if (v.setAccent) v.setAccent(a.color);
+  });
   document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
-  if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
+  if ($("mChart") && $("mChart").children.length) {
+    try {
+      renderMeasureChart();
+    } catch (e) {}
+  }
 }
 
-
 let finishPreviewViewer = null;
-
 
 function openSettings() {
   const grid = $("accentGrid");
   const cur = currentAccent().id;
-  grid.innerHTML = ACCENTS.map(a =>
-    `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
-    `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`).join("");
+  grid.innerHTML = ACCENTS.map(
+    a =>
+      `<button class="accent-pick ${a.id === cur ? "on" : ""}" data-accent="${a.id}">` +
+      `<span class="swatch" style="background:${a.color}"></span>${a.name}</button>`
+  ).join("");
   syncSettingsUI();
   $("settingsVeil").classList.remove("hidden");
   // live 3D preview for the finish selector
@@ -611,95 +748,197 @@ function openSettings() {
   } catch (e) {}
 }
 
-
 function closeSettings() {
   $("settingsVeil").classList.add("hidden");
   try {
-    if (finishPreviewViewer) { finishPreviewViewer.dispose(); finishPreviewViewer = null; }
-    const pc = $("finishPreview"); if (pc) pc.innerHTML = "";
+    if (finishPreviewViewer) {
+      finishPreviewViewer.dispose();
+      finishPreviewViewer = null;
+    }
+    const pc = $("finishPreview");
+    if (pc) pc.innerHTML = "";
   } catch (e) {}
 }
-
 
 function syncSettingsUI() {
   const s = getSettings();
   document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
-  document.querySelectorAll("#goalSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.goal === (s.goal || "maintain")));
-  document.querySelectorAll("#speedSeg .seg").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.speed) === s.demoSpeed));
+  document
+    .querySelectorAll("#goalSeg .seg")
+    .forEach(b => b.classList.toggle("on", b.dataset.goal === (s.goal || "maintain")));
+  document
+    .querySelectorAll("#speedSeg .seg")
+    .forEach(b => b.classList.toggle("on", parseFloat(b.dataset.speed) === s.demoSpeed));
   document.querySelectorAll("#langSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.lang === s.lang));
   const tg = (id, on) => $(id).setAttribute("aria-checked", on ? "true" : "false");
-  tg("tglSound", s.sound); tg("tglMotion", s.reduceMotion); tg("tglDemoPlay", s.demoAutoplay);
-  tg("tglAutoRest", s.autoRest); tg("tglVoice", s.voiceCues);
-  tg("tglBigText", s.bigText); tg("tglContrast", s.highContrast); tg("tglAdvanced", s.advanced); tg("tglHaptic", s.haptics); syncFinishUI();
-  const _rt = $("reminderTime"); if (_rt) _rt.value = s.reminder || "";
+  tg("tglSound", s.sound);
+  tg("tglMotion", s.reduceMotion);
+  tg("tglDemoPlay", s.demoAutoplay);
+  tg("tglAutoRest", s.autoRest);
+  tg("tglVoice", s.voiceCues);
+  tg("tglBigText", s.bigText);
+  tg("tglContrast", s.highContrast);
+  tg("tglAdvanced", s.advanced);
+  tg("tglHaptic", s.haptics);
+  syncFinishUI();
+  const _rt = $("reminderTime");
+  if (_rt) _rt.value = s.reminder || "";
   const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
-  $("eqGrid").innerHTML = eqs.map(q =>
-    `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
+  $("eqGrid").innerHTML = eqs
+    .map(
+      q =>
+        `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`
+    )
+    .join("");
 }
-
 
 /* ---------- i18n ---------- */
 const STRINGS = {
   en: {
-    nav_exercises: "Exercises", nav_programs: "Programs", nav_body: "3D Body Map", nav_favorites: "Favorites", nav_progress: "Progress",
-    home_kicker: "3D GYM TRAINING", home_title: "Every muscle. Every exercise. In 3D.",
+    nav_exercises: "Exercises",
+    nav_programs: "Programs",
+    nav_body: "3D Body Map",
+    nav_favorites: "Favorites",
+    nav_progress: "Progress",
+    home_kicker: "3D GYM TRAINING",
+    home_title: "Every muscle. Every exercise. In 3D.",
     home_lede: "193 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.",
-    home_cta_body: "Explore the 3D body", home_cta_ex: "Browse exercises",
-    stat_exercises: "exercises", stat_muscles: "muscle groups", stat_body: "interactive body",
+    home_cta_body: "Explore the 3D body",
+    home_cta_ex: "Browse exercises",
+    stat_exercises: "exercises",
+    stat_muscles: "muscle groups",
+    stat_body: "interactive body",
     home_muscles: "Train by muscle",
-    ex_title: "All exercises", ex_search_ph: "Search exercises… (e.g. squat, cable, beginner)",
-    prog_title: "Training programs", prog_lede: "Pick a plan and just train. Every workout is laid out set by set.",
-    prog_quiz: "Find my program", prog_create: "Create program",
-    body_title: "3D Body Map", body_lede: "Click any muscle on the body to see every exercise that trains it.",
-    body_front: "Front", body_back: "Back", body_muscles: "Muscles", body_recovery: "Recovery",
+    ex_title: "All exercises",
+    ex_search_ph: "Search exercises… (e.g. squat, cable, beginner)",
+    prog_title: "Training programs",
+    prog_lede: "Pick a plan and just train. Every workout is laid out set by set.",
+    prog_quiz: "Find my program",
+    prog_create: "Create program",
+    body_title: "3D Body Map",
+    body_lede: "Click any muscle on the body to see every exercise that trains it.",
+    body_front: "Front",
+    body_back: "Back",
+    body_muscles: "Muscles",
+    body_recovery: "Recovery",
     body_hint: "Drag to rotate · scroll to zoom · click a muscle",
-    fav_title: "Your favorites", fav_empty: "Nothing saved yet. Tap the heart on any exercise.",
-    progress_title: "Progress", tab_overview: "Overview", tab_history: "History", tab_records: "Records", tab_volume: "Volume",
-    tab_year: "Year", tab_board: "Leaderboard", body_pain: "Pain",
-    set_title: "Settings", set_accent: "Accent color", set_accent_note: "Applies across the app, including the 3D body ring.",
-    set_units: "Units", set_myeq: "My equipment", set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
-    set_lang: "Language", set_workout: "Workout", set_sound: "Rest timer sound", set_motion: "Reduce motion",
-    set_demos: "Exercise demos", set_autoplay: "Autoplay", set_speed: "Demo speed", set_data: "Data", set_haptic: "Haptic feedback",
-    set_export: "Export data", set_reset: "Reset all data",
-    builder_title: "Create program", builder_lede: "Build your own training plan from the exercise library.",
-    myeq_only: "My equipment only", swap_title: "Swap it", swap_sub: "same muscle, different gear",
-    b_add_day: "Add day", b_save: "Save program", b_cancel: "Cancel", b_delete: "Delete program",
-    b_name: "Program name", b_name_ph: "e.g. My Push Day Split", b_tagline: "Tagline (optional)", b_tagline_ph: "e.g. 3 days, dumbbells only",
+    fav_title: "Your favorites",
+    fav_empty: "Nothing saved yet. Tap the heart on any exercise.",
+    progress_title: "Progress",
+    tab_overview: "Overview",
+    tab_history: "History",
+    tab_records: "Records",
+    tab_volume: "Volume",
+    tab_year: "Year",
+    tab_board: "Leaderboard",
+    body_pain: "Pain",
+    set_title: "Settings",
+    set_accent: "Accent color",
+    set_accent_note: "Applies across the app, including the 3D body ring.",
+    set_units: "Units",
+    set_myeq: "My equipment",
+    set_myeq_note: "Used by the program quiz and exercise swaps. Empty means everything.",
+    set_lang: "Language",
+    set_workout: "Workout",
+    set_sound: "Rest timer sound",
+    set_motion: "Reduce motion",
+    set_demos: "Exercise demos",
+    set_autoplay: "Autoplay",
+    set_speed: "Demo speed",
+    set_data: "Data",
+    set_haptic: "Haptic feedback",
+    set_export: "Export data",
+    set_reset: "Reset all data",
+    builder_title: "Create program",
+    builder_lede: "Build your own training plan from the exercise library.",
+    myeq_only: "My equipment only",
+    swap_title: "Swap it",
+    swap_sub: "same muscle, different gear",
+    b_add_day: "Add day",
+    b_save: "Save program",
+    b_cancel: "Cancel",
+    b_delete: "Delete program",
+    b_name: "Program name",
+    b_name_ph: "e.g. My Push Day Split",
+    b_tagline: "Tagline (optional)",
+    b_tagline_ph: "e.g. 3 days, dumbbells only"
   },
   fr: {
-    nav_exercises: "Exercices", nav_programs: "Programmes", nav_body: "Corps 3D", nav_favorites: "Favoris", nav_progress: "Progrès",
-    home_kicker: "MUSCULATION 3D", home_title: "Chaque muscle. Chaque exercice. En 3D.",
-    home_lede: "193 exercices sur un corps 3D interactif. Touchez un muscle, voyez-le s'illuminer, apprenez le mouvement.",
-    home_cta_body: "Explorer le corps 3D", home_cta_ex: "Voir les exercices",
-    stat_exercises: "exercices", stat_muscles: "groupes musculaires", stat_body: "corps interactif",
+    nav_exercises: "Exercices",
+    nav_programs: "Programmes",
+    nav_body: "Corps 3D",
+    nav_favorites: "Favoris",
+    nav_progress: "Progrès",
+    home_kicker: "MUSCULATION 3D",
+    home_title: "Chaque muscle. Chaque exercice. En 3D.",
+    home_lede:
+      "193 exercices sur un corps 3D interactif. Touchez un muscle, voyez-le s'illuminer, apprenez le mouvement.",
+    home_cta_body: "Explorer le corps 3D",
+    home_cta_ex: "Voir les exercices",
+    stat_exercises: "exercices",
+    stat_muscles: "groupes musculaires",
+    stat_body: "corps interactif",
     home_muscles: "S'entraîner par muscle",
-    ex_title: "Tous les exercices", ex_search_ph: "Rechercher… (ex. squat, câble, débutant)",
-    prog_title: "Programmes", prog_lede: "Choisissez un plan et entraînez-vous. Chaque séance est détaillée série par série.",
-    prog_quiz: "Trouver mon programme", prog_create: "Créer un programme",
-    body_title: "Corps 3D", body_lede: "Cliquez sur un muscle pour voir tous les exercices qui le travaillent.",
-    body_front: "Avant", body_back: "Arrière", body_muscles: "Muscles", body_recovery: "Récupération",
+    ex_title: "Tous les exercices",
+    ex_search_ph: "Rechercher… (ex. squat, câble, débutant)",
+    prog_title: "Programmes",
+    prog_lede: "Choisissez un plan et entraînez-vous. Chaque séance est détaillée série par série.",
+    prog_quiz: "Trouver mon programme",
+    prog_create: "Créer un programme",
+    body_title: "Corps 3D",
+    body_lede: "Cliquez sur un muscle pour voir tous les exercices qui le travaillent.",
+    body_front: "Avant",
+    body_back: "Arrière",
+    body_muscles: "Muscles",
+    body_recovery: "Récupération",
     body_hint: "Glisser pour pivoter · défiler pour zoomer · cliquer un muscle",
-    fav_title: "Mes favoris", fav_empty: "Rien enregistré. Touchez le cœur sur un exercice.",
-    progress_title: "Progrès", tab_overview: "Aperçu", tab_history: "Historique", tab_records: "Records", tab_volume: "Volume",
-    tab_year: "Année", tab_board: "Classement", body_pain: "Douleur",
-    set_title: "Réglages", set_accent: "Couleur d'accent", set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
-    set_units: "Unités", set_myeq: "Mon équipement", set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
-    set_lang: "Langue", set_workout: "Séance", set_sound: "Son du minuteur", set_motion: "Réduire les animations",
-    set_demos: "Démos d'exercices", set_autoplay: "Lecture auto", set_speed: "Vitesse des démos", set_data: "Données", set_haptic: "Retour haptique",
-    set_export: "Exporter", set_reset: "Tout effacer",
-    builder_title: "Créer un programme", builder_lede: "Créez votre plan depuis la bibliothèque d'exercices.",
-    myeq_only: "Mon équipement uniquement", swap_title: "Remplacer", swap_sub: "même muscle, autre matériel",
-    b_add_day: "Ajouter un jour", b_save: "Enregistrer", b_cancel: "Annuler", b_delete: "Supprimer le programme",
-    b_name: "Nom du programme", b_name_ph: "ex. Mon split push", b_tagline: "Slogan (optionnel)", b_tagline_ph: "ex. 3 jours, haltères uniquement",
+    fav_title: "Mes favoris",
+    fav_empty: "Rien enregistré. Touchez le cœur sur un exercice.",
+    progress_title: "Progrès",
+    tab_overview: "Aperçu",
+    tab_history: "Historique",
+    tab_records: "Records",
+    tab_volume: "Volume",
+    tab_year: "Année",
+    tab_board: "Classement",
+    body_pain: "Douleur",
+    set_title: "Réglages",
+    set_accent: "Couleur d'accent",
+    set_accent_note: "S'applique partout, y compris l'anneau du corps 3D.",
+    set_units: "Unités",
+    set_myeq: "Mon équipement",
+    set_myeq_note: "Utilisé par le quiz et les substitutions. Vide = tout.",
+    set_lang: "Langue",
+    set_workout: "Séance",
+    set_sound: "Son du minuteur",
+    set_motion: "Réduire les animations",
+    set_demos: "Démos d'exercices",
+    set_autoplay: "Lecture auto",
+    set_speed: "Vitesse des démos",
+    set_data: "Données",
+    set_haptic: "Retour haptique",
+    set_export: "Exporter",
+    set_reset: "Tout effacer",
+    builder_title: "Créer un programme",
+    builder_lede: "Créez votre plan depuis la bibliothèque d'exercices.",
+    myeq_only: "Mon équipement uniquement",
+    swap_title: "Remplacer",
+    swap_sub: "même muscle, autre matériel",
+    b_add_day: "Ajouter un jour",
+    b_save: "Enregistrer",
+    b_cancel: "Annuler",
+    b_delete: "Supprimer le programme",
+    b_name: "Nom du programme",
+    b_name_ph: "ex. Mon split push",
+    b_tagline: "Slogan (optionnel)",
+    b_tagline_ph: "ex. 3 jours, haltères uniquement"
   }
 };
-
 
 function t(key) {
   const lang = getSettings().lang || "en";
   return (STRINGS[lang] && STRINGS[lang][key]) || STRINGS.en[key] || key;
 }
-
 
 function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -708,66 +947,111 @@ function applyI18n() {
     let first = true;
     Array.from(el.childNodes).forEach(node => {
       if (node.nodeType === 3) {
-        if (first) { node.textContent = txt; first = false; }
-        else node.textContent = "";
+        if (first) {
+          node.textContent = txt;
+          first = false;
+        } else node.textContent = "";
       }
     });
     if (first) el.textContent = txt;
   });
-  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
   document.documentElement.lang = getSettings().lang || "en";
 }
 
-
 /* ---------- settings state ---------- */
-const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false, haptics: true, bodyFinish: "standard" };
-
+const DEFAULT_SETTINGS = {
+  units: "kg",
+  sound: true,
+  demoAutoplay: true,
+  demoSpeed: 1,
+  reduceMotion: false,
+  myEquipment: [],
+  lang: "en",
+  autoRest: true,
+  restShort: 60,
+  restLong: 180,
+  voiceCues: false,
+  reminder: "",
+  advanced: false,
+  haptics: true,
+  bodyFinish: "standard"
+};
 
 function getSettings() {
-  try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
-  catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
+  try {
+    return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}"));
+  } catch (e) {
+    return Object.assign({}, DEFAULT_SETTINGS);
+  }
 }
 
+function saveSettings(s) {
+  localStorage.setItem("forge-settings", JSON.stringify(s));
+}
 
-function saveSettings(s) { localStorage.setItem("forge-settings", JSON.stringify(s)); }
+function unitLabel() {
+  return getSettings().units;
+}
 
+function fromKg(kg) {
+  const v = getSettings().units === "lb" ? kg * 2.20462 : kg;
+  return Math.round(v * 10) / 10;
+}
 
-function unitLabel() { return getSettings().units; }
+function toKg(v) {
+  return getSettings().units === "lb" ? v / 2.20462 : v;
+}
 
+function fmtW(kg) {
+  return fromKg(kg) + " " + unitLabel();
+}
 
-function fromKg(kg) { const v = getSettings().units === "lb" ? kg * 2.20462 : kg; return Math.round(v * 10) / 10; }
-
-
-function toKg(v) { return getSettings().units === "lb" ? v / 2.20462 : v; }
-
-
-function fmtW(kg) { return fromKg(kg) + " " + unitLabel(); }
-
-
-function fmtDate(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-
+function fmtDate(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
 
 /* ---------- workout log ---------- */
 function getLog() {
-  try { const l = JSON.parse(localStorage.getItem("forge-log") || "[]"); return Array.isArray(l) ? l : []; }
-  catch (e) { return []; }
+  try {
+    const l = JSON.parse(localStorage.getItem("forge-log") || "[]");
+    return Array.isArray(l) ? l : [];
+  } catch (e) {
+    return [];
+  }
 }
 
+function saveLog(l) {
+  localStorage.setItem("forge-log", JSON.stringify(l));
+}
 
-function saveLog(l) { localStorage.setItem("forge-log", JSON.stringify(l)); }
+function getGoals() {
+  try {
+    const g = JSON.parse(localStorage.getItem("forge-goals") || "[]");
+    return Array.isArray(g) ? g : [];
+  } catch (e) {
+    return [];
+  }
+}
 
+function saveGoals(g) {
+  localStorage.setItem("forge-goals", JSON.stringify(g));
+}
 
-function getGoals() { try { const g = JSON.parse(localStorage.getItem("forge-goals") || "[]"); return Array.isArray(g) ? g : []; } catch (e) { return []; } }
+function getTemplates() {
+  try {
+    const t = JSON.parse(localStorage.getItem("forge-templates") || "[]");
+    return Array.isArray(t) ? t : [];
+  } catch (e) {
+    return [];
+  }
+}
 
-
-function saveGoals(g) { localStorage.setItem("forge-goals", JSON.stringify(g)); }
-
-
-function getTemplates() { try { const t = JSON.parse(localStorage.getItem("forge-templates") || "[]"); return Array.isArray(t) ? t : []; } catch (e) { return []; } }
-
-
-function saveTemplates(t) { localStorage.setItem("forge-templates", JSON.stringify(t)); }
-
+function saveTemplates(t) {
+  localStorage.setItem("forge-templates", JSON.stringify(t));
+}
 
 function lastWeightKg(exId) {
   const log = getLog();
@@ -778,19 +1062,20 @@ function lastWeightKg(exId) {
   return null;
 }
 
-
 function exercisePR(exId) {
   let best = null;
-  getLog().forEach(w => w.exercises.forEach(x => {
-    if (x.id !== exId) return;
-    x.sets.forEach(s => {
-      const wgt = s.weight || 0;
-      if (!best || wgt > best.weight || (wgt === best.weight && s.reps > best.reps)) best = { weight: wgt, reps: s.reps };
-    });
-  }));
+  getLog().forEach(w =>
+    w.exercises.forEach(x => {
+      if (x.id !== exId) return;
+      x.sets.forEach(s => {
+        const wgt = s.weight || 0;
+        if (!best || wgt > best.weight || (wgt === best.weight && s.reps > best.reps))
+          best = { weight: wgt, reps: s.reps };
+      });
+    })
+  );
   return best;
 }
-
 
 function muscleLastTrained() {
   const last = {};
@@ -805,36 +1090,48 @@ function muscleLastTrained() {
   return last;
 }
 
-
 function daysAgo(dateStr) {
-  const d = new Date(dateStr + "T12:00:00"), n = new Date();
+  const d = new Date(dateStr + "T12:00:00"),
+    n = new Date();
   n.setHours(12, 0, 0, 0);
   return Math.max(0, Math.round((n - d) / 864e5));
 }
 
-
 function getPain() {
-  try { return JSON.parse(localStorage.getItem("forge-pain") || "{}"); } catch (e) { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("forge-pain") || "{}");
+  } catch (e) {
+    return {};
+  }
 }
 
-
-function savePain(p) { try { localStorage.setItem("forge-pain", JSON.stringify(p)); } catch (e) {} }
-
+function savePain(p) {
+  try {
+    localStorage.setItem("forge-pain", JSON.stringify(p));
+  } catch (e) {}
+}
 
 function getSoreness() {
-  try { return JSON.parse(localStorage.getItem("forge-sore") || "{}"); } catch (e) { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("forge-sore") || "{}");
+  } catch (e) {
+    return {};
+  }
 }
 
-
-function saveSoreness(s) { try { localStorage.setItem("forge-sore", JSON.stringify(s)); } catch (e) {} }
-
+function saveSoreness(s) {
+  try {
+    localStorage.setItem("forge-sore", JSON.stringify(s));
+  } catch (e) {}
+}
 
 function muscleHeat() {
   const last = {};
   getLog().forEach(w => {
     const ago = daysAgo(w.date);
     w.exercises.forEach(x => {
-      const ex = byId(x.id); if (!ex) return;
+      const ex = byId(x.id);
+      if (!ex) return;
       [ex.primary].concat(ex.secondary || []).forEach(g => {
         g = groupOf(g);
         if (last[g] == null || ago < last[g]) last[g] = ago;
@@ -846,7 +1143,6 @@ function muscleHeat() {
   return heat;
 }
 
-
 function muscleFatigue() {
   // accumulated volume per muscle, decaying over 7 days
   const fatigue = {};
@@ -856,7 +1152,8 @@ function muscleFatigue() {
     if (daysAgo > 7) return;
     const decay = 1 - daysAgo / 7;
     w.exercises.forEach(x => {
-      const ex = byId(x.id); if (!ex) return;
+      const ex = byId(x.id);
+      if (!ex) return;
       const vol = x.sets.reduce((a, s) => a + s.weight * s.reps, 0);
       const g = groupOf(ex.primary);
       fatigue[g] = (fatigue[g] || 0) + vol * decay;
@@ -867,7 +1164,6 @@ function muscleFatigue() {
   for (const g in fatigue) out[g] = Math.min(1, fatigue[g] / max);
   return out;
 }
-
 
 function startReplay(entry) {
   const v = window._bodyViewer;
@@ -886,7 +1182,7 @@ function startReplay(entry) {
       return;
     }
     const heat = {};
-    muscles.slice(0, i + 1).forEach(g => heat[g] = 1);
+    muscles.slice(0, i + 1).forEach(g => (heat[g] = 1));
     v.setHeat(heat);
     // show exercise name
     const ex = byId(entry.exercises[i].id);
@@ -906,13 +1202,11 @@ function startReplay(entry) {
   step();
 }
 
-
 function latestBodyweightKg() {
   const m = getMeasures();
   for (let i = m.length - 1; i >= 0; i--) if (m[i].weight) return toKg(m[i].weight);
   return 0;
 }
-
 
 function setVolumeKg(exId, s) {
   const ex = byId(exId);
@@ -922,19 +1216,23 @@ function setVolumeKg(exId, s) {
   return (s.weight || 0) * (s.reps || 0);
 }
 
-
 function totalVolumeKg(log) {
-  return (log || getLog()).reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((d, s) => d + setVolumeKg(x.id, s), 0), 0), 0);
+  return (log || getLog()).reduce(
+    (a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((d, s) => d + setVolumeKg(x.id, s), 0), 0),
+    0
+  );
 }
 
-
 function volumeByMuscle(days) {
-  const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
+  const cutoff = new Date();
+  cutoff.setHours(12, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - days);
   const vol = {};
   getLog().forEach(w => {
     if (new Date(w.date + "T12:00:00") < cutoff) return;
     w.exercises.forEach(x => {
-      const ex = byId(x.id); if (!ex) return;
+      const ex = byId(x.id);
+      if (!ex) return;
       const g = groupOf(ex.primary);
       vol[g] = (vol[g] || 0) + x.sets.length;
     });
@@ -942,65 +1240,75 @@ function volumeByMuscle(days) {
   return vol;
 }
 
-
 function weeklyStreak(log) {
-  const weeks = new Set((log || getLog()).map(w => {
-    const d = new Date((w.date || "") + "T12:00:00");
-    const monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    return fmtDate(monday);
-  }));
+  const weeks = new Set(
+    (log || getLog()).map(w => {
+      const d = new Date((w.date || "") + "T12:00:00");
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return fmtDate(monday);
+    })
+  );
   let streak = 0;
-  const d = new Date(); d.setHours(12, 0, 0, 0);
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
   if (!weeks.has(fmtDate(d))) d.setDate(d.getDate() - 7);
-  while (weeks.has(fmtDate(d))) { streak++; d.setDate(d.getDate() - 7); }
+  while (weeks.has(fmtDate(d))) {
+    streak++;
+    d.setDate(d.getDate() - 7);
+  }
   return streak;
 }
-
 
 function workoutStreak() {
   const days = [...new Set(getLog().map(w => w.date))].sort();
   if (!days.length) return 0;
   const xp = getXP();
   const month = fmtDate(new Date()).slice(0, 7);
-  if (xp.freezeMonth !== month) { xp.freeze = 1; xp.freezeMonth = month; xp.frozen = []; saveXP(xp); }
+  if (xp.freezeMonth !== month) {
+    xp.freeze = 1;
+    xp.freezeMonth = month;
+    xp.frozen = [];
+    saveXP(xp);
+  }
   xp.frozen = xp.frozen || [];
-  let streak = 0, changed = false;
-  const d = new Date(); d.setHours(12, 0, 0, 0);
+  let streak = 0,
+    changed = false;
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
   if (!days.includes(fmtDate(d))) d.setDate(d.getDate() - 1);
   while (true) {
     const key = fmtDate(d);
-    if (days.includes(key) || xp.frozen.includes(key)) { streak++; }
-    else if ((xp.freeze || 0) > 0 && streak > 0) {
-      xp.freeze--; xp.frozen.push(key); streak++; changed = true;
-    }
-    else break;
+    if (days.includes(key) || xp.frozen.includes(key)) {
+      streak++;
+    } else if ((xp.freeze || 0) > 0 && streak > 0) {
+      xp.freeze--;
+      xp.frozen.push(key);
+      streak++;
+      changed = true;
+    } else break;
     d.setDate(d.getDate() - 1);
   }
   if (changed) saveXP(xp);
   return streak;
 }
 
-
 /* ---------- active program ---------- */
 const getActiveProg = () => localStorage.getItem("forge-active") || null;
-
 
 function setActiveProg(id) {
   if (id) localStorage.setItem("forge-active", id);
   else localStorage.removeItem("forge-active");
 }
 
-
 function nextDayIdx(p) {
   const i = p.days.findIndex((d, di) => !(done[p.id + ":" + di] || []).length);
   return i === -1 ? 0 : i;
 }
 
-
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
-
 
 const QUOTES = [
   "The last three or four reps is what makes the muscle grow.",
@@ -1013,58 +1321,58 @@ const QUOTES = [
   "The pain you feel today will be the strength you feel tomorrow."
 ];
 
-
 function miniToast(msg) {
   const t = document.createElement("div");
   t.className = "mini-toast";
   t.textContent = msg;
   document.body.appendChild(t);
   requestAnimationFrame(() => t.classList.add("show"));
-  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 2200);
+  setTimeout(() => {
+    t.classList.remove("show");
+    setTimeout(() => t.remove(), 400);
+  }, 2200);
 }
 
-
-let logoTaps = 0, logoTimer = null;
-
+let logoTaps = 0,
+  logoTimer = null;
 
 const footBrand = document.querySelector(".foot-brand");
 
-
 if (footBrand) {
   footBrand.style.cursor = "pointer";
-  footBrand.addEventListener("click", (e) => {
+  footBrand.addEventListener("click", e => {
     e.preventDefault();
     logoTaps++;
     clearTimeout(logoTimer);
-    logoTimer = setTimeout(() => { logoTaps = 0; }, 2000);
+    logoTimer = setTimeout(() => {
+      logoTaps = 0;
+    }, 2000);
     if (logoTaps >= 5) {
       logoTaps = 0;
-      footBrand.animate(
-        [{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }],
-        { duration: 600, easing: "cubic-bezier(.2,.8,.3,1)" }
-      );
+      footBrand.animate([{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }], {
+        duration: 600,
+        easing: "cubic-bezier(.2,.8,.3,1)"
+      });
       const msgs = ["You found it!", "Still forging!", "No shortcuts. Just reps.", "Okay, back to training!"];
       miniToast(msgs[Math.floor(Math.random() * msgs.length)]);
     }
   });
 }
 
-
 const fq = $("footQuote");
-
 
 if (fq) {
   const d = new Date();
-  fq.textContent = "\u201C" + QUOTES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % QUOTES.length] + "\u201D";
+  fq.textContent =
+    "\u201C" + QUOTES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % QUOTES.length] + "\u201D";
 }
-
 
 const fa = $("footAccents");
 
-
 if (fa) {
-  fa.innerHTML = ACCENTS.map(a =>
-    `<button style="background:${a.color}" data-faccent="${a.id}" aria-label="${a.name}" title="${a.name}" class="${(localStorage.getItem("forge-accent") || "volt") === a.id ? "on" : ""}"></button>`
+  fa.innerHTML = ACCENTS.map(
+    a =>
+      `<button style="background:${a.color}" data-faccent="${a.id}" aria-label="${a.name}" title="${a.name}" class="${(localStorage.getItem("forge-accent") || "volt") === a.id ? "on" : ""}"></button>`
   ).join("");
   fa.querySelectorAll("[data-faccent]").forEach(b => {
     b.onclick = () => {
@@ -1074,8 +1382,8 @@ if (fa) {
   });
 }
 
-
 const CHANGELOG = [
+  ["v11.38", "prettier formatting across js, css, html; fixed stray div tag"],
   ["v11.37", "code formatting: 2 blank lines between functions, 1 declaration per line in CSS, fixed split brace bugs"],
   ["v11.36", "Refactor: split codebase into js and css modules"],
   ["v11.35", "Fix Clips button navigating to exercise page"],
@@ -1096,9 +1404,15 @@ const CHANGELOG = [
   ["v11.20", "Revert empty state illustrations"],
   ["v11.19", "Fix nav pill glide for scrolled nav positions"],
   ["v11.18", "Fix nav pill glide, week ring text and empty data, empty state icons"],
-  ["v11.17", "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"],
+  [
+    "v11.17",
+    "Visual polish pass: animated nav indicator, button press physics, chart entrance animations, card depth, typography scale, two-column Insights, workout celebration, illustrated empty states, weekly progress ring, streak flame"
+  ],
   ["v11.16", "Fix doubled unit in last-time summary (was showing kg twice)"],
-  ["v11.15", "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"],
+  [
+    "v11.15",
+    "Warm-up set generator in the workout player: one-tap warm-up sets based on last session's working weight"
+  ],
   ["v11.14", "Fix radar chart label overlap."],
   ["v11.13", "Movement balance radar on Insights, set-complete micro-animation."],
   ["v11.12", "Fix finish preview layout in settings."],
@@ -1137,90 +1451,95 @@ const CHANGELOG = [
   ["v10.77", "New centered footer design."]
 ];
 
-
-const fv = $("footVer"), fc = $("footChangelog");
-
+const fv = $("footVer"),
+  fc = $("footChangelog");
 
 if (fv && fc) {
   const N = 5;
   const row = ([v, t]) => `<div><b>${v}</b> - ${t}</div>`;
   const recent = CHANGELOG.slice(0, N).map(row).join("");
-  const older = CHANGELOG.length > N
-    ? `<div class="hidden" id="footOlder">${CHANGELOG.slice(N).map(row).join("")}</div>
+  const older =
+    CHANGELOG.length > N
+      ? `<div class="hidden" id="footOlder">${CHANGELOG.slice(N).map(row).join("")}</div>
        <button class="foot-more" id="footMore">Show older</button>`
-    : "";
+      : "";
   fc.innerHTML = recent + older;
   const more = $("footMore");
-  if (more) more.onclick = e => {
-    e.stopPropagation();
-    const o = $("footOlder");
-    o.classList.toggle("hidden");
-    more.textContent = o.classList.contains("hidden") ? "Show older" : "Show less";
-  };
+  if (more)
+    more.onclick = e => {
+      e.stopPropagation();
+      const o = $("footOlder");
+      o.classList.toggle("hidden");
+      more.textContent = o.classList.contains("hidden") ? "Show older" : "Show less";
+    };
   fv.onclick = () => fc.classList.toggle("hidden");
 }
 
-
 const hg = $("homeGreet");
-
 
 if (hg) {
   const hr = new Date().getHours();
   hg.textContent = hr < 5 ? "Night owl" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
 }
 
-
 const toTop = $("toTop");
 
-
 if (toTop) {
-  window.addEventListener("scroll", () => {
-    toTop.classList.toggle("show", window.scrollY > 600);
-  }, { passive: true });
+  window.addEventListener(
+    "scroll",
+    () => {
+      toTop.classList.toggle("show", window.scrollY > 600);
+    },
+    { passive: true }
+  );
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-
 
 const emptyNote = (title, hint) => `<div class="empty-note"><p><b>${title}</b></p><p>${hint}</p></div>`;
 
-
 const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
 
+const eqName = {
+  bodyweight: "Bodyweight",
+  barbell: "Barbell",
+  dumbbell: "Dumbbell",
+  cable: "Cable",
+  machine: "Machine",
+  kettlebell: "Kettlebell",
+  band: "Band"
+};
 
-const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
-
-
-const lvlDots = l => l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●";
-
+const lvlDots = l => (l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●");
 
 const byId = id => EXERCISES.find(e => e.id === id);
 
-
 let viewers = [];
 
-
-function clearViewers() { viewers.forEach(v => v.dispose()); viewers = []; }
-
-
-function applyBodyFinish(name) {
-  viewers.forEach(v => { if (v.setFinish) v.setFinish(name); });
-  if (window._bodyViewer && window._bodyViewer.setFinish && !viewers.includes(window._bodyViewer)) window._bodyViewer.setFinish(name);
+function clearViewers() {
+  viewers.forEach(v => v.dispose());
+  viewers = [];
 }
 
+function applyBodyFinish(name) {
+  viewers.forEach(v => {
+    if (v.setFinish) v.setFinish(name);
+  });
+  if (window._bodyViewer && window._bodyViewer.setFinish && !viewers.includes(window._bodyViewer))
+    window._bodyViewer.setFinish(name);
+}
 
 let demos = [];
 
-
-function clearDemos() { demos.forEach(d => d.destroy()); demos = []; }
-
+function clearDemos() {
+  demos.forEach(d => d.destroy());
+  demos = [];
+}
 
 function heartBtn(ex) {
   return `<button class="heart ${favs.has(ex.id) ? "faved" : ""}" data-fav="${ex.id}" title="Save" aria-label="Save to favorites">${window.FORGE_ICON("heart")}</button>`;
 }
-
 
 function cardHTML(ex) {
   return `<div class="card" data-ex="${ex.id}">
@@ -1233,7 +1552,6 @@ function cardHTML(ex) {
     </div>
   </div>`;
 }
-
 
 document.addEventListener("click", e => {
   const fav = e.target.closest("[data-fav]");
@@ -1253,23 +1571,23 @@ document.addEventListener("click", e => {
   }
   const card = e.target.closest("[data-ex]");
   if (card) location.hash = "#/exercise/" + card.dataset.ex;
-}
-
-
-);
-
+});
 
 /* audio beep: respects sound setting, optional freq/dur */
 function beep(freq, dur) {
   if (!getSettings().sound) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = freq || 880; o.type = "sine";
+    const o = ctx.createOscillator(),
+      g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.frequency.value = freq || 880;
+    o.type = "sine";
     const d = dur || 0.5;
     g.gain.setValueAtTime(0.3, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + d);
-    o.start(); o.stop(ctx.currentTime + d + 0.05);
+    o.start();
+    o.stop(ctx.currentTime + d + 0.05);
   } catch (e) {}
 }

@@ -1,38 +1,17 @@
 /* FORGE - program list, detail, builder extras */
-'use strict';
-
+"use strict";
 
 // PROGRAMS
 const EXPRESS_POOL = [
-  { id: "goblet-squat", sets: 3, reps: "10" }
-
-
-, { id: "push-up", sets: 3, reps: "12" }
-
-
-,
-  { id: "dumbbell-romanian-deadlift", sets: 3, reps: "10" }
-
-
-, { id: "chest-supported-dumbbell-row", sets: 3, reps: "10" }
-
-
-,
-  { id: "overhead-press", sets: 2, reps: "10" }
-
-
-, { id: "glute-bridge", sets: 2, reps: "15" }
-
-
-,
-  { id: "plank", sets: 2, reps: "45s" }
-
-
-, { id: "standing-calf-raise", sets: 2, reps: "15" }
-
-
+  { id: "goblet-squat", sets: 3, reps: "10" },
+  { id: "push-up", sets: 3, reps: "12" },
+  { id: "dumbbell-romanian-deadlift", sets: 3, reps: "10" },
+  { id: "chest-supported-dumbbell-row", sets: 3, reps: "10" },
+  { id: "overhead-press", sets: 2, reps: "10" },
+  { id: "glute-bridge", sets: 2, reps: "15" },
+  { id: "plank", sets: 2, reps: "45s" },
+  { id: "standing-calf-raise", sets: 2, reps: "15" }
 ];
-
 
 // PYRAMID SET BUILDER
 function openPyramid(exId) {
@@ -69,13 +48,19 @@ function openPyramid(exId) {
   </div>`;
   veil.querySelector(".modal-x").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   const close = () => veil.remove();
-  veil.addEventListener("click", e => { if (e.target === veil || e.target.closest(".modal-x")) close(); });
+  veil.addEventListener("click", e => {
+    if (e.target === veil || e.target.closest(".modal-x")) close();
+  });
   document.body.appendChild(veil);
-  const topEl = veil.querySelector("#pyrTop"), botEl = veil.querySelector("#pyrBot"),
-        stepsEl = veil.querySelector("#pyrSteps"), repsEl = veil.querySelector("#pyrReps"),
-        dirEl = veil.querySelector("#pyrDir"), outEl = veil.querySelector("#pyrOut");
+  const topEl = veil.querySelector("#pyrTop"),
+    botEl = veil.querySelector("#pyrBot"),
+    stepsEl = veil.querySelector("#pyrSteps"),
+    repsEl = veil.querySelector("#pyrReps"),
+    dirEl = veil.querySelector("#pyrDir"),
+    outEl = veil.querySelector("#pyrOut");
   function buildPlan() {
-    const top = parseFloat(topEl.value), bot = parseFloat(botEl.value);
+    const top = parseFloat(topEl.value),
+      bot = parseFloat(botEl.value);
     let steps = Math.round(parseFloat(stepsEl.value) || 4);
     steps = Math.min(6, Math.max(3, steps));
     stepsEl.value = steps;
@@ -84,7 +69,9 @@ function openPyramid(exId) {
       outEl.innerHTML = `<p class="muted" style="font-size:13px">Enter top and bottom weights to preview the pyramid.</p>`;
       return null;
     }
-    const hi = Math.max(top, bot), lo = Math.min(top, bot), dir = dirEl.value;
+    const hi = Math.max(top, bot),
+      lo = Math.min(top, bot),
+      dir = dirEl.value;
     const wUser = [];
     for (let i = 0; i < steps; i++) {
       const t = i / (steps - 1);
@@ -92,9 +79,15 @@ function openPyramid(exId) {
       wUser.push(Math.round(raw * 2) / 2);
     }
     const weightsKg = wUser.map(toKg);
-    outEl.innerHTML = `<table style="width:100%;font-size:13px;border-collapse:collapse">
+    outEl.innerHTML =
+      `<table style="width:100%;font-size:13px;border-collapse:collapse">
       <tr style="color:var(--muted);text-align:left"><th style="padding:6px 4px">Step</th><th style="padding:6px 4px">Weight</th><th style="padding:6px 4px">Reps</th></tr>` +
-      wUser.map((w, i) => `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 4px">${i + 1}</td><td style="padding:6px 4px">${fmtW(weightsKg[i])}</td><td style="padding:6px 4px">${reps}</td></tr>`).join("") +
+      wUser
+        .map(
+          (w, i) =>
+            `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 4px">${i + 1}</td><td style="padding:6px 4px">${fmtW(weightsKg[i])}</td><td style="padding:6px 4px">${reps}</td></tr>`
+        )
+        .join("") +
       `</table>`;
     return { steps, reps, weightsKg, repsArr: Array(steps).fill(reps) };
   }
@@ -103,16 +96,35 @@ function openPyramid(exId) {
   buildPlan();
   veil.querySelector("#pyrStart").addEventListener("click", () => {
     const plan = buildPlan();
-    if (!plan) { appAlert("Enter valid top and bottom weights first."); return; }
-    const prog = { id: "pyramid-" + Date.now().toString(36), name: ex.name + " Pyramid", tagline: "Pyramid session",
-      custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: ex.equipment || "Mixed",
-      days: [{ name: "Pyramid session", exercises: [{ id: ex.id, sets: plan.steps, reps: String(plan.reps), repsArr: plan.repsArr, weightsArr: plan.weightsKg }] }] };
-    const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+    if (!plan) {
+      appAlert("Enter valid top and bottom weights first.");
+      return;
+    }
+    const prog = {
+      id: "pyramid-" + Date.now().toString(36),
+      name: ex.name + " Pyramid",
+      tagline: "Pyramid session",
+      custom: true,
+      level: "custom",
+      daysPerWeek: 1,
+      weeks: 1,
+      equipment: ex.equipment || "Mixed",
+      days: [
+        {
+          name: "Pyramid session",
+          exercises: [
+            { id: ex.id, sets: plan.steps, reps: String(plan.reps), repsArr: plan.repsArr, weightsArr: plan.weightsKg }
+          ]
+        }
+      ]
+    };
+    const all = getCustomPrograms();
+    all.push(prog);
+    saveCustomPrograms(all);
     close();
     location.hash = "#/workout/" + prog.id + "/0";
   });
 }
-
 
 function startExpress() {
   const picks = [];
@@ -125,17 +137,26 @@ function startExpress() {
     picks.push({ id: e.id, sets: e.sets, reps: e.reps });
     if (picks.length >= 6) break;
   }
-  const prog = { id: "express-" + Date.now().toString(36), name: "20-Minute Express", tagline: "Full-body condensed session",
-    custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: "Mixed", express: true,
-    days: [{ name: "Express session", exercises: picks }] };
-  const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+  const prog = {
+    id: "express-" + Date.now().toString(36),
+    name: "20-Minute Express",
+    tagline: "Full-body condensed session",
+    custom: true,
+    level: "custom",
+    daysPerWeek: 1,
+    weeks: 1,
+    equipment: "Mixed",
+    express: true,
+    days: [{ name: "Express session", exercises: picks }]
+  };
+  const all = getCustomPrograms();
+  all.push(prog);
+  saveCustomPrograms(all);
   location.hash = "#/workout/" + prog.id + "/0";
 }
 
-
 // Travel mode: swap exercises to minimal-equipment alternatives
 const TRAVEL_EQ = ["bodyweight", "dumbbell", "band"];
-
 
 function travelSub(exId) {
   const ex = byId(exId);
@@ -146,13 +167,21 @@ function travelSub(exId) {
   return cands[0];
 }
 
-
-const DUNGEON_TITLES = ["Goblin ambush", "Skeleton crypt", "Dragon's lair", "Orc war camp", "Dark dungeon", "Troll bridge"];
-
+const DUNGEON_TITLES = [
+  "Goblin ambush",
+  "Skeleton crypt",
+  "Dragon's lair",
+  "Orc war camp",
+  "Dark dungeon",
+  "Troll bridge"
+];
 
 function startDungeon() {
   const groups = [...new Set(EXERCISES.map(e => e.primary))];
-  for (let i = groups.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[groups[i], groups[j]] = [groups[j], groups[i]]; }
+  for (let i = groups.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [groups[i], groups[j]] = [groups[j], groups[i]];
+  }
   const picks = [];
   for (const g of groups) {
     if (picks.length >= 5) break;
@@ -162,13 +191,23 @@ function startDungeon() {
     picks.push({ id: ex.id, sets: 3, reps: "8-12" });
   }
   const title = DUNGEON_TITLES[Math.floor(Math.random() * DUNGEON_TITLES.length)];
-  const prog = { id: "dungeon-" + Date.now().toString(36), name: "Dungeon: " + title, tagline: "Random encounter. Finish it for +100 bonus XP.",
-    custom: true, level: "custom", daysPerWeek: 1, weeks: 1, equipment: "Mixed", dungeon: true,
-    days: [{ name: "The encounter", exercises: picks }] };
-  const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+  const prog = {
+    id: "dungeon-" + Date.now().toString(36),
+    name: "Dungeon: " + title,
+    tagline: "Random encounter. Finish it for +100 bonus XP.",
+    custom: true,
+    level: "custom",
+    daysPerWeek: 1,
+    weeks: 1,
+    equipment: "Mixed",
+    dungeon: true,
+    days: [{ name: "The encounter", exercises: picks }]
+  };
+  const all = getCustomPrograms();
+  all.push(prog);
+  saveCustomPrograms(all);
   location.hash = "#/workout/" + prog.id + "/0";
 }
-
 
 function renderPrograms() {
   const activeId = getActiveProg();
@@ -186,11 +225,20 @@ function renderPrograms() {
     $("activeBanner").classList.add("hidden");
     $("activeBanner").innerHTML = "";
   }
-  $("programGrid").innerHTML = allPrograms().map(p => {
-    const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
-    const isActive = activeId === p.id;
-    const pIcon = { "full-body-starter": "dumbbell", "push-pull-legs": "arrow-right", "upper-lower": "calendar", "strength-5x5": "trophy", "dumbbell-home": "flame", "hiit-conditioning": "zap" }[p.id] || (p.custom ? "plus" : "dumbbell");
-    return `<div class="prog-card" data-prog="${p.id}">
+  $("programGrid").innerHTML = allPrograms()
+    .map(p => {
+      const n = p.days.reduce((a, d) => a + d.exercises.length, 0);
+      const isActive = activeId === p.id;
+      const pIcon =
+        {
+          "full-body-starter": "dumbbell",
+          "push-pull-legs": "arrow-right",
+          "upper-lower": "calendar",
+          "strength-5x5": "trophy",
+          "dumbbell-home": "flame",
+          "hiit-conditioning": "zap"
+        }[p.id] || (p.custom ? "plus" : "dumbbell");
+      return `<div class="prog-card" data-prog="${p.id}">
       <div class="prog-top"><span class="prog-icon">${window.FORGE_ICON(pIcon)}</span>
       <h3>${esc(p.name)} ${isActive ? '<span class="tag volt-tag">Active</span>' : ""} ${p.custom ? '<span class="tag">Custom</span>' : ""}</h3></div>
       <p class="muted">${esc(p.tagline)}</p>
@@ -201,27 +249,25 @@ function renderPrograms() {
       </div>
       <p class="muted" style="margin-top:10px;font-size:13px">${p.days.length} workouts · ${n} exercises · ${esc(p.equipment)}</p>
     </div>`;
-  }).join("");
+    })
+    .join("");
 }
-
 
 document.addEventListener("click", e => {
   const pc = e.target.closest("[data-prog]");
   if (pc) location.hash = "#/program/" + pc.dataset.prog;
-}
-
-
-);
-
+});
 
 // PROGRAM DETAIL
 function renderProgram(id) {
   const p = progById(id);
-  if (!p) { location.hash = "#/programs"; return; }
+  if (!p) {
+    location.hash = "#/programs";
+    return;
+  }
   $("pgName").textContent = p.name;
   $("pgTag").textContent = p.tagline;
-  $("pgBadges").innerHTML =
-    `<span class="tag volt-tag">${cap1(p.level)}</span>
+  $("pgBadges").innerHTML = `<span class="tag volt-tag">${cap1(p.level)}</span>
      <span class="tag">${p.daysPerWeek} days/week</span>
      <span class="tag">${p.weeks} weeks</span>
      <span class="tag">${esc(p.equipment)}</span>`;
@@ -232,10 +278,19 @@ function renderProgram(id) {
        <button class="btn btn-ghost btn-sm" id="pgStop">Stop program</button>`
     : `<button class="btn btn-primary btn-sm" id="pgStart">Start this program</button>`;
   const st = $("pgStart");
-  if (st) st.onclick = () => { setActiveProg(p.id); renderProgram(p.id); };
+  if (st)
+    st.onclick = () => {
+      setActiveProg(p.id);
+      renderProgram(p.id);
+    };
   const sp = $("pgStop");
-  if (sp) sp.onclick = () => { setActiveProg(null); renderProgram(p.id); };
-  $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a 4-week calendar file">Export to calendar</button>`;
+  if (sp)
+    sp.onclick = () => {
+      setActiveProg(null);
+      renderProgram(p.id);
+    };
+  $("pgActions").innerHTML +=
+    ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a 4-week calendar file">Export to calendar</button>`;
   $("pgICS").onclick = () => exportProgramICS(p.id);
   if (p.custom) {
     $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">${t("b_delete")}</button>`;
@@ -249,55 +304,81 @@ function renderProgram(id) {
   }
   $("pgDays").innerHTML = p.mesocycle
     ? `<div class="onerm-box" style="margin-bottom:16px"><b>Periodized plan:</b> <span class="muted">Weights increase 2.5% weekly. Week 4 is a deload at 60%.</span></div>` +
-      p.mesocycle.map(w => `
+      p.mesocycle
+        .map(
+          w => `
         <h3 style="margin:20px 0 12px">${w.deload ? "Week " + w.week + " (Deload)" : "Week " + w.week}</h3>
-        ${w.days.map((d, di) => `
+        ${w.days
+          .map(
+            (d, di) => `
           <div class="day-card">
             <div class="day-head">
               <h3>${esc(d.name)}</h3>
               <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}?week=${w.week}">Start workout</a>
             </div>
             <div class="day-exercises">
-              ${d.exercises.map(x => {
-                const ex = byId(x.id);
-                return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)} @ ${fmtW(x.weight)}</span></div>`;
-              }).join("")}
+              ${d.exercises
+                .map(x => {
+                  const ex = byId(x.id);
+                  return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)} @ ${fmtW(x.weight)}</span></div>`;
+                })
+                .join("")}
             </div>
-          </div>`).join("")}
-      `).join("")
-    : p.days.map((d, di) => {
-    const key = p.id + ":" + di;
-    const times = (done[key] || []).length;
-    return `<div class="day-card">
+          </div>`
+          )
+          .join("")}
+      `
+        )
+        .join("")
+    : p.days
+        .map((d, di) => {
+          const key = p.id + ":" + di;
+          const times = (done[key] || []).length;
+          return `<div class="day-card">
       <div class="day-head">
         <h3>${esc(d.name)} ${times ? `<span class="done-mark">${window.FORGE_ICON("check")} ${times}x</span>` : ""}</h3>
         <a class="btn btn-primary btn-sm" href="#/workout/${p.id}/${di}">Start workout</a>
       </div>
       <div class="day-exercises">
-      ${d.exercises.map(x => {
-        const ex = byId(x.id);
-        return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
-      }).join("")}
+      ${d.exercises
+        .map(x => {
+          const ex = byId(x.id);
+          return `<div class="mini-card" data-ex="${x.id}"><b>${esc(ex ? ex.name : x.id)}</b><span>${x.sets} × ${esc(x.reps)}</span></div>`;
+        })
+        .join("")}
       </div>
     </div>`;
-  }).join("");
+        })
+        .join("");
 }
-
 
 function exportProgramICS(pid) {
   const p = progById(pid);
   if (!p) return;
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FORGE//Workout//EN"];
-  const start = new Date(); start.setDate(start.getDate() + 1);
+  const start = new Date();
+  start.setDate(start.getDate() + 1);
   for (let wk = 0; wk < 4; wk++) {
     p.days.forEach((d, di) => {
-      const dt = new Date(start); dt.setDate(dt.getDate() + wk * 7 + di);
+      const dt = new Date(start);
+      dt.setDate(dt.getDate() + wk * 7 + di);
       const ds = fmtDate(dt).replace(/-/g, "");
-      lines.push("BEGIN:VEVENT", "UID:forge-" + pid + "-" + wk + "-" + di + "@forge",
-        "DTSTART:" + ds + "T180000", "DURATION:PT1H",
+      lines.push(
+        "BEGIN:VEVENT",
+        "UID:forge-" + pid + "-" + wk + "-" + di + "@forge",
+        "DTSTART:" + ds + "T180000",
+        "DURATION:PT1H",
         "SUMMARY:FORGE " + d.name.replace(/[,;\\]/g, ""),
-        "DESCRIPTION:" + d.exercises.map(x => { const ex = byId(x.id); return (ex ? ex.name : x.id) + " " + x.sets + "x" + x.reps; }).join(", ").replace(/[,;\\]/g, ""),
-        "END:VEVENT");
+        "DESCRIPTION:" +
+          d.exercises
+            .map(x => {
+              const ex = byId(x.id);
+              return (ex ? ex.name : x.id) + " " + x.sets + "x" + x.reps;
+            })
+            .join(", ")
+            .replace(/[,;\\]/g, ""),
+        "END:VEVENT"
+      );
     });
   }
   lines.push("END:VCALENDAR");

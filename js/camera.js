@@ -1,10 +1,12 @@
 /* FORGE - camera: form recorder, mirror mode, photo capture */
-'use strict';
-
+"use strict";
 
 /* ---------- CAMERA FEATURES ---------- */
-let _camStream = null, _recState = null, _mirrorInt = null, _photoPose = "front", _camFacing = "environment";
-
+let _camStream = null,
+  _recState = null,
+  _mirrorInt = null,
+  _photoPose = "front",
+  _camFacing = "environment";
 
 async function camGet(facing) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -12,28 +14,34 @@ async function camGet(facing) {
     return null;
   }
   try {
-    const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing || "environment" }, audio: false });
+    const s = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facing || "environment" },
+      audio: false
+    });
     _camFacing = facing || "environment";
     return s;
   } catch (e) {
     const n = e && e.name;
     if (n === "NotAllowedError" || n === "SecurityError")
       appAlert("Camera permission was denied. Allow camera access in your browser settings to use this.");
-    else if (n === "NotFoundError" || n === "OverconstrainedError")
-      appAlert("No camera found on this device.");
-    else
-      appAlert("Could not start the camera.");
+    else if (n === "NotFoundError" || n === "OverconstrainedError") appAlert("No camera found on this device.");
+    else appAlert("Could not start the camera.");
     return null;
   }
 }
 
-
 function camStop() {
-  if (_camStream) { _camStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); _camStream = null; }
+  if (_camStream) {
+    _camStream.getTracks().forEach(t => {
+      try {
+        t.stop();
+      } catch (e) {}
+    });
+    _camStream = null;
+  }
   const v = $("camVideo");
   if (v) v.srcObject = null;
 }
-
 
 async function camFlip(mirrored) {
   const track = _camStream && _camStream.getVideoTracks()[0];
@@ -48,28 +56,34 @@ async function camFlip(mirrored) {
     camStop();
     const s = await camGet(want);
     if (s) {
-      _camStream = s; _camFacing = want;
+      _camStream = s;
+      _camFacing = want;
       const v = $("camVideo");
-      v.style.transform = (want === "user" && mirrored !== false) ? "scaleX(-1)" : "";
+      v.style.transform = want === "user" && mirrored !== false ? "scaleX(-1)" : "";
       v.srcObject = s;
     }
     return;
   }
-  const curIdx = Math.max(0, devices.findIndex(d => d.deviceId === curId));
+  const curIdx = Math.max(
+    0,
+    devices.findIndex(d => d.deviceId === curId)
+  );
   const next = devices[(curIdx + 1) % devices.length];
   camStop();
   try {
-    const s = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: next.deviceId } }, audio: false });
+    const s = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: next.deviceId } },
+      audio: false
+    });
     _camStream = s;
     _camFacing = (next.label || "").toLowerCase().includes("front") ? "user" : "environment";
     const v = $("camVideo");
-    v.style.transform = (_camFacing === "user" && mirrored !== false) ? "scaleX(-1)" : "";
+    v.style.transform = _camFacing === "user" && mirrored !== false ? "scaleX(-1)" : "";
     v.srcObject = s;
   } catch (e) {
     appAlert("Could not switch camera.");
   }
 }
-
 
 function camShell() {
   let ov = $("camOverlay");
@@ -93,37 +107,52 @@ function camShell() {
   return ov;
 }
 
-
 function camShow() {
   camShell().classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
 
-
 function recCleanup() {
-  const st = _recState; _recState = null;
+  const st = _recState;
+  _recState = null;
   if (st) {
     st.discarded = true;
     if (st.tint) clearInterval(st.tint);
-    if (st.rec) { try { st.rec.stop(); } catch (e) {} }
+    if (st.rec) {
+      try {
+        st.rec.stop();
+      } catch (e) {}
+    }
   }
 }
 
-
 function camHide() {
   recCleanup();
-  if (_mirrorInt) { clearInterval(_mirrorInt); _mirrorInt = null; }
+  if (_mirrorInt) {
+    clearInterval(_mirrorInt);
+    _mirrorInt = null;
+  }
   camStop();
   const ov = $("camOverlay");
   if (ov) ov.classList.add("hidden");
   document.body.style.overflow = "";
-  const hud = $("camHud"); if (hud) { hud.innerHTML = ""; hud.classList.add("hidden"); }
-  const ctl = $("camControls"); if (ctl) ctl.innerHTML = "";
-  const gh = $("camGhost"); if (gh) { gh.removeAttribute("src"); gh.classList.add("hidden"); }
-  const tm = $("camTimer"); if (tm) tm.classList.add("hidden");
-  const v = $("camVideo"); if (v) v.style.transform = "";
+  const hud = $("camHud");
+  if (hud) {
+    hud.innerHTML = "";
+    hud.classList.add("hidden");
+  }
+  const ctl = $("camControls");
+  if (ctl) ctl.innerHTML = "";
+  const gh = $("camGhost");
+  if (gh) {
+    gh.removeAttribute("src");
+    gh.classList.add("hidden");
+  }
+  const tm = $("camTimer");
+  if (tm) tm.classList.add("hidden");
+  const v = $("camVideo");
+  if (v) v.style.transform = "";
 }
-
 
 function camToast(msg, imgSrc) {
   let t = $("camToast");
@@ -134,25 +163,28 @@ function camToast(msg, imgSrc) {
     t.setAttribute("role", "status");
     document.body.appendChild(t);
   }
-  t.innerHTML = `${imgSrc ? `<img src="${imgSrc}" alt="">` : (window.FORGE_ICON ? window.FORGE_ICON("check") : "")}<span>${esc(msg)}</span>`;
+  t.innerHTML = `${imgSrc ? `<img src="${imgSrc}" alt="">` : window.FORGE_ICON ? window.FORGE_ICON("check") : ""}<span>${esc(msg)}</span>`;
   requestAnimationFrame(() => t.classList.add("show"));
   clearTimeout(t._hideT);
   t._hideT = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
-
 /* ----- progress photo capture ----- */
 function photoGhost() {
   const gh = $("camGhost");
   if (!gh) return;
-  const last = getPhotos().filter(p => p.pose === _photoPose).sort((a, b) => b.ts - a.ts)[0];
-  if (last && last.src) { gh.src = last.src; gh.classList.remove("hidden"); }
-  else gh.classList.add("hidden");
+  const last = getPhotos()
+    .filter(p => p.pose === _photoPose)
+    .sort((a, b) => b.ts - a.ts)[0];
+  if (last && last.src) {
+    gh.src = last.src;
+    gh.classList.remove("hidden");
+  } else gh.classList.add("hidden");
 }
 
-
 async function openPhotoCapture() {
-  camShell(); camShow();
+  camShell();
+  camShow();
   $("camTitle").textContent = "Take progress photo";
   const ctl = $("camControls");
   ctl.innerHTML = `
@@ -164,15 +196,20 @@ async function openPhotoCapture() {
       <button class="cam-flip" id="camPhotoFlip">Switch camera</button>
     </div>
     <p class="cam-hint">Line up with the ghost of your last photo for consistent framing.</p>`;
-  ctl.querySelectorAll("[data-pp]").forEach(b => b.addEventListener("click", () => {
-    _photoPose = b.dataset.pp;
-    ctl.querySelectorAll("[data-pp]").forEach(x => x.classList.toggle("on", x === b));
-    photoGhost();
-  }));
+  ctl.querySelectorAll("[data-pp]").forEach(b =>
+    b.addEventListener("click", () => {
+      _photoPose = b.dataset.pp;
+      ctl.querySelectorAll("[data-pp]").forEach(x => x.classList.toggle("on", x === b));
+      photoGhost();
+    })
+  );
   $("camShutter").addEventListener("click", photoSnap);
   $("camPhotoFlip").addEventListener("click", () => camFlip(true));
   const s = await camGet("user");
-  if (!s) { camHide(); return; }
+  if (!s) {
+    camHide();
+    return;
+  }
   _camStream = s;
   const v = $("camVideo");
   v.style.transform = "scaleX(-1)";
@@ -180,12 +217,12 @@ async function openPhotoCapture() {
   photoGhost();
 }
 
-
 function photoSnap() {
   const v = $("camVideo");
   if (!v || !v.videoWidth) return;
   const canvas = document.createElement("canvas");
-  const max = 800, scale = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
+  const max = 800,
+    scale = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
   canvas.width = Math.round(v.videoWidth * scale);
   canvas.height = Math.round(v.videoHeight * scale);
   const ctx = canvas.getContext("2d");
@@ -195,7 +232,10 @@ function photoSnap() {
   }
   ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
   const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-  if (dataUrl.length > 1500000) { appAlert("Photo too large, try again."); return; }
+  if (dataUrl.length > 1500000) {
+    appAlert("Photo too large, try again.");
+    return;
+  }
   const photos = getPhotos();
   photos.push({ date: fmtDate(new Date()), ts: Date.now(), src: dataUrl, pose: _photoPose });
   savePhotos(photos);
@@ -205,11 +245,13 @@ function photoSnap() {
   camToast(`Photo saved (${pose}).`, dataUrl);
 }
 
-
 /* ----- form clip storage (IndexedDB) ----- */
 function clipDB() {
   return new Promise((resolve, reject) => {
-    if (!("indexedDB" in window)) { reject(new Error("nodb")); return; }
+    if (!("indexedDB" in window)) {
+      reject(new Error("nodb"));
+      return;
+    }
     const req = indexedDB.open("forge-clips", 1);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -223,7 +265,6 @@ function clipDB() {
   });
 }
 
-
 async function saveClip(c) {
   const db = await clipDB();
   return new Promise((resolve, reject) => {
@@ -233,7 +274,6 @@ async function saveClip(c) {
     tx.onerror = () => reject(tx.error);
   });
 }
-
 
 async function getClips(exId) {
   const db = await clipDB();
@@ -245,7 +285,6 @@ async function getClips(exId) {
   });
 }
 
-
 async function deleteClip(id) {
   const db = await clipDB();
   return new Promise((resolve, reject) => {
@@ -255,7 +294,6 @@ async function deleteClip(id) {
     tx.onerror = () => reject(tx.error);
   });
 }
-
 
 async function refreshClipCounts() {
   if (!("indexedDB" in window)) return;
@@ -268,9 +306,13 @@ async function refreshClipCounts() {
       req.onsuccess = () => resolve(req.result || []);
       req.onerror = () => reject(req.error);
     });
-  } catch (e) { return; }
+  } catch (e) {
+    return;
+  }
   const counts = {};
-  all.forEach(c => { counts[c.exId] = (counts[c.exId] || 0) + 1; });
+  all.forEach(c => {
+    counts[c.exId] = (counts[c.exId] || 0) + 1;
+  });
   document.querySelectorAll(".clips-toggle").forEach(b => {
     const n = counts[b.dataset.clipEx] || 0;
     b.classList.toggle("hidden", n === 0);
@@ -284,13 +326,16 @@ async function refreshClipCounts() {
   });
 }
 
-
 /* ----- form recorder ----- */
 async function openFormRecorder(xi, exId, exName) {
-  camShell(); camShow();
+  camShell();
+  camShow();
   $("camTitle").textContent = exName;
   const s = await camGet("environment");
-  if (!s) { camHide(); return; }
+  if (!s) {
+    camHide();
+    return;
+  }
   _camStream = s;
   $("camVideo").srcObject = s;
   _recState = { xi, exId, exName, reps: 0, rec: null, chunks: [], t0: 0, tint: null, discarded: false };
@@ -306,13 +351,18 @@ async function openFormRecorder(xi, exId, exName) {
       <button class="cam-flip" id="camRecFlip">Switch camera</button>
     </div>
     <p class="cam-hint">Tap + for each rep, or tap the video. Stop recording to save the clip.</p>`;
-  $("camRepPlus").addEventListener("click", ev => { ev.stopPropagation(); recBump(1); });
-  $("camRepMinus").addEventListener("click", ev => { ev.stopPropagation(); recBump(-1); });
+  $("camRepPlus").addEventListener("click", ev => {
+    ev.stopPropagation();
+    recBump(1);
+  });
+  $("camRepMinus").addEventListener("click", ev => {
+    ev.stopPropagation();
+    recBump(-1);
+  });
   $("camVideo").addEventListener("click", () => recBump(1));
   $("camRecBtn").addEventListener("click", recToggle);
   $("camRecFlip").addEventListener("click", () => camFlip(false));
 }
-
 
 function recBump(d) {
   if (!_recState) return;
@@ -322,26 +372,39 @@ function recBump(d) {
   buzz(10);
 }
 
-
 function recToggle() {
   if (!_recState) return;
   if (_recState.rec) recStopUser();
   else recStart();
 }
 
-
 function recStart() {
   const st = _recState;
-  if (!st || !window.MediaRecorder) { appAlert("Video recording is not supported on this device."); return; }
+  if (!st || !window.MediaRecorder) {
+    appAlert("Video recording is not supported on this device.");
+    return;
+  }
   const mime = ["video/webm;codecs=vp9", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
   try {
     st.rec = new MediaRecorder(_camStream, mime ? { mimeType: mime } : undefined);
-  } catch (e) { appAlert("Video recording is not supported on this device."); return; }
+  } catch (e) {
+    appAlert("Video recording is not supported on this device.");
+    return;
+  }
   st.chunks = [];
   st.discarded = false;
-  st.rec.ondataavailable = e => { if (e.data && e.data.size) st.chunks.push(e.data); };
-  st.rec.onstop = () => { if (!st.discarded) recSaved(st); };
-  try { st.rec.start(500); } catch (e) { appAlert("Could not start recording."); return; }
+  st.rec.ondataavailable = e => {
+    if (e.data && e.data.size) st.chunks.push(e.data);
+  };
+  st.rec.onstop = () => {
+    if (!st.discarded) recSaved(st);
+  };
+  try {
+    st.rec.start(500);
+  } catch (e) {
+    appAlert("Could not start recording.");
+    return;
+  }
   st.t0 = Date.now();
   const tm = $("camTimer");
   tm.classList.remove("hidden");
@@ -352,22 +415,35 @@ function recStart() {
     if (s >= 300) recStopUser();
   }, 500);
   const btn = $("camRecBtn");
-  if (btn) { btn.classList.add("on"); btn.innerHTML = `<span class="cam-rec-dot"></span>Stop`; }
+  if (btn) {
+    btn.classList.add("on");
+    btn.innerHTML = `<span class="cam-rec-dot"></span>Stop`;
+  }
 }
-
 
 function recStopUser() {
   const st = _recState;
   if (!st || !st.rec) return;
   _recState = null;
   if (st.tint) clearInterval(st.tint);
-  try { st.rec.stop(); } catch (e) { recSaved(st); }
+  try {
+    st.rec.stop();
+  } catch (e) {
+    recSaved(st);
+  }
 }
-
 
 function recSaved(st) {
   const blob = new Blob(st.chunks, { type: (st.rec && st.rec.mimeType) || "video/webm" });
-  saveClip({ exId: st.exId, exName: st.exName, date: fmtDate(new Date()), ts: Date.now(), reps: st.reps, blob, mime: blob.type })
+  saveClip({
+    exId: st.exId,
+    exName: st.exName,
+    date: fmtDate(new Date()),
+    ts: Date.now(),
+    reps: st.reps,
+    blob,
+    mime: blob.type
+  })
     .then(() => refreshClipCounts())
     .catch(() => {});
   const w = currentWorkout;
@@ -388,10 +464,14 @@ function recSaved(st) {
   }
 }
 
-
 async function openClipLibrary(exId, exName) {
   let clips = [];
-  try { clips = await getClips(exId); } catch (e) { appAlert("Clip storage is not available on this device."); return; }
+  try {
+    clips = await getClips(exId);
+  } catch (e) {
+    appAlert("Clip storage is not available on this device.");
+    return;
+  }
   clips.sort((a, b) => b.ts - a.ts);
   const bd = document.createElement("div");
   bd.className = "clip-backdrop";
@@ -401,7 +481,9 @@ async function openClipLibrary(exId, exName) {
   sh.setAttribute("aria-modal", "true");
   sh.innerHTML = `<h3>Form clips</h3><p class="muted" style="font-size:13px;margin:0 0 4px">${esc(exName)} · ${clips.length} clip${clips.length === 1 ? "" : "s"}</p>
     ${clips.length ? "" : `<div class="empty-note" style="margin-top:12px"><p><b>No clips yet.</b></p><p>Use Record set during a workout to save form videos here.</p></div>`}
-    ${clips.map(c => `
+    ${clips
+      .map(
+        c => `
       <div class="clip-item" data-clip="${c.id}">
         <video src="${URL.createObjectURL(c.blob)}" playsinline preload="metadata" controls></video>
         <div class="clip-meta">
@@ -411,39 +493,53 @@ async function openClipLibrary(exId, exName) {
           </div>
           <button class="clip-del" data-cdel="${c.id}">Delete</button>
         </div>
-      </div>`).join("")}
+      </div>`
+      )
+      .join("")}
     <button class="btn btn-ghost" id="clipClose" style="margin-top:16px;width:100%">Close</button>`;
   document.body.appendChild(bd);
   document.body.appendChild(sh);
   document.body.style.overflow = "hidden";
   const close = () => {
-    sh.querySelectorAll("video").forEach(v => { try { URL.revokeObjectURL(v.src); } catch (e) {} });
-    bd.remove(); sh.remove();
+    sh.querySelectorAll("video").forEach(v => {
+      try {
+        URL.revokeObjectURL(v.src);
+      } catch (e) {}
+    });
+    bd.remove();
+    sh.remove();
     document.body.style.overflow = "";
   };
   bd.addEventListener("click", close);
   $("clipClose").addEventListener("click", close);
   sh.querySelectorAll(".clip-speed").forEach(grp => {
     const vid = grp.closest(".clip-item").querySelector("video");
-    grp.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-      vid.playbackRate = parseFloat(b.dataset.sp);
-      grp.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
-    }));
+    grp.querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => {
+        vid.playbackRate = parseFloat(b.dataset.sp);
+        grp.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      })
+    );
   });
-  sh.querySelectorAll("[data-cdel]").forEach(b => b.addEventListener("click", async () => {
-    await deleteClip(parseInt(b.dataset.cdel, 10));
-    close();
-    refreshClipCounts();
-    openClipLibrary(exId, exName);
-  }));
+  sh.querySelectorAll("[data-cdel]").forEach(b =>
+    b.addEventListener("click", async () => {
+      await deleteClip(parseInt(b.dataset.cdel, 10));
+      close();
+      refreshClipCounts();
+      openClipLibrary(exId, exName);
+    })
+  );
 }
-
 
 /* ----- mirror mode ----- */
 async function openMirror() {
-  camShell(); camShow();
+  camShell();
+  camShow();
   const s = await camGet("user");
-  if (!s) { camHide(); return; }
+  if (!s) {
+    camHide();
+    return;
+  }
   _camStream = s;
   const v = $("camVideo");
   v.style.transform = "scaleX(-1)";
@@ -474,7 +570,10 @@ async function openMirror() {
     }
   });
   const upd = () => {
-    if (!currentWorkout) { hud.innerHTML = `<b>No active workout</b>`; return; }
+    if (!currentWorkout) {
+      hud.innerHTML = `<b>No active workout</b>`;
+      return;
+    }
     let html = "";
     for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
       const x = currentWorkout.exercises[xi];

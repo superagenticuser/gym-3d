@@ -1,25 +1,51 @@
 /* FORGE - main views: home, exercises, detail, body, favorites, tools */
-'use strict';
-
+"use strict";
 
 /* ---------- views ---------- */
-const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress", "builder", "privacy"];
-
+const views = [
+  "home",
+  "exercises",
+  "detail",
+  "body",
+  "favorites",
+  "programs",
+  "program",
+  "workout",
+  "progress",
+  "builder",
+  "privacy"
+];
 
 function show(name) {
   clearViewers();
   clearDemos();
-  if (timerInt) { clearInterval(timerInt); timerInt = null; }
-  views.forEach(v => { const s = $("view-" + v); if (s) s.classList.toggle("hidden", v !== name); });
-  document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.nav === name ||
-    (name === "detail" && a.dataset.nav === "exercises") ||
-    ((name === "program" || name === "workout") && a.dataset.nav === "programs")));
+  if (timerInt) {
+    clearInterval(timerInt);
+    timerInt = null;
+  }
+  views.forEach(v => {
+    const s = $("view-" + v);
+    if (s) s.classList.toggle("hidden", v !== name);
+  });
+  document
+    .querySelectorAll(".nav a")
+    .forEach(a =>
+      a.classList.toggle(
+        "active",
+        a.dataset.nav === name ||
+          (name === "detail" && a.dataset.nav === "exercises") ||
+          ((name === "program" || name === "workout") && a.dataset.nav === "programs")
+      )
+    );
   // slide the nav pill behind the active link
   const positionNavPill = () => {
-    const active = document.querySelector(".nav a.active"), pill = $("navPill"), nav = document.querySelector(".nav");
+    const active = document.querySelector(".nav a.active"),
+      pill = $("navPill"),
+      nav = document.querySelector(".nav");
     if (active && pill && nav) {
-      const nr = nav.getBoundingClientRect(), ar = active.getBoundingClientRect();
-      pill.style.left = (ar.left - nr.left + nav.scrollLeft) + "px";
+      const nr = nav.getBoundingClientRect(),
+        ar = active.getBoundingClientRect();
+      pill.style.left = ar.left - nr.left + nav.scrollLeft + "px";
       pill.style.width = ar.width + "px";
       pill.style.opacity = "1";
     } else if (pill) pill.style.opacity = "0";
@@ -34,20 +60,23 @@ function show(name) {
   window.scrollTo(0, 0);
 }
 
-
 // HOME
 // muscle recovery stats (shared by Home suggestion and 3D Body dashboard)
 function getRecoveryStats() {
   const log = getLog();
   if (!log.length) return null;
   const groups = ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "abs", "calves"];
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const stats = groups.map(g => {
-    let daysAgo = 99, lastVol = 0;
+    let daysAgo = 99,
+      lastVol = 0;
     log.forEach(w => {
-      let vol = 0, hit = false;
+      let vol = 0,
+        hit = false;
       (w.exercises || []).forEach(x => {
-        const ex = byId(x.id); if (!ex) return;
+        const ex = byId(x.id);
+        if (!ex) return;
         const gs = [groupOf(ex.primary)].concat((ex.secondary || []).map(groupOf));
         if (gs.includes(g)) {
           hit = true;
@@ -56,10 +85,13 @@ function getRecoveryStats() {
       });
       if (hit) {
         const d = Math.round((today - new Date(w.date + "T00:00:00")) / 864e5);
-        if (d < daysAgo) { daysAgo = d; lastVol = vol; }
+        if (d < daysAgo) {
+          daysAgo = d;
+          lastVol = vol;
+        }
       }
     });
-    const volumeFactor = Math.min(30, lastVol / 1000 * 10);
+    const volumeFactor = Math.min(30, (lastVol / 1000) * 10);
     const freshness = Math.max(0, Math.min(100, Math.round(daysAgo * 25 - volumeFactor)));
     const status = freshness >= 75 ? "Fresh" : freshness >= 40 ? "Ready" : "Recovering";
     const cls = freshness >= 75 ? "rs-fresh" : freshness >= 40 ? "rs-ready" : "rs-rec";
@@ -70,25 +102,30 @@ function getRecoveryStats() {
   return { stats, best };
 }
 
-
 // 3D Body: full recovery dashboard
 function renderBodyRecovery() {
   const el = $("bodyRecoveryDash");
   if (!el) return;
   const r = getRecoveryStats();
-  if (!r) { el.innerHTML = ""; return; }
+  if (!r) {
+    el.innerHTML = "";
+    return;
+  }
   el.innerHTML = `<div class="rec-dash">
     <h3>Muscle recovery</h3>
     <div class="rec-grid">
-      ${r.stats.map(s => `<div class="rec-item">
+      ${r.stats
+        .map(
+          s => `<div class="rec-item">
         <div class="rn"><span>${s.name}</span><span class="rs ${s.cls}">${s.status}</span></div>
         <div class="rec-bar"><i style="width:${s.freshness}%"></i></div>
         <div class="rec-days">${s.daysAgo >= 99 ? "Not trained yet" : s.daysAgo === 0 ? "Trained today" : s.daysAgo === 1 ? "1 day ago" : s.daysAgo + " days ago"}</div>
-      </div>`).join("")}
+      </div>`
+        )
+        .join("")}
     </div>
   </div>`;
 }
-
 
 function renderHome() {
   const _rs = getSettings().reminder;
@@ -96,7 +133,8 @@ function renderHome() {
   if (_rb) {
     const today = fmtDate(new Date());
     const trainedToday = getLog().some(w => w.date === today);
-    const now = new Date(), hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    const now = new Date(),
+      hm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
     if (_rs && !trainedToday && hm >= _rs) {
       _rb.classList.remove("hidden");
       _rb.innerHTML = `<div class="reminder-top">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""}<b>Time to train!</b></div><p class="muted">Your reminder was set for ${_rs}.</p><a class="btn btn-primary btn-sm" href="#/programs">Pick a workout</a>`;
@@ -110,17 +148,31 @@ function renderHome() {
     if (!hp) return;
     const log = getLog();
     const now = new Date();
-    const monday = new Date(now); monday.setHours(0, 0, 0, 0);
+    const monday = new Date(now);
+    monday.setHours(0, 0, 0, 0);
     monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    const lastMon = new Date(monday); lastMon.setDate(monday.getDate() - 7);
-    const nextMon = new Date(monday); nextMon.setDate(monday.getDate() + 7);
-    const vol = (from, to) => log.filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
-      .reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0), 0);
-    const thisW = vol(monday, nextMon), lastW = vol(lastMon, monday);
+    const lastMon = new Date(monday);
+    lastMon.setDate(monday.getDate() - 7);
+    const nextMon = new Date(monday);
+    nextMon.setDate(monday.getDate() + 7);
+    const vol = (from, to) =>
+      log
+        .filter(w => w.date >= fmtDate(from) && w.date < fmtDate(to))
+        .reduce(
+          (a, w) =>
+            a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + (s.weight || 0) * (s.reps || 0), 0), 0),
+          0
+        );
+    const thisW = vol(monday, nextMon),
+      lastW = vol(lastMon, monday);
     const streak = workoutStreak();
-    if (!log.length || (thisW === 0 && lastW === 0)) { hp.innerHTML = ""; return; }
-    const pct = lastW > 0 ? Math.min(100, Math.round(thisW / lastW * 100)) : (thisW > 0 ? 100 : 0);
-    const circ = 2 * Math.PI * 34, off = circ * (1 - pct / 100);
+    if (!log.length || (thisW === 0 && lastW === 0)) {
+      hp.innerHTML = "";
+      return;
+    }
+    const pct = lastW > 0 ? Math.min(100, Math.round((thisW / lastW) * 100)) : thisW > 0 ? 100 : 0;
+    const circ = 2 * Math.PI * 34,
+      off = circ * (1 - pct / 100);
     hp.innerHTML = `<div class="ring-wrap">
       <div class="ring-holder">
         <svg viewBox="0 0 84 84" width="84" height="84" class="prog-ring">
@@ -139,7 +191,10 @@ function renderHome() {
     const el = $("recoveryDash");
     if (!el) return;
     const r = getRecoveryStats();
-    if (!r || !r.best) { el.innerHTML = ""; return; }
+    if (!r || !r.best) {
+      el.innerHTML = "";
+      return;
+    }
     el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p></div>`;
   })();
   // goal tracker
@@ -151,39 +206,47 @@ function renderHome() {
       el.innerHTML = `<div class="goal-dash">
         <h3>Goals <button class="btn btn-ghost btn-sm" id="goalAddBtn">+ Add goal</button></h3>
         <div id="goalForm" class="hidden"></div>
-        ${goals.length ? `<div class="goal-grid">${goals.map(g => {
-          let title, sub, pct, paceTxt, paceCls;
-          if (g.type === "weight") {
-            const ex = byId(g.exerciseId);
-            const pr = exercisePR(g.exerciseId);
-            const cur = pr ? pr.weight : 0;
-            pct = g.target > 0 ? Math.min(100, Math.round(cur / g.target * 100)) : 0;
-            title = `${ex ? ex.name : "Lift"} ${g.target}kg`;
-            sub = `Current best: ${cur > 0 ? fmtW(cur) : "none yet"} · by ${g.targetDate}`;
-            const total = new Date(g.targetDate) - new Date(g.created);
-            const elapsed = Date.now() - new Date(g.created);
-            const expected = total > 0 ? Math.min(100, elapsed / total * 100) : 100;
-            const onPace = pct >= expected * 0.9;
-            paceTxt = onPace ? "On pace" : "Behind pace";
-            paceCls = onPace ? "pace-on" : "pace-off";
-          } else {
-            const weeks = g.weeks || 8;
-            const start = new Date(g.created); start.setHours(0, 0, 0, 0);
-            const log = getLog();
-            let done = 0;
-            for (let w = 0; w < weeks; w++) {
-              const ws = new Date(start); ws.setDate(ws.getDate() + w * 7);
-              const we = new Date(ws); we.setDate(we.getDate() + 7);
-              const c = log.filter(x => new Date(x.date + "T00:00:00") >= ws && new Date(x.date + "T00:00:00") < we).length;
-              if (c >= g.target) done++;
-            }
-            pct = Math.min(100, Math.round(done / weeks * 100));
-            title = `Train ${g.target}x/week for ${weeks} weeks`;
-            sub = `${done}/${weeks} weeks hit · ${g.target}x per week target`;
-            paceTxt = done > 0 ? `${done} week${done > 1 ? "s" : ""} on target` : "Not started";
-            paceCls = done > 0 ? "pace-on" : "pace-off";
-          }
-          return `<div class="goal-card">
+        ${
+          goals.length
+            ? `<div class="goal-grid">${goals
+                .map(g => {
+                  let title, sub, pct, paceTxt, paceCls;
+                  if (g.type === "weight") {
+                    const ex = byId(g.exerciseId);
+                    const pr = exercisePR(g.exerciseId);
+                    const cur = pr ? pr.weight : 0;
+                    pct = g.target > 0 ? Math.min(100, Math.round((cur / g.target) * 100)) : 0;
+                    title = `${ex ? ex.name : "Lift"} ${g.target}kg`;
+                    sub = `Current best: ${cur > 0 ? fmtW(cur) : "none yet"} · by ${g.targetDate}`;
+                    const total = new Date(g.targetDate) - new Date(g.created);
+                    const elapsed = Date.now() - new Date(g.created);
+                    const expected = total > 0 ? Math.min(100, (elapsed / total) * 100) : 100;
+                    const onPace = pct >= expected * 0.9;
+                    paceTxt = onPace ? "On pace" : "Behind pace";
+                    paceCls = onPace ? "pace-on" : "pace-off";
+                  } else {
+                    const weeks = g.weeks || 8;
+                    const start = new Date(g.created);
+                    start.setHours(0, 0, 0, 0);
+                    const log = getLog();
+                    let done = 0;
+                    for (let w = 0; w < weeks; w++) {
+                      const ws = new Date(start);
+                      ws.setDate(ws.getDate() + w * 7);
+                      const we = new Date(ws);
+                      we.setDate(we.getDate() + 7);
+                      const c = log.filter(
+                        x => new Date(x.date + "T00:00:00") >= ws && new Date(x.date + "T00:00:00") < we
+                      ).length;
+                      if (c >= g.target) done++;
+                    }
+                    pct = Math.min(100, Math.round((done / weeks) * 100));
+                    title = `Train ${g.target}x/week for ${weeks} weeks`;
+                    sub = `${done}/${weeks} weeks hit · ${g.target}x per week target`;
+                    paceTxt = done > 0 ? `${done} week${done > 1 ? "s" : ""} on target` : "Not started";
+                    paceCls = done > 0 ? "pace-on" : "pace-off";
+                  }
+                  return `<div class="goal-card">
             <button class="goal-del" data-goal-del="${g.id}" aria-label="Delete goal">×</button>
             <div class="gt">${esc(title)}</div>
             <div class="gm">${esc(sub)}</div>
@@ -191,14 +254,21 @@ function renderHome() {
             <div class="goal-pct">${pct}%</div>
             <div class="goal-pace ${paceCls}">${esc(paceTxt)}</div>
           </div>`;
-        }).join("")}</div>` : `<p class="muted" style="font-size:13px">No goals yet. Set a strength target or a training frequency goal.</p>`}
+                })
+                .join("")}</div>`
+            : `<p class="muted" style="font-size:13px">No goals yet. Set a strength target or a training frequency goal.</p>`
+        }
       </div>`;
       const addBtn = $("goalAddBtn");
-      if (addBtn) addBtn.onclick = () => {
-        const f = $("goalForm");
-        const exOpts = EXERCISES.filter(e => e.equipment !== "bodyweight").slice(0, 60).map(e => `<option value="${e.id}">${esc(e.name)}</option>`).join("");
-        f.classList.remove("hidden");
-        f.innerHTML = `<div class="goal-form">
+      if (addBtn)
+        addBtn.onclick = () => {
+          const f = $("goalForm");
+          const exOpts = EXERCISES.filter(e => e.equipment !== "bodyweight")
+            .slice(0, 60)
+            .map(e => `<option value="${e.id}">${esc(e.name)}</option>`)
+            .join("");
+          f.classList.remove("hidden");
+          f.innerHTML = `<div class="goal-form">
           <select id="ngType"><option value="weight">Strength goal</option><option value="frequency">Frequency goal</option></select>
           <span id="ngExWrap"><select id="ngEx">${exOpts}</select></span>
           <input id="ngTarget" type="number" min="1" placeholder="Target kg" style="width:100px">
@@ -206,68 +276,86 @@ function renderHome() {
           <span id="ngWeeksWrap" class="hidden"><input id="ngWeeks" type="number" min="1" max="52" value="8" style="width:70px" placeholder="Weeks"></span>
           <button class="btn btn-primary btn-sm" id="ngSave">Save</button>
         </div>`;
-        $("ngType").onchange = e => {
-          const isW = e.target.value === "weight";
-          $("ngExWrap").classList.toggle("hidden", !isW);
-          $("ngDateWrap").classList.toggle("hidden", !isW);
-          $("ngWeeksWrap").classList.toggle("hidden", isW);
-          $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+          $("ngType").onchange = e => {
+            const isW = e.target.value === "weight";
+            $("ngExWrap").classList.toggle("hidden", !isW);
+            $("ngDateWrap").classList.toggle("hidden", !isW);
+            $("ngWeeksWrap").classList.toggle("hidden", isW);
+            $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+          };
+          $("ngSave").onclick = () => {
+            const type = $("ngType").value;
+            const target = parseFloat($("ngTarget").value);
+            if (!target || target <= 0) {
+              appAlert("Enter a valid target.");
+              return;
+            }
+            const g = { id: "g" + Date.now().toString(36), type, target, created: fmtDate(new Date()) };
+            if (type === "weight") {
+              g.exerciseId = $("ngEx").value;
+              g.targetDate = $("ngDate").value || fmtDate(new Date(Date.now() + 90 * 864e5));
+            } else {
+              g.weeks = parseInt($("ngWeeks").value) || 8;
+            }
+            const gs = getGoals();
+            gs.push(g);
+            saveGoals(gs);
+            render();
+          };
         };
-        $("ngSave").onclick = () => {
-          const type = $("ngType").value;
-          const target = parseFloat($("ngTarget").value);
-          if (!target || target <= 0) { appAlert("Enter a valid target."); return; }
-          const g = { id: "g" + Date.now().toString(36), type, target, created: fmtDate(new Date()) };
-          if (type === "weight") {
-            g.exerciseId = $("ngEx").value;
-            g.targetDate = $("ngDate").value || fmtDate(new Date(Date.now() + 90 * 864e5));
-          } else {
-            g.weeks = parseInt($("ngWeeks").value) || 8;
-          }
-          const gs = getGoals(); gs.push(g); saveGoals(gs);
-          render();
-        };
-      };
-      el.querySelectorAll("[data-goal-del]").forEach(b => b.onclick = () => {
-        saveGoals(getGoals().filter(g => g.id !== b.dataset.goalDel));
-        render();
-      });
+      el.querySelectorAll("[data-goal-del]").forEach(
+        b =>
+          (b.onclick = () => {
+            saveGoals(getGoals().filter(g => g.id !== b.dataset.goalDel));
+            render();
+          })
+      );
     };
     render();
   })();
   const counts = {};
-  EXERCISES.forEach(e => counts[e.primary] = (counts[e.primary] || 0) + 1);
-  $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
-    `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
-  ).join("");
+  EXERCISES.forEach(e => (counts[e.primary] = (counts[e.primary] || 0) + 1));
+  $("muscleGrid").innerHTML = Object.keys(MUSCLE_INFO)
+    .map(
+      id =>
+        `<a class="muscle-card" href="#/exercises?m=${id}"><b>${MUSCLE_INFO[id].name}</b><span>${counts[id] || 0} exercises</span></a>`
+    )
+    .join("");
   const v = createBodyViewer($("hero3d"), { autoRotate: !getSettings().reduceMotion, dist: 5.6 });
   if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
   viewers.push(v);
   const groups = ["chest", "back", "shoulders", "quads", "glutes", "biceps"];
   let i = 0;
   const cyc = setInterval(() => {
-    if (!document.body.contains($("hero3d"))) { clearInterval(cyc); return; }
+    if (!document.body.contains($("hero3d"))) {
+      clearInterval(cyc);
+      return;
+    }
     v.highlight(expandMuscles(groups[i++ % groups.length]), []);
   }, 2400);
   v.highlight(expandMuscles("chest"), []);
   const origDispose = v.dispose.bind(v);
-  v.dispose = () => { clearInterval(cyc); origDispose(); };
+  v.dispose = () => {
+    clearInterval(cyc);
+    origDispose();
+  };
 }
-
 
 // EXERCISES
 const filters = { q: "", muscle: "", eq: "", lvl: "", myEq: false };
 
-
 function initExercises() {
   const chips = ["", ...Object.keys(MUSCLE_INFO)];
-  $("muscleChips").innerHTML = chips.map(id =>
-    `<button class="chip ${id === filters.muscle ? "on" : ""}" data-m="${id}">${id ? MUSCLE_INFO[id].name : "All"}</button>`
-  ).join("");
+  $("muscleChips").innerHTML = chips
+    .map(
+      id =>
+        `<button class="chip ${id === filters.muscle ? "on" : ""}" data-m="${id}">${id ? MUSCLE_INFO[id].name : "All"}</button>`
+    )
+    .join("");
   const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
-  $("eqFilter").innerHTML = `<option value="">All equipment</option>` + eqs.map(q => `<option value="${q}">${eqName[q]}</option>`).join("");
+  $("eqFilter").innerHTML =
+    `<option value="">All equipment</option>` + eqs.map(q => `<option value="${q}">${eqName[q]}</option>`).join("");
 }
-
 
 function filtered() {
   const q = filters.q.toLowerCase();
@@ -277,18 +365,26 @@ function filtered() {
     if (filters.eq && e.equipment !== filters.eq) return false;
     if (filters.lvl && e.level !== filters.lvl) return false;
     if (filters.myEq && myEq.length && !myEq.includes(e.equipment)) return false;
-    if (q && !(e.name.toLowerCase().includes(q) || (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q)) || e.equipment.includes(q) || e.level.includes(q))) return false;
+    if (
+      q &&
+      !(
+        e.name.toLowerCase().includes(q) ||
+        (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q)) ||
+        e.equipment.includes(q) ||
+        e.level.includes(q)
+      )
+    )
+      return false;
     return true;
   });
 }
 
-
 function renderExercises() {
   const list = filtered();
   $("exCount").textContent = list.length;
-  $("exerciseGrid").innerHTML = list.map(cardHTML).join("") || `<p class="muted">No exercises match. Try clearing filters.</p>`;
+  $("exerciseGrid").innerHTML =
+    list.map(cardHTML).join("") || `<p class="muted">No exercises match. Try clearing filters.</p>`;
 }
-
 
 // DETAIL
 function syncDetailFav(ex) {
@@ -298,10 +394,12 @@ function syncDetailFav(ex) {
   b.innerHTML = window.FORGE_ICON("heart") + (favs.has(ex.id) ? " Saved to favorites" : " Save to favorites");
 }
 
-
 function renderDetail(id) {
   const ex = byId(id);
-  if (!ex) { location.hash = "#/exercises"; return; }
+  if (!ex) {
+    location.hash = "#/exercises";
+    return;
+  }
   $("dName").textContent = ex.name;
   $("dBadges").innerHTML =
     (ex.custom ? `<span class="tag volt-tag">Custom</span>` : "") +
@@ -314,26 +412,47 @@ function renderDetail(id) {
   $("dPyramid").dataset.id = ex.id;
   $("dSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
   const cues = FORM_CUES[ex.primary] || FORM_CUES.default;
-  $("dSteps").innerHTML += `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
+  $("dSteps").innerHTML +=
+    `<li class="cue-header"><b>Form cues:</b><ul class="cues">${cues.map(c => `<li>✓ ${esc(c)}</li>`).join("")}</ul></li>`;
   $("dMuscles").innerHTML =
     `<span class="tag tag-lg primary" data-goto-muscle="${ex.primary}">${MUSCLE_INFO[ex.primary].name} · primary</span>` +
-    ex.secondary.map(s => { const g = groupOf(s); return `<span class="tag tag-lg" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`; }).join("");
+    ex.secondary
+      .map(s => {
+        const g = groupOf(s);
+        return `<span class="tag tag-lg" data-goto-muscle="${g}">${MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g}</span>`;
+      })
+      .join("");
   const sim = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary).slice(0, 4);
-  $("dSimilar").innerHTML = sim.map(x =>
-    `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
-  ).join("");
+  $("dSimilar").innerHTML = sim
+    .map(
+      x =>
+        `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]} · ${cap1(x.level)}</span></div>`
+    )
+    .join("");
   const myEq = getSettings().myEquipment || [];
   const altPool = EXERCISES.filter(x => x.id !== ex.id && x.primary === ex.primary && x.equipment !== ex.equipment);
   // group by equipment, prioritize user's own equipment
   const byEq = {};
-  altPool.forEach(x => { (byEq[x.equipment] = byEq[x.equipment] || []).push(x); });
+  altPool.forEach(x => {
+    (byEq[x.equipment] = byEq[x.equipment] || []).push(x);
+  });
   const eqOrder = Object.keys(byEq).sort((a, b) => (myEq.includes(b) ? 1 : 0) - (myEq.includes(a) ? 1 : 0));
-  $("dSwaps").innerHTML = eqOrder.length ? eqOrder.map(eq =>
-    `<div class="swap-group"><p class="swap-eq">${eqName[eq]}${myEq.includes(eq) ? ` <span class="tag volt-tag" style="font-size:10px">yours</span>` : ""}</p>` +
-    byEq[eq].slice(0, 4).map(x =>
-      `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="muted" style="font-size:12px">${cap1(x.level)}</span>${window.FORGE_ICON("arrow-right")}</button>`
-    ).join("") + `</div>`
-  ).join("") : `<p class="muted">No swaps needed, this one covers it.</p>`;
+  $("dSwaps").innerHTML = eqOrder.length
+    ? eqOrder
+        .map(
+          eq =>
+            `<div class="swap-group"><p class="swap-eq">${eqName[eq]}${myEq.includes(eq) ? ` <span class="tag volt-tag" style="font-size:10px">yours</span>` : ""}</p>` +
+            byEq[eq]
+              .slice(0, 4)
+              .map(
+                x =>
+                  `<button class="swap-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span class="muted" style="font-size:12px">${cap1(x.level)}</span>${window.FORGE_ICON("arrow-right")}</button>`
+              )
+              .join("") +
+            `</div>`
+        )
+        .join("")
+    : `<p class="muted">No swaps needed, this one covers it.</p>`;
   // 1RM estimator from logged sets (Epley formula)
   const log = getLog();
   let best1rm = 0;
@@ -349,48 +468,88 @@ function renderDetail(id) {
       }
     });
   });
-  $("dOnerm").innerHTML = best1rm > 0
-    ? `<div class="onerm-box"><b>Estimated 1RM:</b> ${fmtW(best1rm)} <span class="muted">based on your logged sets</span></div>`
-    : "";
+  $("dOnerm").innerHTML =
+    best1rm > 0
+      ? `<div class="onerm-box"><b>Estimated 1RM:</b> ${fmtW(best1rm)} <span class="muted">based on your logged sets</span></div>`
+      : "";
   // per-lift progression chart
   const _hist = exerciseHistory(ex.id);
   if (_hist.length >= 2) {
-    $("dProg").innerHTML = `<h3 style="margin-top:18px">Your progression</h3><div class="chart-wrap" style="margin:0 0 12px"><canvas id="dProgCanvas"></canvas></div>`;
+    $("dProg").innerHTML =
+      `<h3 style="margin-top:18px">Your progression</h3><div class="chart-wrap" style="margin:0 0 12px"><canvas id="dProgCanvas"></canvas></div>`;
     const cv = $("dProgCanvas");
     const dpr = window.devicePixelRatio || 1;
     const wrap = cv.parentElement;
-    const cw = wrap.clientWidth - 32, ch = 170;
-    cv.width = cw * dpr; cv.height = ch * dpr;
-    cv.style.width = cw + "px"; cv.style.height = ch + "px";
-    const cx = cv.getContext("2d"); cx.scale(dpr, dpr);
+    const cw = wrap.clientWidth - 32,
+      ch = 170;
+    cv.width = cw * dpr;
+    cv.height = ch * dpr;
+    cv.style.width = cw + "px";
+    cv.style.height = ch + "px";
+    const cx = cv.getContext("2d");
+    cx.scale(dpr, dpr);
     const accent = currentAccent().color;
-    const vals = _hist.map(h => h.orm > 0 ? h.orm : h.best);
-    const mn = Math.min(...vals), mx = Math.max(...vals);
-    const pad = Math.max((mx - mn) * 0.3, 1), lo = mn - pad, rg = (mx - mn + pad * 2) || 1;
-    const pL = 44, pR = 10, pT = 10, pB = 22;
+    const vals = _hist.map(h => (h.orm > 0 ? h.orm : h.best));
+    const mn = Math.min(...vals),
+      mx = Math.max(...vals);
+    const pad = Math.max((mx - mn) * 0.3, 1),
+      lo = mn - pad,
+      rg = mx - mn + pad * 2 || 1;
+    const pL = 44,
+      pR = 10,
+      pT = 10,
+      pB = 22;
     const X = i => pL + (i / (vals.length - 1)) * (cw - pL - pR);
     const Y = v => pT + (1 - (v - lo) / rg) * (ch - pT - pB);
-    cx.font = "11px sans-serif"; cx.textAlign = "right";
+    cx.font = "11px sans-serif";
+    cx.textAlign = "right";
     for (let g = 0; g <= 2; g++) {
-      const gv = lo + rg * g / 2, gy = Y(gv);
-      cx.strokeStyle = "rgba(255,255,255,0.07)"; cx.lineWidth = 1;
-      cx.beginPath(); cx.moveTo(pL, gy); cx.lineTo(cw - pR, gy); cx.stroke();
-      cx.fillStyle = "#8a93a6"; cx.fillText(fromKg(gv).toFixed(1), pL - 6, gy + 4);
+      const gv = lo + (rg * g) / 2,
+        gy = Y(gv);
+      cx.strokeStyle = "rgba(255,255,255,0.07)";
+      cx.lineWidth = 1;
+      cx.beginPath();
+      cx.moveTo(pL, gy);
+      cx.lineTo(cw - pR, gy);
+      cx.stroke();
+      cx.fillStyle = "#8a93a6";
+      cx.fillText(fromKg(gv).toFixed(1), pL - 6, gy + 4);
     }
     cx.beginPath();
-    vals.forEach((v, i) => { i ? cx.lineTo(X(i), Y(v)) : cx.moveTo(X(0), Y(v)); });
-    cx.strokeStyle = accent; cx.lineWidth = 2.5; cx.lineJoin = "round"; cx.stroke();
     vals.forEach((v, i) => {
-      cx.beginPath(); cx.arc(X(i), Y(v), 3.5, 0, 7); cx.fillStyle = accent; cx.fill();
+      i ? cx.lineTo(X(i), Y(v)) : cx.moveTo(X(0), Y(v));
+    });
+    cx.strokeStyle = accent;
+    cx.lineWidth = 2.5;
+    cx.lineJoin = "round";
+    cx.stroke();
+    vals.forEach((v, i) => {
+      cx.beginPath();
+      cx.arc(X(i), Y(v), 3.5, 0, 7);
+      cx.fillStyle = accent;
+      cx.fill();
     });
     cx.fillStyle = "#8a93a6";
-    const _fi = i => { try { return new Date(_hist[i].date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch (e) { return ""; } };
-    cx.textAlign = "left"; cx.fillText(_fi(0), pL, ch - 6);
-    cx.textAlign = "right"; cx.fillText(_fi(vals.length - 1), cw - pR, ch - 6);
-    attachChartTip(cv, vals.map((v, i) => ({ x: X(i), y: Y(v), i })), p =>
-      `${_fi(p.i)}: est. 1RM ${fromKg(vals[p.i]).toFixed(1)} ${unitLabel()}`);
+    const _fi = i => {
+      try {
+        return new Date(_hist[i].date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      } catch (e) {
+        return "";
+      }
+    };
+    cx.textAlign = "left";
+    cx.fillText(_fi(0), pL, ch - 6);
+    cx.textAlign = "right";
+    cx.fillText(_fi(vals.length - 1), cw - pR, ch - 6);
+    attachChartTip(
+      cv,
+      vals.map((v, i) => ({ x: X(i), y: Y(v), i })),
+      p => `${_fi(p.i)}: est. 1RM ${fromKg(vals[p.i]).toFixed(1)} ${unitLabel()}`
+    );
   } else {
-    $("dProg").innerHTML = _hist.length ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>` : "";
+    $("dProg").innerHTML = _hist.length
+      ? `<p class="muted" style="font-size:13px">Log this exercise once more to see your progression chart.</p>`
+      : "";
   }
   const v = createBodyViewer($("detail3d"), { autoRotate: !getSettings().reduceMotion });
   if (v.setFinish) v.setFinish(getSettings().bodyFinish || "standard");
@@ -400,36 +559,38 @@ function renderDetail(id) {
   v.highlight(full ? [] : expandMuscles(ex.primary), full ? [] : ex.secondary.flatMap(expandMuscles), full);
   const setV = front => {
     v.setView(front ? "front" : "back");
-    $("dFront").classList.toggle("on", front); $("dBack").classList.toggle("on", !front);
+    $("dFront").classList.toggle("on", front);
+    $("dBack").classList.toggle("on", !front);
   };
   $("dFront").onclick = () => setV(true);
   $("dBack").onclick = () => setV(false);
 }
-
 
 document.addEventListener("click", e => {
   const g = e.target.closest("[data-goto-muscle]");
   if (g) location.hash = "#/exercises?m=" + g.dataset.gotoMuscle;
   const sr = e.target.closest("[data-sore]");
   if (sr) {
-    const grp = sr.dataset.g, val = sr.dataset.sore;
+    const grp = sr.dataset.g,
+      val = sr.dataset.sore;
     const today = fmtDate(new Date());
     const m = getSoreness();
-    if (val === "clear") { if (m[today]) delete m[today][grp]; }
-    else { m[today] = m[today] || {}; m[today][grp] = val; }
+    if (val === "clear") {
+      if (m[today]) delete m[today][grp];
+    } else {
+      m[today] = m[today] || {};
+      m[today][grp] = val;
+    }
     saveSoreness(m);
     selectMuscle(grp);
     return;
   }
-}
-
-
-);
-
+});
 
 // BODY MAP
 function openMuscleSheet(mid) {
-  const g = groupOf(mid), info = MUSCLE_INFO[g];
+  const g = groupOf(mid),
+    info = MUSCLE_INFO[g];
   if (!info) return;
   const list = EXERCISES.filter(e => e.primary === g || (e.secondary || []).map(groupOf).includes(g)).slice(0, 6);
   const old = document.querySelector(".sheet-veil");
@@ -445,8 +606,13 @@ function openMuscleSheet(mid) {
     ${list.length ? `<div class="mini-cards">${list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment] || x.equipment}</span></div>`).join("")}</div>` : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`}
   </div>`;
   veil.querySelector(".sheet-close").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
-  const onEsc = e => { if (e.key === "Escape") closeSheet(); };
-  const closeSheet = () => { document.removeEventListener("keydown", onEsc); veil.remove(); };
+  const onEsc = e => {
+    if (e.key === "Escape") closeSheet();
+  };
+  const closeSheet = () => {
+    document.removeEventListener("keydown", onEsc);
+    veil.remove();
+  };
   veil.addEventListener("click", e => {
     if (e.target === veil || e.target.closest("[data-ex]") || e.target.closest(".sheet-close")) closeSheet();
   });
@@ -454,22 +620,33 @@ function openMuscleSheet(mid) {
   document.body.appendChild(veil);
 }
 
-
 function renderBody(selected) {
   const v = createBodyViewer($("body3d"), {
-    autoRotate: !getSettings().reduceMotion, dist: 6.1,
+    autoRotate: !getSettings().reduceMotion,
+    dist: 6.1,
     onMuscleHold: mid => openMuscleSheet(mid),
     onMuscleClick: mid => {
       const g = groupOf(mid);
       if (window._bodyMode === "pain") {
         const pain = getPain();
-        if (pain[g]) delete pain[g]; else pain[g] = Date.now();
+        if (pain[g]) delete pain[g];
+        else pain[g] = Date.now();
         savePain(pain);
         paintPain();
         return;
       }
       selectMuscle(g);
-      const backSide = ["back", "lats", "traps", "lower-back", "rear-delt", "triceps", "glutes", "hamstrings", "calves"].includes(mid);
+      const backSide = [
+        "back",
+        "lats",
+        "traps",
+        "lower-back",
+        "rear-delt",
+        "triceps",
+        "glutes",
+        "hamstrings",
+        "calves"
+      ].includes(mid);
       v.setView(backSide ? "back" : "front");
       $("bFront").classList.toggle("on", !backSide);
       $("bBack").classList.toggle("on", backSide);
@@ -478,7 +655,8 @@ function renderBody(selected) {
   viewers.push(v);
   const setV = front => {
     v.setView(front ? "front" : "back");
-    $("bFront").classList.toggle("on", front); $("bBack").classList.toggle("on", !front);
+    $("bFront").classList.toggle("on", front);
+    $("bBack").classList.toggle("on", !front);
   };
   const paintPain = () => {
     const marked = Object.keys(getPain());
@@ -500,23 +678,40 @@ function renderBody(selected) {
   window._bodyMode = "muscles";
   $("bFront").onclick = () => setV(true);
   $("bBack").onclick = () => setV(false);
-  $("bMuscles").onclick = () => { window._bodyMode = "muscles"; syncMode(); selectMuscle(window._lastMuscle || "chest"); };
-  $("bRecovery").onclick = () => { window._bodyMode = "recovery"; syncMode(); v.setHeat(muscleHeat()); };
-  $("bFatigue").onclick = () => { window._bodyMode = "fatigue"; syncMode(); v.setHeat(muscleFatigue()); };
-  $("bPain").onclick = () => { window._bodyMode = "pain"; syncMode(); };
+  $("bMuscles").onclick = () => {
+    window._bodyMode = "muscles";
+    syncMode();
+    selectMuscle(window._lastMuscle || "chest");
+  };
+  $("bRecovery").onclick = () => {
+    window._bodyMode = "recovery";
+    syncMode();
+    v.setHeat(muscleHeat());
+  };
+  $("bFatigue").onclick = () => {
+    window._bodyMode = "fatigue";
+    syncMode();
+    v.setHeat(muscleFatigue());
+  };
+  $("bPain").onclick = () => {
+    window._bodyMode = "pain";
+    syncMode();
+  };
   window._bodyViewer = v;
   v.setFinish(getSettings().bodyFinish || "standard");
   selectMuscle(selected || "chest");
   renderBodyRecovery();
 }
 
-
 function selectMuscle(groupId) {
   const v = window._bodyViewer;
   const info = MUSCLE_INFO[groupId];
   if (!info || !v) return;
   window._lastMuscle = groupId;
-  if (window._bodyHeatMode) { window._bodyHeatMode = false; if (window._syncBodyMode) window._syncBodyMode(); }
+  if (window._bodyHeatMode) {
+    window._bodyHeatMode = false;
+    if (window._syncBodyMode) window._syncBodyMode();
+  }
   const full = groupId === "full-body" || groupId === "cardio";
   v.highlight(full ? [] : expandMuscles(groupId), [], full);
   const lastTr = muscleLastTrained();
@@ -534,8 +729,12 @@ function selectMuscle(groupId) {
   const today = fmtDate(new Date());
   const soreMap = getSoreness();
   const soreState = (soreMap[today] && soreMap[today][groupId]) || null;
-  const soreLabel = soreState === "sore" ? `<span style="color:var(--warn);font-weight:700">Sore today</span>`
-    : soreState === "injured" ? `<span style="color:#f87171;font-weight:700">Injured - take it easy</span>` : "";
+  const soreLabel =
+    soreState === "sore"
+      ? `<span style="color:var(--warn);font-weight:700">Sore today</span>`
+      : soreState === "injured"
+        ? `<span style="color:#f87171;font-weight:700">Injured - take it easy</span>`
+        : "";
   $("muscleInfo").innerHTML = `<h3>${info.name}</h3><p class="desc">${info.desc}</p>
     <p style="margin-top:8px;font-size:14px">${recHTML}</p>
     ${soreLabel ? `<p style="font-size:14px;margin-top:4px">${soreLabel}</p>` : ""}
@@ -547,10 +746,13 @@ function selectMuscle(groupId) {
   const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
   $("bodyExercises").innerHTML = list.length
     ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
-      list.map(x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]}</span></div>`).join("")
+      list
+        .map(
+          x => `<div class="mini-card" data-ex="${x.id}"><b>${esc(x.name)}</b><span>${eqName[x.equipment]}</span></div>`
+        )
+        .join("")
     : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`;
 }
-
 
 // FAVORITES
 function renderFavorites() {
@@ -561,46 +763,64 @@ function renderFavorites() {
   if (!list.length) fe.innerHTML = emptyNote("No favorites yet", "Tap the heart on any exercise to save it here.");
 }
 
-
 // QUIZ
 const QUIZ_QUESTIONS = [
-  { key: "days", title: "How many days per week can you train?", title_fr: "Combien de jours par semaine pouvez-vous vous entraîner ?", options: [
-    { v: 2, label: "2 days", label_fr: "2 jours" }, { v: 3, label: "3 days", label_fr: "3 jours" }, { v: 4, label: "4 days", label_fr: "4 jours" }, { v: 6, label: "5+ days", label_fr: "5+ jours" } ] }
-
-
-,
-  { key: "equip", title: "What equipment do you have access to?", title_fr: "De quel équipement disposez-vous ?", options: [
-    { v: "full", label: "Full gym", label_fr: "Salle complète" }, { v: "dumbbells", label: "Dumbbells + bench", label_fr: "Haltères + banc" },
-    { v: "dumbbells-only", label: "Dumbbells only", label_fr: "Haltères uniquement" }, { v: "bodyweight", label: "Bodyweight / minimal", label_fr: "Poids du corps / minimal" } ] }
-
-
-,
-  { key: "goal", title: "What's your main goal?", title_fr: "Quel est votre objectif principal ?", options: [
-    { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" }, { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" }, { v: "fitness", label: "General fitness", label_fr: "Forme générale" } ] }
-
-
-,
+  {
+    key: "days",
+    title: "How many days per week can you train?",
+    title_fr: "Combien de jours par semaine pouvez-vous vous entraîner ?",
+    options: [
+      { v: 2, label: "2 days", label_fr: "2 jours" },
+      { v: 3, label: "3 days", label_fr: "3 jours" },
+      { v: 4, label: "4 days", label_fr: "4 jours" },
+      { v: 6, label: "5+ days", label_fr: "5+ jours" }
+    ]
+  },
+  {
+    key: "equip",
+    title: "What equipment do you have access to?",
+    title_fr: "De quel équipement disposez-vous ?",
+    options: [
+      { v: "full", label: "Full gym", label_fr: "Salle complète" },
+      { v: "dumbbells", label: "Dumbbells + bench", label_fr: "Haltères + banc" },
+      { v: "dumbbells-only", label: "Dumbbells only", label_fr: "Haltères uniquement" },
+      { v: "bodyweight", label: "Bodyweight / minimal", label_fr: "Poids du corps / minimal" }
+    ]
+  },
+  {
+    key: "goal",
+    title: "What's your main goal?",
+    title_fr: "Quel est votre objectif principal ?",
+    options: [
+      { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" },
+      { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" },
+      { v: "fitness", label: "General fitness", label_fr: "Forme générale" }
+    ]
+  }
 ];
 
+function ql(o) {
+  return getSettings().lang === "fr" ? o.label_fr || o.label : o.label;
+}
 
-function ql(o) { return getSettings().lang === "fr" ? (o.label_fr || o.label) : o.label; }
-
-
-function qt(q) { return getSettings().lang === "fr" ? (q.title_fr || q.title) : q.title; }
-
+function qt(q) {
+  return getSettings().lang === "fr" ? q.title_fr || q.title : q.title;
+}
 
 const QUIZ_FIT = {
-  "full-body-starter": { days: [2, 3], equip: ["dumbbells", "dumbbells-only", "bodyweight"], goal: ["muscle", "fitness"] },
-  "push-pull-legs":    { days: [6], equip: ["full"], goal: ["muscle"] },
-  "upper-lower":       { days: [4], equip: ["full"], goal: ["muscle", "strength"] },
-  "strength-5x5":      { days: [3], equip: ["full"], goal: ["strength"] },
-  "dumbbell-home":     { days: [2, 3], equip: ["dumbbells", "dumbbells-only"], goal: ["fitness", "muscle"] },
-  "hiit-conditioning": { days: [3, 4], equip: ["bodyweight", "dumbbells-only"], goal: ["fitness"] },
+  "full-body-starter": {
+    days: [2, 3],
+    equip: ["dumbbells", "dumbbells-only", "bodyweight"],
+    goal: ["muscle", "fitness"]
+  },
+  "push-pull-legs": { days: [6], equip: ["full"], goal: ["muscle"] },
+  "upper-lower": { days: [4], equip: ["full"], goal: ["muscle", "strength"] },
+  "strength-5x5": { days: [3], equip: ["full"], goal: ["strength"] },
+  "dumbbell-home": { days: [2, 3], equip: ["dumbbells", "dumbbells-only"], goal: ["fitness", "muscle"] },
+  "hiit-conditioning": { days: [3, 4], equip: ["bodyweight", "dumbbells-only"], goal: ["fitness"] }
 };
 
-
 let quizState = null;
-
 
 function openQuiz() {
   quizState = { step: 0, answers: {} };
@@ -609,9 +829,9 @@ function openQuiz() {
   $("quizVeil").classList.remove("hidden");
 }
 
-
-function closeQuiz() { $("quizVeil").classList.add("hidden"); }
-
+function closeQuiz() {
+  $("quizVeil").classList.add("hidden");
+}
 
 function renderQuizStep() {
   const q = QUIZ_QUESTIONS[quizState.step];
@@ -622,30 +842,40 @@ function renderQuizStep() {
      <div class="quiz-opts">` +
     q.options.map(o => `<button class="quiz-opt" data-qv="${o.v}">${ql(o)}</button>`).join("") +
     `</div>` +
-    (quizState.step > 0 ? `<button class="btn btn-ghost btn-sm" id="quizBack" style="margin-top:14px">${fr ? "Retour" : "Back"}</button>` : "");
+    (quizState.step > 0
+      ? `<button class="btn btn-ghost btn-sm" id="quizBack" style="margin-top:14px">${fr ? "Retour" : "Back"}</button>`
+      : "");
 }
-
 
 function quizScore(p, a) {
   const fit = QUIZ_FIT[p.id];
   if (!fit) return { score: 0, reasons: [] };
-  let s = 0; const reasons = [];
-  if (fit.days.includes(a.days)) { s += 3; reasons.push(`${p.daysPerWeek} days/week fits your schedule`); }
-  else if (fit.days.some(d => Math.abs(d - a.days) === 1)) { s += 1; }
-  if (fit.equip.includes(a.equip)) { s += 3; reasons.push(`Uses your ${QUIZ_QUESTIONS[1].options.find(o => String(o.v) === a.equip).label.toLowerCase()}`); }
-  if (fit.goal.includes(a.goal)) { s += 3; reasons.push(`Built for ${QUIZ_QUESTIONS[2].options.find(o => String(o.v) === a.goal).label.toLowerCase()}`); }
+  let s = 0;
+  const reasons = [];
+  if (fit.days.includes(a.days)) {
+    s += 3;
+    reasons.push(`${p.daysPerWeek} days/week fits your schedule`);
+  } else if (fit.days.some(d => Math.abs(d - a.days) === 1)) {
+    s += 1;
+  }
+  if (fit.equip.includes(a.equip)) {
+    s += 3;
+    reasons.push(`Uses your ${QUIZ_QUESTIONS[1].options.find(o => String(o.v) === a.equip).label.toLowerCase()}`);
+  }
+  if (fit.goal.includes(a.goal)) {
+    s += 3;
+    reasons.push(`Built for ${QUIZ_QUESTIONS[2].options.find(o => String(o.v) === a.goal).label.toLowerCase()}`);
+  }
   if (p.level === "beginner") s += 0.5;
   return { score: s, reasons };
 }
-
 
 function renderQuizResult() {
   const a = quizState.answers;
   const fr = getSettings().lang === "fr";
   const ranked = PROGRAMS.map(p => ({ p, ...quizScore(p, a) })).sort((x, y) => y.score - x.score);
   const top = ranked[0];
-  $("quizBody").innerHTML =
-    `<p class="muted" style="margin-bottom:6px">${fr ? "Votre programme" : "Your match"}</p>
+  $("quizBody").innerHTML = `<p class="muted" style="margin-bottom:6px">${fr ? "Votre programme" : "Your match"}</p>
      <h4 style="margin:0 0 8px;font-size:20px">${esc(top.p.name)}</h4>
      <p class="muted" style="margin-bottom:12px">${esc(top.p.tagline)}</p>
      ${top.reasons.map(r => `<p style="margin:6px 0;font-size:14px"><span style="color:var(--volt)">✓</span> ${esc(r)}</p>`).join("")}
@@ -661,32 +891,32 @@ function renderQuizResult() {
      ${ranked[1] ? `<p class="muted" style="margin-top:16px;font-size:13px">${fr ? "Aussi : " : "Runner-up: "}<a href="#/program/${ranked[1].p.id}" style="color:var(--volt)">${esc(ranked[1].p.name)}</a></p>` : ""}`;
 }
 
-
 // PROGRAM BUILDER
 let builder = null;
 
-
 let pickerDay = -1;
-
 
 function newBuilder() {
   builder = { name: "", tagline: "", days: [{ name: "Day 1", exercises: [] }] };
-  $("bName").value = ""; $("bTagline").value = "";
+  $("bName").value = "";
+  $("bTagline").value = "";
   renderBuilder();
 }
 
-
 function renderBuilder() {
   if (!builder) newBuilder();
-  $("bDays").innerHTML = builder.days.map((d, di) => `
+  $("bDays").innerHTML = builder.days
+    .map(
+      (d, di) => `
     <div class="day-block">
       <div class="day-head">
         <input type="text" class="text-input" value="${esc(d.name)}" data-bday="${di}" maxlength="40" aria-label="Day name" />
         <button class="icon-btn" data-bdel-day="${di}" aria-label="Delete day">${window.FORGE_ICON("x")}</button>
       </div>
-      ${d.exercises.map((x, xi) => {
-        const ex = byId(x.id);
-        return `<div class="bex-row">
+      ${d.exercises
+        .map((x, xi) => {
+          const ex = byId(x.id);
+          return `<div class="bex-row">
           <span class="drag-handle" data-bdrag="${di}:${xi}" title="Drag to reorder" aria-label="Drag to reorder">&#8942;&#8942;</span>
           <b>${esc(ex ? ex.name : x.id)}</b>
           <span class="bex-fields">
@@ -696,19 +926,22 @@ function renderBuilder() {
           </span>
           <button class="icon-btn" data-bdel-ex="${di}:${xi}" aria-label="Remove exercise">${window.FORGE_ICON("x")}</button>
         </div>`;
-      }).join("")}
+        })
+        .join("")}
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" data-bpick="${di}">Add exercises</button>
         <button class="btn btn-ghost btn-sm" data-btpl-save="${di}">Save as template</button>
         <button class="btn btn-ghost btn-sm" data-btpl-apply="${di}">From template</button>
         <button class="btn btn-ghost btn-sm" data-b1rm="${di}" title="Fill target weights at 75% of your estimated 1RM">Autofill 75% 1RM</button>
       </div>
-    </div>`).join("");
+    </div>`
+    )
+    .join("");
 }
 
-
 function openPicker(di) {
-  pickerDay = di; templateDay = -1;
+  pickerDay = di;
+  templateDay = -1;
   $("pickerTitle").textContent = "Add exercises";
   $("pickerSearch").closest(".search-wrap").style.display = "";
   $("pickerClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
@@ -717,43 +950,55 @@ function openPicker(di) {
   $("pickerVeil").classList.remove("hidden");
 }
 
-
-function closePicker() { $("pickerVeil").classList.add("hidden"); pickerDay = -1; }
-
+function closePicker() {
+  $("pickerVeil").classList.add("hidden");
+  pickerDay = -1;
+}
 
 let templateDay = -1;
-
 
 function openTemplatePicker(di) {
   templateDay = di;
   const tpl = getTemplates();
   $("pickerTitle").textContent = "Apply template";
   $("pickerSearch").closest(".search-wrap").style.display = "none";
-  $("pickerList").innerHTML = tpl.length ? tpl.map(t =>
-    `<div class="picker-item tpl-item" style="cursor:default">
+  $("pickerList").innerHTML = tpl.length
+    ? tpl
+        .map(
+          t =>
+            `<div class="picker-item tpl-item" style="cursor:default">
       <b>${esc(t.name)}</b><span class="tag">${t.exercises.length} exercises</span>
       <div class="tpl-actions">
         <button class="btn btn-primary btn-sm" data-tpl-apply="${t.id}">Apply</button>
         <button class="btn btn-ghost btn-sm danger" data-tpl-del="${t.id}">Delete</button>
       </div>
-    </div>`).join("") : `<div class="empty-note"><p><b>No templates yet.</b></p><p>Build a day and tap "Save as template".</p></div>`;
+    </div>`
+        )
+        .join("")
+    : `<div class="empty-note"><p><b>No templates yet.</b></p><p>Build a day and tap "Save as template".</p></div>`;
   $("pickerVeil").classList.remove("hidden");
 }
-
 
 function renderPicker(q) {
   q = q.toLowerCase();
   const inDay = pickerDay >= 0 ? new Set(builder.days[pickerDay].exercises.map(x => x.id)) : new Set();
-  const list = EXERCISES.filter(e =>
-    !q || e.name.toLowerCase().includes(q) || (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q))
+  const list = EXERCISES.filter(
+    e =>
+      !q ||
+      e.name.toLowerCase().includes(q) ||
+      (MUSCLE_INFO[e.primary] && MUSCLE_INFO[e.primary].name.toLowerCase().includes(q))
   ).slice(0, 60);
-  $("pickerList").innerHTML = list.map(e =>
-    `<button class="picker-item" data-pick="${e.id}">
+  $("pickerList").innerHTML =
+    list
+      .map(
+        e =>
+          `<button class="picker-item" data-pick="${e.id}">
       <b>${esc(e.name)}</b><span class="tag">${MUSCLE_INFO[e.primary].name}</span>
       ${inDay.has(e.id) ? `<span class="added">Added</span>` : ""}
-    </button>`).join("") || `<p class="muted">No matches.</p>`;
+    </button>`
+      )
+      .join("") || `<p class="muted">No matches.</p>`;
 }
-
 
 function saveBuilder() {
   builder.name = $("bName").value.trim();
@@ -767,39 +1012,68 @@ function saveBuilder() {
     return;
   }
   const days = builder.days.filter(d => d.exercises.length > 0);
-  if (!days.length) { appAlert("Add at least one exercise to a day."); return; }
+  if (!days.length) {
+    appAlert("Add at least one exercise to a day.");
+    return;
+  }
   const id = "custom-" + Date.now().toString(36);
   const prog = {
-    id, name: builder.name, tagline: builder.tagline, custom: true,
-    level: "custom", daysPerWeek: days.length, weeks: 4, equipment: "Mixed",
-    days: days.map(d => ({ name: d.name.trim() || "Day", exercises: d.exercises.map(x => ({ id: x.id, sets: x.sets, reps: x.reps, weight: x.weight != null ? x.weight : null })) }))
+    id,
+    name: builder.name,
+    tagline: builder.tagline,
+    custom: true,
+    level: "custom",
+    daysPerWeek: days.length,
+    weeks: 4,
+    equipment: "Mixed",
+    days: days.map(d => ({
+      name: d.name.trim() || "Day",
+      exercises: d.exercises.map(x => ({
+        id: x.id,
+        sets: x.sets,
+        reps: x.reps,
+        weight: x.weight != null ? x.weight : null
+      }))
+    }))
   };
-  const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+  const all = getCustomPrograms();
+  all.push(prog);
+  saveCustomPrograms(all);
   location.hash = "#/program/" + id;
 }
-
 
 // PLATE CALCULATOR
 // Plate colors follow the common competition scheme (kg) / gym scheme (lb)
 const PLATE_COLORS = {
-  25: "#d43a2f", 20: "#2f6fd4", 15: "#d4a92f", 10: "#3aa655", 5: "#e8e8e8",
-  2.5: "#c0392b", 1.25: "#95a5a6",
-  45: "#d43a2f", 35: "#2f6fd4"
+  25: "#d43a2f",
+  20: "#2f6fd4",
+  15: "#d4a92f",
+  10: "#3aa655",
+  5: "#e8e8e8",
+  2.5: "#c0392b",
+  1.25: "#95a5a6",
+  45: "#d43a2f",
+  35: "#2f6fd4"
 };
-
 
 function plateDiagramSVG(used, units) {
   const maxW = units === "kg" ? 25 : 45;
-  const W = 400, H = 130, cx = W / 2, cy = H / 2;
+  const W = 400,
+    H = 130,
+    cx = W / 2,
+    cy = H / 2;
   // real barbell anatomy from the center out: grip shaft, then plates on the
   // sleeves, then collars, then a short bar tip
   let plateSpan = 0;
-  used.forEach(w => { plateSpan += Math.round(9 + 11 * (w / maxW)) + 2; });
-  const shaftHalf = 95;                   // grip area each side of center
-  const collarGap = 4;                    // gap between last plate and collar
-  const tipLen = 14;                      // bar tip beyond the collar
+  used.forEach(w => {
+    plateSpan += Math.round(9 + 11 * (w / maxW)) + 2;
+  });
+  const shaftHalf = 95; // grip area each side of center
+  const collarGap = 4; // gap between last plate and collar
+  const tipLen = 14; // bar tip beyond the collar
   const halfBar = shaftHalf + plateSpan + collarGap + 8 + tipLen;
-  const barX = cx - halfBar, barW = halfBar * 2;
+  const barX = cx - halfBar,
+    barW = halfBar * 2;
   let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Barbell loading diagram">`;
   // bar shaft
   svg += `<rect x="${barX}" y="${cy - 3}" width="${barW}" height="6" rx="3" fill="#8a8f98"/>`;
@@ -814,8 +1088,8 @@ function plateDiagramSVG(used, units) {
   let offset = shaftHalf;
   ordered.forEach(w => {
     const frac = w / maxW;
-    const ph = Math.round(34 + 66 * frac);      // plate height
-    const pw = Math.round(9 + 11 * frac);       // plate thickness
+    const ph = Math.round(34 + 66 * frac); // plate height
+    const pw = Math.round(9 + 11 * frac); // plate thickness
     const color = PLATE_COLORS[w] || "#8a8f98";
     const dark = color === "#e8e8e8";
     const y = cy - ph / 2;
@@ -826,7 +1100,7 @@ function plateDiagramSVG(used, units) {
     // weight label on larger plates
     if (ph >= 52) {
       const fs = ph >= 80 ? 13 : 11;
-      const tc = (dark || w === 15) ? "#1a1d21" : "#fff";
+      const tc = dark || w === 15 ? "#1a1d21" : "#fff";
       svg += `<text x="${cx + offset + pw / 2}" y="${cy + fs / 3}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${tc}" font-family="inherit">${w}</text>`;
       svg += `<text x="${cx - offset - pw / 2}" y="${cy + fs / 3}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${tc}" font-family="inherit">${w}</text>`;
     }
@@ -840,7 +1114,6 @@ function plateDiagramSVG(used, units) {
   return svg;
 }
 
-
 function calcPlates() {
   const units = getSettings().units;
   const bar = parseFloat($("plateBar").value) || 0;
@@ -853,18 +1126,24 @@ function calcPlates() {
   }
   const used = [];
   for (const p of plates) {
-    while (remaining >= p - 0.001) { used.push(p); remaining -= p; }
+    while (remaining >= p - 0.001) {
+      used.push(p);
+      remaining -= p;
+    }
   }
   const diagram = used.length ? `<div class="plate-diagram">${plateDiagramSVG(used, units)}</div>` : "";
   if (remaining > 0.01) {
-    $("plateResult").innerHTML = diagram + `<p class="muted">Closest: ${used.length ? used.join(" + ") : "bar only"} per side (${(remaining * 2).toFixed(1)} ${units} short).</p>`;
+    $("plateResult").innerHTML =
+      diagram +
+      `<p class="muted">Closest: ${used.length ? used.join(" + ") : "bar only"} per side (${(remaining * 2).toFixed(1)} ${units} short).</p>`;
   } else {
-    $("plateResult").innerHTML = diagram + (used.length
-      ? `<p style="font-size:16px;margin-top:10px"><b>Per side:</b> ${used.join(" + ")} <span class="muted">${units}</span></p>`
-      : `<p class="muted">Just the bar.</p>`);
+    $("plateResult").innerHTML =
+      diagram +
+      (used.length
+        ? `<p style="font-size:16px;margin-top:10px"><b>Per side:</b> ${used.join(" + ")} <span class="muted">${units}</span></p>`
+        : `<p class="muted">Just the bar.</p>`);
   }
 }
-
 
 function openPlates() {
   const units = getSettings().units;
@@ -874,45 +1153,54 @@ function openPlates() {
   $("plateVeil").classList.remove("hidden");
 }
 
-
 // FORM CUES
 const FORM_CUES = {
-  "chest": ["Squeeze shoulder blades together", "Keep a slight arch in your back", "Lower with control, don't bounce"],
-  "back": ["Lead with your elbows", "Squeeze at the top for 1 second", "Don't swing, control the weight"],
-  "shoulders": ["Keep core braced", "Don't shrug your traps up", "Control the negative"],
-  "biceps": ["Pin elbows to your sides", "Don't swing your torso", "Full range of motion"],
-  "triceps": ["Keep upper arms still", "Lock out at the top", "Don't flare elbows"],
-  "quads": ["Knees track over toes", "Chest up, core tight", "Drive through your heels"],
-  "hamstrings": ["Hinge at the hips", "Slight bend in knees", "Feel the stretch, then squeeze"],
-  "glutes": ["Squeeze hard at the top", "Don't hyperextend your back", "Drive through heels"],
-  "calves": ["Full stretch at bottom", "Pause at the top", "Don't bounce"],
-  "abs": ["Exhale on the effort", "Don't pull your neck", "Slow and controlled"],
-  "default": ["Breathe steadily", "Control the weight both ways", "Stop if form breaks down"]
+  chest: ["Squeeze shoulder blades together", "Keep a slight arch in your back", "Lower with control, don't bounce"],
+  back: ["Lead with your elbows", "Squeeze at the top for 1 second", "Don't swing, control the weight"],
+  shoulders: ["Keep core braced", "Don't shrug your traps up", "Control the negative"],
+  biceps: ["Pin elbows to your sides", "Don't swing your torso", "Full range of motion"],
+  triceps: ["Keep upper arms still", "Lock out at the top", "Don't flare elbows"],
+  quads: ["Knees track over toes", "Chest up, core tight", "Drive through your heels"],
+  hamstrings: ["Hinge at the hips", "Slight bend in knees", "Feel the stretch, then squeeze"],
+  glutes: ["Squeeze hard at the top", "Don't hyperextend your back", "Drive through heels"],
+  calves: ["Full stretch at bottom", "Pause at the top", "Don't bounce"],
+  abs: ["Exhale on the effort", "Don't pull your neck", "Slow and controlled"],
+  default: ["Breathe steadily", "Control the weight both ways", "Stop if form breaks down"]
 };
-
 
 // SHARE CARD (Feature 7): renders a 1080x1350 portrait workout card to an offscreen canvas
 function generateShareCard(entry) {
   try {
     const canvas = document.createElement("canvas");
-    canvas.width = 1080; canvas.height = 1350;
+    canvas.width = 1080;
+    canvas.height = 1350;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    const W = 1080, H = 1350;
-    const volt = "#d4ff3f", ink = "#f2f4f8", muted = "#9aa3b5";
+    const W = 1080,
+      H = 1350;
+    const volt = "#d4ff3f",
+      ink = "#f2f4f8",
+      muted = "#9aa3b5";
     // background
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#0b0d12"); grad.addColorStop(1, "#161b26");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+    grad.addColorStop(0, "#0b0d12");
+    grad.addColorStop(1, "#161b26");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
     // volt accent bar
-    ctx.fillStyle = volt; ctx.fillRect(0, 0, W, 10);
+    ctx.fillStyle = volt;
+    ctx.fillRect(0, 0, W, 10);
     ctx.textAlign = "center";
     // brand
     ctx.fillStyle = volt;
     ctx.font = "800 92px system-ui, -apple-system, sans-serif";
-    try { ctx.letterSpacing = "14px"; } catch (e) {}
+    try {
+      ctx.letterSpacing = "14px";
+    } catch (e) {}
     ctx.fillText("FORGE", W / 2, 150);
-    try { ctx.letterSpacing = "0px"; } catch (e) {}
+    try {
+      ctx.letterSpacing = "0px";
+    } catch (e) {}
     // date, e.g. "Mon, Oct 5, 2026"
     const parts = (entry.date || "").split("-");
     let dateStr = entry.date || "";
@@ -920,16 +1208,22 @@ function generateShareCard(entry) {
       const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
       dateStr = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
     }
-    ctx.fillStyle = muted; ctx.font = "500 40px system-ui, sans-serif";
+    ctx.fillStyle = muted;
+    ctx.font = "500 40px system-ui, sans-serif";
     ctx.fillText(dateStr, W / 2, 225);
     // program + day
     const sub = [entry.programName, entry.dayName].filter(Boolean).join(" - ");
-    const subShown = sub.length > 34 ? sub.slice(0, 33) + "…" : (sub || "Workout");
-    ctx.fillStyle = ink; ctx.font = "700 52px system-ui, sans-serif";
+    const subShown = sub.length > 34 ? sub.slice(0, 33) + "…" : sub || "Workout";
+    ctx.fillStyle = ink;
+    ctx.font = "700 52px system-ui, sans-serif";
     ctx.fillText(subShown, W / 2, 300);
     // divider
-    ctx.strokeStyle = "#232936"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(W - 140, 360); ctx.stroke();
+    ctx.strokeStyle = "#232936";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(140, 360);
+    ctx.lineTo(W - 140, 360);
+    ctx.stroke();
     // stats row
     const totalSets = entry.exercises.reduce((a, x) => a + x.sets.length, 0);
     const totalVol = entry.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0);
@@ -940,46 +1234,58 @@ function generateShareCard(entry) {
     ];
     const colX = [W / 2 - 340, W / 2, W / 2 + 340];
     stats.forEach((st, i) => {
-      ctx.fillStyle = ink; ctx.font = "800 76px system-ui, sans-serif";
+      ctx.fillStyle = ink;
+      ctx.font = "800 76px system-ui, sans-serif";
       ctx.fillText(st[0], colX[i], 480);
-      ctx.fillStyle = muted; ctx.font = "500 32px system-ui, sans-serif";
+      ctx.fillStyle = muted;
+      ctx.font = "500 32px system-ui, sans-serif";
       ctx.fillText(st[1], colX[i], 535);
     });
     // top 4 exercises by volume
-    ctx.fillStyle = volt; ctx.font = "700 36px system-ui, sans-serif";
+    ctx.fillStyle = volt;
+    ctx.font = "700 36px system-ui, sans-serif";
     ctx.fillText("TOP LIFTS", W / 2, 650);
-    const ranked = entry.exercises.map(x => ({
-      x,
-      vol: x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0),
-      reps: x.sets.reduce((b, s) => b + (s.reps || 0), 0)
-    })).sort((a, b) => b.vol - a.vol).slice(0, 4);
+    const ranked = entry.exercises
+      .map(x => ({
+        x,
+        vol: x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0),
+        reps: x.sets.reduce((b, s) => b + (s.reps || 0), 0)
+      }))
+      .sort((a, b) => b.vol - a.vol)
+      .slice(0, 4);
     ctx.textAlign = "left";
     let y = 730;
     ranked.forEach(r => {
       const ex = byId(r.x.id);
       const name = ex ? ex.name : r.x.id;
       const shown = name.length > 30 ? name.slice(0, 29) + "…" : name;
-      ctx.fillStyle = ink; ctx.font = "600 40px system-ui, sans-serif";
+      ctx.fillStyle = ink;
+      ctx.font = "600 40px system-ui, sans-serif";
       ctx.fillText(shown, 110, y);
-      ctx.fillStyle = muted; ctx.font = "500 34px system-ui, sans-serif";
+      ctx.fillStyle = muted;
+      ctx.font = "500 34px system-ui, sans-serif";
       ctx.fillText(r.x.sets.length + " sets - " + r.reps + " reps - " + fmtW(r.vol), 110, y + 52);
       y += 130;
     });
     // footer
     ctx.textAlign = "center";
-    ctx.fillStyle = "#5b6472"; ctx.font = "500 32px system-ui, sans-serif";
+    ctx.fillStyle = "#5b6472";
+    ctx.font = "500 32px system-ui, sans-serif";
     ctx.fillText("Trained with FORGE", W / 2, H - 70);
     return canvas;
-  } catch (e) { return null; }
+  } catch (e) {
+    return null;
+  }
 }
 
-
 // AI FORM CHECK (MoveNet pose estimation, on-device)
-let formStream = null, formDetector = null, formRunning = false, formRaf = 0;
+let formStream = null,
+  formDetector = null,
+  formRunning = false,
+  formRaf = 0;
 
-
-let squatState = "up", squatReps = 0;
-
+let squatState = "up",
+  squatReps = 0;
 
 async function loadFormModel() {
   if (formDetector) return formDetector;
@@ -987,21 +1293,26 @@ async function loadFormModel() {
     await new Promise((res, rej) => {
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js";
-      s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      s.onload = res;
+      s.onerror = rej;
+      document.head.appendChild(s);
     });
   }
   if (!window.poseDetection) {
     await new Promise((res, rej) => {
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js";
-      s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      s.onload = res;
+      s.onerror = rej;
+      document.head.appendChild(s);
     });
   }
   const model = poseDetection.SupportedModels.MoveNet;
-  formDetector = await poseDetection.createDetector(model, { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING });
+  formDetector = await poseDetection.createDetector(model, {
+    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+  });
   return formDetector;
 }
-
 
 async function startFormCheck() {
   $("formFeedback").textContent = "Loading AI model…";
@@ -1013,7 +1324,8 @@ async function startFormCheck() {
     await video.play();
     $("formStart").classList.add("hidden");
     $("formStop").classList.remove("hidden");
-    squatState = "up"; squatReps = 0;
+    squatState = "up";
+    squatReps = 0;
     formRunning = true;
     formLoop();
   } catch (e) {
@@ -1021,20 +1333,22 @@ async function startFormCheck() {
   }
 }
 
-
 function stopFormCheck() {
   formRunning = false;
   cancelAnimationFrame(formRaf);
-  if (formStream) { formStream.getTracks().forEach(t => t.stop()); formStream = null; }
+  if (formStream) {
+    formStream.getTracks().forEach(t => t.stop());
+    formStream = null;
+  }
   $("formStart").classList.remove("hidden");
   $("formStop").classList.add("hidden");
   $("formVeil").classList.add("hidden");
 }
 
-
 async function formLoop() {
   if (!formRunning) return;
-  const video = $("formVideo"), canvas = $("formCanvas");
+  const video = $("formVideo"),
+    canvas = $("formCanvas");
   if (video.readyState >= 2 && formDetector) {
     const poses = await formDetector.estimatePoses(video);
     drawPose(canvas, video, poses[0]);
@@ -1043,23 +1357,30 @@ async function formLoop() {
   formRaf = requestAnimationFrame(formLoop);
 }
 
-
 function drawPose(canvas, video, pose) {
   const ctx = canvas.getContext("2d");
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!pose) return;
   ctx.fillStyle = "#a3e635";
   pose.keypoints.forEach(kp => {
-    if (kp.score > 0.3) { ctx.beginPath(); ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI); ctx.fill(); }
+    if (kp.score > 0.3) {
+      ctx.beginPath();
+      ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
   });
 }
 
-
 function analyzeSquat(pose) {
-  if (!pose) { $("formFeedback").textContent = "No body detected, step back."; return; }
+  if (!pose) {
+    $("formFeedback").textContent = "No body detected, step back.";
+    return;
+  }
   const kp = n => pose.keypoints.find(k => k.name === n);
-  const hip = kp("left_hip"), knee = kp("left_knee");
+  const hip = kp("left_hip"),
+    knee = kp("left_knee");
   if (!hip || !knee || hip.score < 0.3 || knee.score < 0.3) {
     $("formFeedback").textContent = "Show your side profile to the camera.";
     return;
@@ -1071,7 +1392,8 @@ function analyzeSquat(pose) {
     squatState = "down";
     msg = "Good depth! Drive up.";
   } else if (squatState === "down" && depth < 0) {
-    squatState = "up"; squatReps++;
+    squatState = "up";
+    squatReps++;
     msg = `Rep ${squatReps}, nice!`;
   } else if (squatState === "up") {
     msg = depth > -30 ? "Bend your knees…" : "Going down…";
@@ -1081,46 +1403,93 @@ function analyzeSquat(pose) {
   $("formFeedback").innerHTML = `${msg}<br><span class="muted" style="font-size:13px">Reps: ${squatReps}</span>`;
 }
 
-
 function openFormCheck() {
   $("formClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   $("formVeil").classList.remove("hidden");
 }
 
-
 // VOICE LOGGING
 let voiceRec = null;
 
-
 function setVoiceBtn(listening) {
-  const b = $("voiceBtn"); if (!b) return;
-  b.innerHTML = `<span class="btn-ic">` + (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") + `</span>` + (listening ? " Stop" : " Voice log");
+  const b = $("voiceBtn");
+  if (!b) return;
+  b.innerHTML =
+    `<span class="btn-ic">` +
+    (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") +
+    `</span>` +
+    (listening ? " Stop" : " Voice log");
 }
-
 
 function toggleVoiceLog() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { appAlert("Voice not supported in this browser."); return; }
-  if (voiceRec) { voiceRec.stop(); voiceRec = null; setVoiceBtn(false); return; }
+  if (!SR) {
+    appAlert("Voice not supported in this browser.");
+    return;
+  }
+  if (voiceRec) {
+    voiceRec.stop();
+    voiceRec = null;
+    setVoiceBtn(false);
+    return;
+  }
   voiceRec = new SR();
   voiceRec.lang = "en-US";
   voiceRec.onresult = e => {
     let text = e.results[0][0].transcript.toLowerCase();
     // convert word numbers to digits (speech recognition often hears "ten" not "10")
-    const WORDS = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
-      eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19, twenty:20,
-      thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90, hundred:100 };
-    text = text.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b/g, w => WORDS[w]);
+    const WORDS = {
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+      six: 6,
+      seven: 7,
+      eight: 8,
+      nine: 9,
+      ten: 10,
+      eleven: 11,
+      twelve: 12,
+      thirteen: 13,
+      fourteen: 14,
+      fifteen: 15,
+      sixteen: 16,
+      seventeen: 17,
+      eighteen: 18,
+      nineteen: 19,
+      twenty: 20,
+      thirty: 30,
+      forty: 40,
+      fifty: 50,
+      sixty: 60,
+      seventy: 70,
+      eighty: 80,
+      ninety: 90,
+      hundred: 100
+    };
+    text = text.replace(
+      /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b/g,
+      w => WORDS[w]
+    );
     // handle "twenty five" style compounds
-    text = text.replace(/(\d+)\s+(\d+)\b/g, (m, a, b) => (parseInt(a) >= 20 && parseInt(b) < 10) ? String(parseInt(a) + parseInt(b)) : m);
+    text = text.replace(/(\d+)\s+(\d+)\b/g, (m, a, b) =>
+      parseInt(a) >= 20 && parseInt(b) < 10 ? String(parseInt(a) + parseInt(b)) : m
+    );
     const repsM = text.match(/(\d+)\s*reps?/);
     const wM = text.match(/(\d+(?:\.\d+)?)\s*(kg|kilos?|lb|lbs|pounds?)/);
     // fallback: two bare numbers = reps then weight (e.g. "10 60")
-    let reps = repsM ? repsM[1] : null, weight = wM ? wM[1] : null, wUnit = wM ? wM[2] : null;
+    let reps = repsM ? repsM[1] : null,
+      weight = wM ? wM[1] : null,
+      wUnit = wM ? wM[2] : null;
     if (!reps && !weight) {
       const nums = text.match(/\d+(?:\.\d+)?/g);
-      if (nums && nums.length >= 2) { reps = nums[0]; weight = nums[1]; }
-      else if (nums && nums.length === 1) { reps = nums[0]; }
+      if (nums && nums.length >= 2) {
+        reps = nums[0];
+        weight = nums[1];
+      } else if (nums && nums.length === 1) {
+        reps = nums[0];
+      }
     }
     if (reps || weight) {
       const rows = document.querySelectorAll(".set-row2:not(.voiced)");
@@ -1129,7 +1498,10 @@ function toggleVoiceLog() {
         row.classList.add("voiced");
         if (reps) {
           const inp = row.querySelector('input[data-f="reps"]');
-          if (inp) { inp.value = reps; inp.dispatchEvent(new Event("input", { bubbles: true })); }
+          if (inp) {
+            inp.value = reps;
+            inp.dispatchEvent(new Event("input", { bubbles: true }));
+          }
         }
         if (weight) {
           const inp = row.querySelector('input[data-f="weight"]');
@@ -1150,12 +1522,14 @@ function toggleVoiceLog() {
       $("voiceStatus").textContent = `Heard: "${text}". Try "10 reps 60 kilos"`;
     }
   };
-  voiceRec.onend = () => { voiceRec = null; setVoiceBtn(false); };
+  voiceRec.onend = () => {
+    voiceRec = null;
+    setVoiceBtn(false);
+  };
   voiceRec.start();
   setVoiceBtn(true);
-  $("voiceStatus").textContent = "Listening… say \"10 reps 60 kilos\"";
+  $("voiceStatus").textContent = 'Listening… say "10 reps 60 kilos"';
 }
-
 
 // AI COACH - generates a program from your history
 function generateCoachProgram() {
@@ -1183,25 +1557,34 @@ function generateCoachProgram() {
     if (cands.length) picks.push(cands[Math.floor(Math.random() * cands.length)]);
   });
   // fill to 6 exercises with compounds
-  const compounds = EXERCISES.filter(e => ["chest", "back", "quads"].includes(e.primary) && (!myEq.length || myEq.includes(e.equipment)));
+  const compounds = EXERCISES.filter(
+    e => ["chest", "back", "quads"].includes(e.primary) && (!myEq.length || myEq.includes(e.equipment))
+  );
   while (picks.length < 6 && compounds.length) {
     const c = compounds.splice(Math.floor(Math.random() * compounds.length), 1)[0];
     if (!picks.includes(c)) picks.push(c);
   }
   const id = "coach-" + Date.now().toString(36);
   const prog = {
-    id, name: "AI Coach Plan", tagline: "Generated for your weak points: " + weak.map(g => MUSCLE_INFO[g].name).join(", "),
-    custom: true, level: "custom", daysPerWeek: 3, weeks: 4, equipment: "Mixed",
+    id,
+    name: "AI Coach Plan",
+    tagline: "Generated for your weak points: " + weak.map(g => MUSCLE_INFO[g].name).join(", "),
+    custom: true,
+    level: "custom",
+    daysPerWeek: 3,
+    weeks: 4,
+    equipment: "Mixed",
     days: [
       { name: "Day 1", exercises: picks.slice(0, 3).map(e => ({ id: e.id, sets: 3, reps: "10" })) },
       { name: "Day 2", exercises: picks.slice(3, 6).map(e => ({ id: e.id, sets: 3, reps: "10" })) },
-      { name: "Day 3", exercises: picks.slice(0, 3).map(e => ({ id: e.id, sets: 3, reps: "12" })) },
+      { name: "Day 3", exercises: picks.slice(0, 3).map(e => ({ id: e.id, sets: 3, reps: "12" })) }
     ]
   };
-  const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
+  const all = getCustomPrograms();
+  all.push(prog);
+  saveCustomPrograms(all);
   location.hash = "#/program/" + id;
 }
-
 
 // AUTO-REGULATION + DELOAD + RECOVERY
 function suggestWeight(exId) {
@@ -1221,7 +1604,6 @@ function suggestWeight(exId) {
   return null;
 }
 
-
 function lastSessionFull(exId) {
   // returns the most recent logged session's sets for this exercise
   const log = getLog();
@@ -1233,7 +1615,6 @@ function lastSessionFull(exId) {
   }
   return null;
 }
-
 
 function lastSessionSummary(ls) {
   if (!ls || !ls.sets.length) return "";
@@ -1248,7 +1629,6 @@ function lastSessionSummary(ls) {
   return groups.map(g => `${g.n}x${g.reps} @ ${fmtW(g.weight)}`).join(", ");
 }
 
-
 function checkDeload() {
   const log = getLog();
   if (log.length < 6) return false;
@@ -1257,10 +1637,10 @@ function checkDeload() {
   const week1 = log.filter(w => now - w.ts < 7 * 864e5);
   const week2 = log.filter(w => now - w.ts >= 7 * 864e5 && now - w.ts < 14 * 864e5);
   if (week1.length < 2 || week2.length < 2) return false;
-  const vol = ws => ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
+  const vol = ws =>
+    ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
   return vol(week1) < vol(week2) * 0.85;
 }
-
 
 function recoveryScore() {
   const log = getLog();
