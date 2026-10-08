@@ -23,6 +23,7 @@ const MUSCLE_INFO = {
   cardio:     { name: "Cardio",       desc: "Engine building. Heart, lungs and work capacity." }
 };
 
+
 /* ---------- custom exercises (user-created, stored locally) ---------- */
 function getCustomExercises() {
   try {
@@ -30,17 +31,27 @@ function getCustomExercises() {
     return Array.isArray(v) ? v : [];
   } catch (e) { return []; }
 }
+
+
 function saveCustomExercises(list) {
   try { localStorage.setItem("forge-custom-exercises", JSON.stringify(list)); } catch (e) {}
 }
+
+
 EXERCISES.push(...getCustomExercises());
+
+
 function openCustomModal() {
   $("customName").value = "";
   $("customSecondary").querySelectorAll("input:checked").forEach(c => { c.checked = false; });
   $("customVeil").classList.remove("hidden");
   setTimeout(() => $("customName").focus(), 60);
 }
+
+
 function closeCustomModal() { $("customVeil").classList.add("hidden"); }
+
+
 function saveCustomExercise() {
   const name = $("customName").value.trim();
   if (!name) { appAlert("Give your exercise a name first."); return; }
@@ -59,29 +70,58 @@ function saveCustomExercise() {
   closeCustomModal();
   initExercises(); renderExercises();
 }
+
+
 const MANNEQUIN_IDS = ["chest","back","lats","traps","lower-back","front-delt","side-delt","rear-delt",
   "biceps","triceps","forearms","abs","obliques","glutes","quads","hamstrings","calves"];
+
+
 const DELT_TO_GROUP = { "front-delt": "shoulders", "side-delt": "shoulders", "rear-delt": "shoulders" };
+
+
 const groupOf = (mid) => DELT_TO_GROUP[mid] || mid;
+
+
 function expandMuscles(groupId) {
   if (groupId === "shoulders") return ["front-delt", "side-delt", "rear-delt"];
   if (groupId === "full-body" || groupId === "cardio") return MANNEQUIN_IDS.slice();
   return [groupId];
 }
 
+
 /* ---------- accent colors ---------- */
 const ACCENTS = [
-  { id: "volt",    name: "Volt",    color: "#d4ff3f", ink: "#0b0d12" },
-  { id: "ember",   name: "Ember",   color: "#ff7847", ink: "#0b0d12" },
-  { id: "aqua",    name: "Aqua",    color: "#38e1ff", ink: "#0b0d12" },
-  { id: "violet",  name: "Violet",  color: "#b49aff", ink: "#0b0d12" },
-  { id: "crimson", name: "Crimson", color: "#ff4d6d", ink: "#ffffff" },
+  { id: "volt",    name: "Volt",    color: "#d4ff3f", ink: "#0b0d12" }
+
+
+,
+  { id: "ember",   name: "Ember",   color: "#ff7847", ink: "#0b0d12" }
+
+
+,
+  { id: "aqua",    name: "Aqua",    color: "#38e1ff", ink: "#0b0d12" }
+
+
+,
+  { id: "violet",  name: "Violet",  color: "#b49aff", ink: "#0b0d12" }
+
+
+,
+  { id: "crimson", name: "Crimson", color: "#ff4d6d", ink: "#ffffff" }
+
+
+,
   { id: "gold",    name: "Gold",    color: "#ffd23f", ink: "#0b0d12" }
+
+
 ];
+
+
 function currentAccent() {
   const id = localStorage.getItem("forge-accent") || "volt";
   return ACCENTS.find(a => a.id === id) || ACCENTS[0];
 }
+
 
 /* ---------- 3D body viewer ---------- */
 function createBodyViewer(container, opts) {
@@ -498,24 +538,43 @@ function createBodyViewer(container, opts) {
   };
 }
 
+
 /* ---------- favorites & completed ---------- */
 const favs = new Set(JSON.parse(localStorage.getItem("forge-favs") || "[]"));
-const done = JSON.parse(localStorage.getItem("forge-done") || "{}"); // "progId:dayIdx" -> [dates]
+
+
+const done = JSON.parse(localStorage.getItem("forge-done") || "{}");
+
+
+// "progId:dayIdx" -> [dates]
 function saveFavs() {
   localStorage.setItem("forge-favs", JSON.stringify([...favs]));
   document.getElementById("favCount").textContent = favs.size;
 }
+
+
 function saveDone() { localStorage.setItem("forge-done", JSON.stringify(done)); }
+
+
 const progById = id => allPrograms().find(p => p.id === id);
+
+
 function getCustomPrograms() {
   try { const l = JSON.parse(localStorage.getItem("forge-custom-programs") || "[]"); return Array.isArray(l) ? l : []; }
   catch (e) { return []; }
 }
+
+
 function saveCustomPrograms(l) { localStorage.setItem("forge-custom-programs", JSON.stringify(l)); }
+
+
 function allPrograms() { return PROGRAMS.concat(getCustomPrograms()); }
+
+
 function deleteCustomProgram(id) {
   saveCustomPrograms(getCustomPrograms().filter(p => p.id !== id));
 }
+
 
 /* ---------- accent ---------- */
 function applyAccent(id, save) {
@@ -527,7 +586,11 @@ function applyAccent(id, save) {
   document.querySelectorAll(".accent-pick").forEach(b => b.classList.toggle("on", b.dataset.accent === a.id));
   if ($("mChart") && $("mChart").children.length) { try { renderMeasureChart(); } catch (e) {} }
 }
+
+
 let finishPreviewViewer = null;
+
+
 function openSettings() {
   const grid = $("accentGrid");
   const cur = currentAccent().id;
@@ -547,6 +610,8 @@ function openSettings() {
     }
   } catch (e) {}
 }
+
+
 function closeSettings() {
   $("settingsVeil").classList.add("hidden");
   try {
@@ -554,6 +619,8 @@ function closeSettings() {
     const pc = $("finishPreview"); if (pc) pc.innerHTML = "";
   } catch (e) {}
 }
+
+
 function syncSettingsUI() {
   const s = getSettings();
   document.querySelectorAll("#unitSeg .seg").forEach(b => b.classList.toggle("on", b.dataset.unit === s.units));
@@ -569,6 +636,7 @@ function syncSettingsUI() {
   $("eqGrid").innerHTML = eqs.map(q =>
     `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`).join("");
 }
+
 
 /* ---------- i18n ---------- */
 const STRINGS = {
@@ -625,10 +693,14 @@ const STRINGS = {
     b_name: "Nom du programme", b_name_ph: "ex. Mon split push", b_tagline: "Slogan (optionnel)", b_tagline_ph: "ex. 3 jours, haltères uniquement",
   }
 };
+
+
 function t(key) {
   const lang = getSettings().lang || "en";
   return (STRINGS[lang] && STRINGS[lang][key]) || STRINGS.en[key] || key;
 }
+
+
 function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const txt = t(el.dataset.i18n);
@@ -646,29 +718,57 @@ function applyI18n() {
   document.documentElement.lang = getSettings().lang || "en";
 }
 
+
 /* ---------- settings state ---------- */
 const DEFAULT_SETTINGS = { units: "kg", sound: true, demoAutoplay: true, demoSpeed: 1, reduceMotion: false, myEquipment: [], lang: "en", autoRest: true, restShort: 60, restLong: 180, voiceCues: false, reminder: "", advanced: false, haptics: true, bodyFinish: "standard" };
+
+
 function getSettings() {
   try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem("forge-settings") || "{}")); }
   catch (e) { return Object.assign({}, DEFAULT_SETTINGS); }
 }
+
+
 function saveSettings(s) { localStorage.setItem("forge-settings", JSON.stringify(s)); }
+
+
 function unitLabel() { return getSettings().units; }
+
+
 function fromKg(kg) { const v = getSettings().units === "lb" ? kg * 2.20462 : kg; return Math.round(v * 10) / 10; }
+
+
 function toKg(v) { return getSettings().units === "lb" ? v / 2.20462 : v; }
+
+
 function fmtW(kg) { return fromKg(kg) + " " + unitLabel(); }
+
+
 function fmtDate(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+
 
 /* ---------- workout log ---------- */
 function getLog() {
   try { const l = JSON.parse(localStorage.getItem("forge-log") || "[]"); return Array.isArray(l) ? l : []; }
   catch (e) { return []; }
 }
+
+
 function saveLog(l) { localStorage.setItem("forge-log", JSON.stringify(l)); }
+
+
 function getGoals() { try { const g = JSON.parse(localStorage.getItem("forge-goals") || "[]"); return Array.isArray(g) ? g : []; } catch (e) { return []; } }
+
+
 function saveGoals(g) { localStorage.setItem("forge-goals", JSON.stringify(g)); }
+
+
 function getTemplates() { try { const t = JSON.parse(localStorage.getItem("forge-templates") || "[]"); return Array.isArray(t) ? t : []; } catch (e) { return []; } }
+
+
 function saveTemplates(t) { localStorage.setItem("forge-templates", JSON.stringify(t)); }
+
+
 function lastWeightKg(exId) {
   const log = getLog();
   for (let i = log.length - 1; i >= 0; i--) {
@@ -677,6 +777,8 @@ function lastWeightKg(exId) {
   }
   return null;
 }
+
+
 function exercisePR(exId) {
   let best = null;
   getLog().forEach(w => w.exercises.forEach(x => {
@@ -688,6 +790,8 @@ function exercisePR(exId) {
   }));
   return best;
 }
+
+
 function muscleLastTrained() {
   const last = {};
   getLog().forEach(w => {
@@ -700,19 +804,31 @@ function muscleLastTrained() {
   });
   return last;
 }
+
+
 function daysAgo(dateStr) {
   const d = new Date(dateStr + "T12:00:00"), n = new Date();
   n.setHours(12, 0, 0, 0);
   return Math.max(0, Math.round((n - d) / 864e5));
 }
+
+
 function getPain() {
   try { return JSON.parse(localStorage.getItem("forge-pain") || "{}"); } catch (e) { return {}; }
 }
+
+
 function savePain(p) { try { localStorage.setItem("forge-pain", JSON.stringify(p)); } catch (e) {} }
+
+
 function getSoreness() {
   try { return JSON.parse(localStorage.getItem("forge-sore") || "{}"); } catch (e) { return {}; }
 }
+
+
 function saveSoreness(s) { try { localStorage.setItem("forge-sore", JSON.stringify(s)); } catch (e) {} }
+
+
 function muscleHeat() {
   const last = {};
   getLog().forEach(w => {
@@ -729,6 +845,8 @@ function muscleHeat() {
   for (const g in last) heat[g] = last[g] <= 1 ? 1 : last[g] === 2 ? 0.65 : last[g] === 3 ? 0.35 : 0;
   return heat;
 }
+
+
 function muscleFatigue() {
   // accumulated volume per muscle, decaying over 7 days
   const fatigue = {};
@@ -749,6 +867,8 @@ function muscleFatigue() {
   for (const g in fatigue) out[g] = Math.min(1, fatigue[g] / max);
   return out;
 }
+
+
 function startReplay(entry) {
   const v = window._bodyViewer;
   if (!v || !entry) return;
@@ -785,11 +905,15 @@ function startReplay(entry) {
   };
   step();
 }
+
+
 function latestBodyweightKg() {
   const m = getMeasures();
   for (let i = m.length - 1; i >= 0; i--) if (m[i].weight) return toKg(m[i].weight);
   return 0;
 }
+
+
 function setVolumeKg(exId, s) {
   const ex = byId(exId);
   if (ex && ex.equipment === "bodyweight") {
@@ -797,9 +921,13 @@ function setVolumeKg(exId, s) {
   }
   return (s.weight || 0) * (s.reps || 0);
 }
+
+
 function totalVolumeKg(log) {
   return (log || getLog()).reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((d, s) => d + setVolumeKg(x.id, s), 0), 0), 0);
 }
+
+
 function volumeByMuscle(days) {
   const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
   const vol = {};
@@ -813,6 +941,8 @@ function volumeByMuscle(days) {
   });
   return vol;
 }
+
+
 function weeklyStreak(log) {
   const weeks = new Set((log || getLog()).map(w => {
     const d = new Date((w.date || "") + "T12:00:00");
@@ -826,6 +956,8 @@ function weeklyStreak(log) {
   while (weeks.has(fmtDate(d))) { streak++; d.setDate(d.getDate() - 7); }
   return streak;
 }
+
+
 function workoutStreak() {
   const days = [...new Set(getLog().map(w => w.date))].sort();
   if (!days.length) return 0;
@@ -849,19 +981,27 @@ function workoutStreak() {
   return streak;
 }
 
+
 /* ---------- active program ---------- */
 const getActiveProg = () => localStorage.getItem("forge-active") || null;
+
+
 function setActiveProg(id) {
   if (id) localStorage.setItem("forge-active", id);
   else localStorage.removeItem("forge-active");
 }
+
+
 function nextDayIdx(p) {
   const i = p.days.findIndex((d, di) => !(done[p.id + ":" + di] || []).length);
   return i === -1 ? 0 : i;
 }
 
+
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
+
+
 const QUOTES = [
   "The last three or four reps is what makes the muscle grow.",
   "Strength does not come from winning. Your struggles develop your strengths.",
@@ -872,6 +1012,8 @@ const QUOTES = [
   "Discipline is choosing what you want most over what you want now.",
   "The pain you feel today will be the strength you feel tomorrow."
 ];
+
+
 function miniToast(msg) {
   const t = document.createElement("div");
   t.className = "mini-toast";
@@ -880,8 +1022,14 @@ function miniToast(msg) {
   requestAnimationFrame(() => t.classList.add("show"));
   setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 2200);
 }
+
+
 let logoTaps = 0, logoTimer = null;
+
+
 const footBrand = document.querySelector(".foot-brand");
+
+
 if (footBrand) {
   footBrand.style.cursor = "pointer";
   footBrand.addEventListener("click", (e) => {
@@ -900,12 +1048,20 @@ if (footBrand) {
     }
   });
 }
+
+
 const fq = $("footQuote");
+
+
 if (fq) {
   const d = new Date();
   fq.textContent = "\u201C" + QUOTES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % QUOTES.length] + "\u201D";
 }
+
+
 const fa = $("footAccents");
+
+
 if (fa) {
   fa.innerHTML = ACCENTS.map(a =>
     `<button style="background:${a.color}" data-faccent="${a.id}" aria-label="${a.name}" title="${a.name}" class="${(localStorage.getItem("forge-accent") || "volt") === a.id ? "on" : ""}"></button>`
@@ -917,7 +1073,10 @@ if (fa) {
     };
   });
 }
+
+
 const CHANGELOG = [
+  ["v11.37", "code formatting: 2 blank lines between functions, 1 declaration per line in CSS, fixed split brace bugs"],
   ["v11.36", "Refactor: split codebase into js and css modules"],
   ["v11.35", "Fix Clips button navigating to exercise page"],
   ["v11.34", "Fix mirror rest timer, uniform action buttons"],
@@ -977,7 +1136,11 @@ const CHANGELOG = [
   ["v10.78", "Fixed broken styles from footer CSS."],
   ["v10.77", "New centered footer design."]
 ];
+
+
 const fv = $("footVer"), fc = $("footChangelog");
+
+
 if (fv && fc) {
   const N = 5;
   const row = ([v, t]) => `<div><b>${v}</b> - ${t}</div>`;
@@ -996,36 +1159,69 @@ if (fv && fc) {
   };
   fv.onclick = () => fc.classList.toggle("hidden");
 }
+
+
 const hg = $("homeGreet");
+
+
 if (hg) {
   const hr = new Date().getHours();
   hg.textContent = hr < 5 ? "Night owl" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
 }
+
+
 const toTop = $("toTop");
+
+
 if (toTop) {
   window.addEventListener("scroll", () => {
     toTop.classList.toggle("show", window.scrollY > 600);
   }, { passive: true });
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+
 const emptyNote = (title, hint) => `<div class="empty-note"><p><b>${title}</b></p><p>${hint}</p></div>`;
+
+
 const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+
 const eqName = { bodyweight: "Bodyweight", barbell: "Barbell", dumbbell: "Dumbbell", cable: "Cable", machine: "Machine", kettlebell: "Kettlebell", band: "Band" };
+
+
 const lvlDots = l => l === "beginner" ? "●○○" : l === "intermediate" ? "●●○" : "●●●";
+
+
 const byId = id => EXERCISES.find(e => e.id === id);
+
+
 let viewers = [];
+
+
 function clearViewers() { viewers.forEach(v => v.dispose()); viewers = []; }
+
+
 function applyBodyFinish(name) {
   viewers.forEach(v => { if (v.setFinish) v.setFinish(name); });
   if (window._bodyViewer && window._bodyViewer.setFinish && !viewers.includes(window._bodyViewer)) window._bodyViewer.setFinish(name);
 }
+
+
 let demos = [];
+
+
 function clearDemos() { demos.forEach(d => d.destroy()); demos = []; }
+
 
 function heartBtn(ex) {
   return `<button class="heart ${favs.has(ex.id) ? "faved" : ""}" data-fav="${ex.id}" title="Save" aria-label="Save to favorites">${window.FORGE_ICON("heart")}</button>`;
 }
+
+
 function cardHTML(ex) {
   return `<div class="card" data-ex="${ex.id}">
     ${heartBtn(ex)}
@@ -1037,6 +1233,8 @@ function cardHTML(ex) {
     </div>
   </div>`;
 }
+
+
 document.addEventListener("click", e => {
   const fav = e.target.closest("[data-fav]");
   if (fav) {
@@ -1055,7 +1253,11 @@ document.addEventListener("click", e => {
   }
   const card = e.target.closest("[data-ex]");
   if (card) location.hash = "#/exercise/" + card.dataset.ex;
-});
+}
+
+
+);
+
 
 /* audio beep: respects sound setting, optional freq/dur */
 function beep(freq, dur) {

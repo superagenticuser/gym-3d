@@ -1,8 +1,11 @@
 /* FORGE - main views: home, exercises, detail, body, favorites, tools */
 'use strict';
 
+
 /* ---------- views ---------- */
 const views = ["home", "exercises", "detail", "body", "favorites", "programs", "program", "workout", "progress", "builder", "privacy"];
+
+
 function show(name) {
   clearViewers();
   clearDemos();
@@ -30,6 +33,7 @@ function show(name) {
   }
   window.scrollTo(0, 0);
 }
+
 
 // HOME
 // muscle recovery stats (shared by Home suggestion and 3D Body dashboard)
@@ -65,6 +69,8 @@ function getRecoveryStats() {
   const best = stats.filter(s => majors.includes(s.g)).sort((a, b) => b.freshness - a.freshness)[0];
   return { stats, best };
 }
+
+
 // 3D Body: full recovery dashboard
 function renderBodyRecovery() {
   const el = $("bodyRecoveryDash");
@@ -82,6 +88,8 @@ function renderBodyRecovery() {
     </div>
   </div>`;
 }
+
+
 function renderHome() {
   const _rs = getSettings().reminder;
   const _rb = $("reminderBanner");
@@ -246,8 +254,11 @@ function renderHome() {
   v.dispose = () => { clearInterval(cyc); origDispose(); };
 }
 
+
 // EXERCISES
 const filters = { q: "", muscle: "", eq: "", lvl: "", myEq: false };
+
+
 function initExercises() {
   const chips = ["", ...Object.keys(MUSCLE_INFO)];
   $("muscleChips").innerHTML = chips.map(id =>
@@ -256,6 +267,8 @@ function initExercises() {
   const eqs = [...new Set(EXERCISES.map(e => e.equipment))].sort();
   $("eqFilter").innerHTML = `<option value="">All equipment</option>` + eqs.map(q => `<option value="${q}">${eqName[q]}</option>`).join("");
 }
+
+
 function filtered() {
   const q = filters.q.toLowerCase();
   const myEq = getSettings().myEquipment || [];
@@ -268,11 +281,14 @@ function filtered() {
     return true;
   });
 }
+
+
 function renderExercises() {
   const list = filtered();
   $("exCount").textContent = list.length;
   $("exerciseGrid").innerHTML = list.map(cardHTML).join("") || `<p class="muted">No exercises match. Try clearing filters.</p>`;
 }
+
 
 // DETAIL
 function syncDetailFav(ex) {
@@ -281,6 +297,8 @@ function syncDetailFav(ex) {
   b.classList.toggle("faved", favs.has(ex.id));
   b.innerHTML = window.FORGE_ICON("heart") + (favs.has(ex.id) ? " Saved to favorites" : " Save to favorites");
 }
+
+
 function renderDetail(id) {
   const ex = byId(id);
   if (!ex) { location.hash = "#/exercises"; return; }
@@ -387,6 +405,8 @@ function renderDetail(id) {
   $("dFront").onclick = () => setV(true);
   $("dBack").onclick = () => setV(false);
 }
+
+
 document.addEventListener("click", e => {
   const g = e.target.closest("[data-goto-muscle]");
   if (g) location.hash = "#/exercises?m=" + g.dataset.gotoMuscle;
@@ -401,7 +421,11 @@ document.addEventListener("click", e => {
     selectMuscle(grp);
     return;
   }
-});
+}
+
+
+);
+
 
 // BODY MAP
 function openMuscleSheet(mid) {
@@ -429,6 +453,8 @@ function openMuscleSheet(mid) {
   document.addEventListener("keydown", onEsc);
   document.body.appendChild(veil);
 }
+
+
 function renderBody(selected) {
   const v = createBodyViewer($("body3d"), {
     autoRotate: !getSettings().reduceMotion, dist: 6.1,
@@ -483,6 +509,8 @@ function renderBody(selected) {
   selectMuscle(selected || "chest");
   renderBodyRecovery();
 }
+
+
 function selectMuscle(groupId) {
   const v = window._bodyViewer;
   const info = MUSCLE_INFO[groupId];
@@ -523,6 +551,7 @@ function selectMuscle(groupId) {
     : `<div class="empty-note"><p><b>No exercises yet.</b></p><p>Exercises for this muscle will appear here.</p></div>`;
 }
 
+
 // FAVORITES
 function renderFavorites() {
   const list = EXERCISES.filter(e => favs.has(e.id));
@@ -532,18 +561,34 @@ function renderFavorites() {
   if (!list.length) fe.innerHTML = emptyNote("No favorites yet", "Tap the heart on any exercise to save it here.");
 }
 
+
 // QUIZ
 const QUIZ_QUESTIONS = [
   { key: "days", title: "How many days per week can you train?", title_fr: "Combien de jours par semaine pouvez-vous vous entraîner ?", options: [
-    { v: 2, label: "2 days", label_fr: "2 jours" }, { v: 3, label: "3 days", label_fr: "3 jours" }, { v: 4, label: "4 days", label_fr: "4 jours" }, { v: 6, label: "5+ days", label_fr: "5+ jours" } ] },
+    { v: 2, label: "2 days", label_fr: "2 jours" }, { v: 3, label: "3 days", label_fr: "3 jours" }, { v: 4, label: "4 days", label_fr: "4 jours" }, { v: 6, label: "5+ days", label_fr: "5+ jours" } ] }
+
+
+,
   { key: "equip", title: "What equipment do you have access to?", title_fr: "De quel équipement disposez-vous ?", options: [
     { v: "full", label: "Full gym", label_fr: "Salle complète" }, { v: "dumbbells", label: "Dumbbells + bench", label_fr: "Haltères + banc" },
-    { v: "dumbbells-only", label: "Dumbbells only", label_fr: "Haltères uniquement" }, { v: "bodyweight", label: "Bodyweight / minimal", label_fr: "Poids du corps / minimal" } ] },
+    { v: "dumbbells-only", label: "Dumbbells only", label_fr: "Haltères uniquement" }, { v: "bodyweight", label: "Bodyweight / minimal", label_fr: "Poids du corps / minimal" } ] }
+
+
+,
   { key: "goal", title: "What's your main goal?", title_fr: "Quel est votre objectif principal ?", options: [
-    { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" }, { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" }, { v: "fitness", label: "General fitness", label_fr: "Forme générale" } ] },
+    { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" }, { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" }, { v: "fitness", label: "General fitness", label_fr: "Forme générale" } ] }
+
+
+,
 ];
+
+
 function ql(o) { return getSettings().lang === "fr" ? (o.label_fr || o.label) : o.label; }
+
+
 function qt(q) { return getSettings().lang === "fr" ? (q.title_fr || q.title) : q.title; }
+
+
 const QUIZ_FIT = {
   "full-body-starter": { days: [2, 3], equip: ["dumbbells", "dumbbells-only", "bodyweight"], goal: ["muscle", "fitness"] },
   "push-pull-legs":    { days: [6], equip: ["full"], goal: ["muscle"] },
@@ -552,14 +597,22 @@ const QUIZ_FIT = {
   "dumbbell-home":     { days: [2, 3], equip: ["dumbbells", "dumbbells-only"], goal: ["fitness", "muscle"] },
   "hiit-conditioning": { days: [3, 4], equip: ["bodyweight", "dumbbells-only"], goal: ["fitness"] },
 };
+
+
 let quizState = null;
+
+
 function openQuiz() {
   quizState = { step: 0, answers: {} };
   $("quizClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   renderQuizStep();
   $("quizVeil").classList.remove("hidden");
 }
+
+
 function closeQuiz() { $("quizVeil").classList.add("hidden"); }
+
+
 function renderQuizStep() {
   const q = QUIZ_QUESTIONS[quizState.step];
   const fr = getSettings().lang === "fr";
@@ -571,6 +624,8 @@ function renderQuizStep() {
     `</div>` +
     (quizState.step > 0 ? `<button class="btn btn-ghost btn-sm" id="quizBack" style="margin-top:14px">${fr ? "Retour" : "Back"}</button>` : "");
 }
+
+
 function quizScore(p, a) {
   const fit = QUIZ_FIT[p.id];
   if (!fit) return { score: 0, reasons: [] };
@@ -582,6 +637,8 @@ function quizScore(p, a) {
   if (p.level === "beginner") s += 0.5;
   return { score: s, reasons };
 }
+
+
 function renderQuizResult() {
   const a = quizState.answers;
   const fr = getSettings().lang === "fr";
@@ -604,14 +661,21 @@ function renderQuizResult() {
      ${ranked[1] ? `<p class="muted" style="margin-top:16px;font-size:13px">${fr ? "Aussi : " : "Runner-up: "}<a href="#/program/${ranked[1].p.id}" style="color:var(--volt)">${esc(ranked[1].p.name)}</a></p>` : ""}`;
 }
 
+
 // PROGRAM BUILDER
 let builder = null;
+
+
 let pickerDay = -1;
+
+
 function newBuilder() {
   builder = { name: "", tagline: "", days: [{ name: "Day 1", exercises: [] }] };
   $("bName").value = ""; $("bTagline").value = "";
   renderBuilder();
 }
+
+
 function renderBuilder() {
   if (!builder) newBuilder();
   $("bDays").innerHTML = builder.days.map((d, di) => `
@@ -641,6 +705,8 @@ function renderBuilder() {
       </div>
     </div>`).join("");
 }
+
+
 function openPicker(di) {
   pickerDay = di; templateDay = -1;
   $("pickerTitle").textContent = "Add exercises";
@@ -650,8 +716,14 @@ function openPicker(di) {
   renderPicker("");
   $("pickerVeil").classList.remove("hidden");
 }
+
+
 function closePicker() { $("pickerVeil").classList.add("hidden"); pickerDay = -1; }
+
+
 let templateDay = -1;
+
+
 function openTemplatePicker(di) {
   templateDay = di;
   const tpl = getTemplates();
@@ -667,6 +739,8 @@ function openTemplatePicker(di) {
     </div>`).join("") : `<div class="empty-note"><p><b>No templates yet.</b></p><p>Build a day and tap "Save as template".</p></div>`;
   $("pickerVeil").classList.remove("hidden");
 }
+
+
 function renderPicker(q) {
   q = q.toLowerCase();
   const inDay = pickerDay >= 0 ? new Set(builder.days[pickerDay].exercises.map(x => x.id)) : new Set();
@@ -679,6 +753,8 @@ function renderPicker(q) {
       ${inDay.has(e.id) ? `<span class="added">Added</span>` : ""}
     </button>`).join("") || `<p class="muted">No matches.</p>`;
 }
+
+
 function saveBuilder() {
   builder.name = $("bName").value.trim();
   builder.tagline = $("bTagline").value.trim() || "Custom program";
@@ -702,6 +778,7 @@ function saveBuilder() {
   location.hash = "#/program/" + id;
 }
 
+
 // PLATE CALCULATOR
 // Plate colors follow the common competition scheme (kg) / gym scheme (lb)
 const PLATE_COLORS = {
@@ -709,6 +786,8 @@ const PLATE_COLORS = {
   2.5: "#c0392b", 1.25: "#95a5a6",
   45: "#d43a2f", 35: "#2f6fd4"
 };
+
+
 function plateDiagramSVG(used, units) {
   const maxW = units === "kg" ? 25 : 45;
   const W = 400, H = 130, cx = W / 2, cy = H / 2;
@@ -760,6 +839,8 @@ function plateDiagramSVG(used, units) {
   svg += `</svg>`;
   return svg;
 }
+
+
 function calcPlates() {
   const units = getSettings().units;
   const bar = parseFloat($("plateBar").value) || 0;
@@ -783,6 +864,8 @@ function calcPlates() {
       : `<p class="muted">Just the bar.</p>`);
   }
 }
+
+
 function openPlates() {
   const units = getSettings().units;
   $("plateBar").value = units === "kg" ? 20 : 45;
@@ -790,6 +873,7 @@ function openPlates() {
   calcPlates();
   $("plateVeil").classList.remove("hidden");
 }
+
 
 // FORM CUES
 const FORM_CUES = {
@@ -805,6 +889,7 @@ const FORM_CUES = {
   "abs": ["Exhale on the effort", "Don't pull your neck", "Slow and controlled"],
   "default": ["Breathe steadily", "Control the weight both ways", "Stop if form breaks down"]
 };
+
 
 // SHARE CARD (Feature 7): renders a 1080x1350 portrait workout card to an offscreen canvas
 function generateShareCard(entry) {
@@ -888,9 +973,14 @@ function generateShareCard(entry) {
   } catch (e) { return null; }
 }
 
+
 // AI FORM CHECK (MoveNet pose estimation, on-device)
 let formStream = null, formDetector = null, formRunning = false, formRaf = 0;
+
+
 let squatState = "up", squatReps = 0;
+
+
 async function loadFormModel() {
   if (formDetector) return formDetector;
   if (!window.tf) {
@@ -911,6 +1001,8 @@ async function loadFormModel() {
   formDetector = await poseDetection.createDetector(model, { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING });
   return formDetector;
 }
+
+
 async function startFormCheck() {
   $("formFeedback").textContent = "Loading AI model…";
   try {
@@ -928,6 +1020,8 @@ async function startFormCheck() {
     $("formFeedback").textContent = "Camera unavailable: " + e.message;
   }
 }
+
+
 function stopFormCheck() {
   formRunning = false;
   cancelAnimationFrame(formRaf);
@@ -936,6 +1030,8 @@ function stopFormCheck() {
   $("formStop").classList.add("hidden");
   $("formVeil").classList.add("hidden");
 }
+
+
 async function formLoop() {
   if (!formRunning) return;
   const video = $("formVideo"), canvas = $("formCanvas");
@@ -946,6 +1042,8 @@ async function formLoop() {
   }
   formRaf = requestAnimationFrame(formLoop);
 }
+
+
 function drawPose(canvas, video, pose) {
   const ctx = canvas.getContext("2d");
   canvas.width = video.videoWidth; canvas.height = video.videoHeight;
@@ -956,6 +1054,8 @@ function drawPose(canvas, video, pose) {
     if (kp.score > 0.3) { ctx.beginPath(); ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI); ctx.fill(); }
   });
 }
+
+
 function analyzeSquat(pose) {
   if (!pose) { $("formFeedback").textContent = "No body detected, step back."; return; }
   const kp = n => pose.keypoints.find(k => k.name === n);
@@ -980,17 +1080,24 @@ function analyzeSquat(pose) {
   }
   $("formFeedback").innerHTML = `${msg}<br><span class="muted" style="font-size:13px">Reps: ${squatReps}</span>`;
 }
+
+
 function openFormCheck() {
   $("formClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   $("formVeil").classList.remove("hidden");
 }
 
+
 // VOICE LOGGING
 let voiceRec = null;
+
+
 function setVoiceBtn(listening) {
   const b = $("voiceBtn"); if (!b) return;
   b.innerHTML = `<span class="btn-ic">` + (window.FORGE_ICON ? window.FORGE_ICON(listening ? "square" : "mic") : "") + `</span>` + (listening ? " Stop" : " Voice log");
 }
+
+
 function toggleVoiceLog() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { appAlert("Voice not supported in this browser."); return; }
@@ -1049,6 +1156,7 @@ function toggleVoiceLog() {
   $("voiceStatus").textContent = "Listening… say \"10 reps 60 kilos\"";
 }
 
+
 // AI COACH - generates a program from your history
 function generateCoachProgram() {
   const log = getLog();
@@ -1093,6 +1201,8 @@ function generateCoachProgram() {
   const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
   location.hash = "#/program/" + id;
 }
+
+
 // AUTO-REGULATION + DELOAD + RECOVERY
 function suggestWeight(exId) {
   // find last logged weight for this exercise, suggest +2.5% if reps were high
@@ -1110,6 +1220,8 @@ function suggestWeight(exId) {
   }
   return null;
 }
+
+
 function lastSessionFull(exId) {
   // returns the most recent logged session's sets for this exercise
   const log = getLog();
@@ -1121,6 +1233,8 @@ function lastSessionFull(exId) {
   }
   return null;
 }
+
+
 function lastSessionSummary(ls) {
   if (!ls || !ls.sets.length) return "";
   // compact: group identical sets, e.g. "3x8 @ 60kg"
@@ -1133,6 +1247,8 @@ function lastSessionSummary(ls) {
   });
   return groups.map(g => `${g.n}x${g.reps} @ ${fmtW(g.weight)}`).join(", ");
 }
+
+
 function checkDeload() {
   const log = getLog();
   if (log.length < 6) return false;
@@ -1144,6 +1260,8 @@ function checkDeload() {
   const vol = ws => ws.reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
   return vol(week1) < vol(week2) * 0.85;
 }
+
+
 function recoveryScore() {
   const log = getLog();
   if (!log.length) return 100;
@@ -1154,4 +1272,3 @@ function recoveryScore() {
   let score = 100 - Math.min(30, daysSince * 10) - Math.min(20, lastVol / 500);
   return Math.max(0, Math.round(score));
 }
-

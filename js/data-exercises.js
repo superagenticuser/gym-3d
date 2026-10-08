@@ -16,7 +16,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "incline-dumbbell-press",
   "name": "Incline Dumbbell Press",
@@ -34,7 +37,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "push-up",
   "name": "Push-Up",
@@ -52,7 +58,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "incline-barbell-press",
   "name": "Incline Barbell Press",
@@ -69,7 +78,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-fly",
   "name": "Dumbbell Fly",
@@ -84,7 +96,10 @@ const EXERCISES = [
    "Squeeze your pecs to bring the weights back together over your chest.",
    "Keep the elbow angle fixed. This is a chest isolation move, not a press."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-crossover",
   "name": "Cable Crossover",
@@ -99,7 +114,10 @@ const EXERCISES = [
    "Squeeze hard for a second at full contraction.",
    "Control the return until you feel a stretch, then repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "decline-bench-press",
   "name": "Decline Bench Press",
@@ -116,7 +134,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "chest-dip",
   "name": "Chest Dip",
@@ -133,7 +154,10 @@ const EXERCISES = [
    "Drive back up without shrugging or swinging your legs.",
    "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
- },
+ }
+
+
+,
  {
   "id": "machine-chest-press",
   "name": "Machine Chest Press",
@@ -150,7 +174,10 @@ const EXERCISES = [
    "Squeeze briefly, then lower slowly back to the start.",
    "Don't let the weight stack slam between reps."
   ]
- },
+ }
+
+
+,
  {
   "id": "floor-press",
   "name": "Floor Press",
@@ -167,7 +194,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "landmine-press",
   "name": "Landmine Press",
@@ -185,7 +215,10 @@ const EXERCISES = [
    "Lower it back to your shoulder with control.",
    "Keep your ribs down. Don't overarch your lower back."
   ]
- },
+ }
+
+
+,
  {
   "id": "weighted-push-up",
   "name": "Weighted Push-Up",
@@ -202,7 +235,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "archer-push-up",
   "name": "Archer Push-Up",
@@ -219,7 +255,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "incline-cable-fly",
   "name": "Incline Cable Fly",
@@ -234,7 +273,10 @@ const EXERCISES = [
    "Squeeze hard for a second at full contraction.",
    "Control the return until you feel a stretch, then repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "svend-press",
   "name": "Svend Press",
@@ -251,7 +293,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "decline-push-up",
   "name": "Decline Push-Up",
@@ -268,7 +313,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "machine-chest-fly",
   "name": "Machine Chest Fly",
@@ -283,7 +331,10 @@ const EXERCISES = [
    "Squeeze your pecs to bring the weights back together over your chest.",
    "Keep the elbow angle fixed. This is a chest isolation move, not a press."
   ]
- },
+ }
+
+
+,
  {
   "id": "deadlift",
   "name": "Deadlift",
@@ -302,7 +353,10 @@ const EXERCISES = [
    "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
- },
+ }
+
+
+,
  {
   "id": "bent-over-barbell-row",
   "name": "Bent-Over Barbell Row",
@@ -320,7 +374,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "t-bar-row",
   "name": "T-Bar Row",
@@ -337,7 +394,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "seated-cable-row",
   "name": "Seated Cable Row",
@@ -354,7 +414,10 @@ const EXERCISES = [
    "Squeeze your back for a second at full contraction.",
    "Extend your arms slowly back to the start without rounding your back."
   ]
- },
+ }
+
+
+,
  {
   "id": "pendlay-row",
   "name": "Pendlay Row",
@@ -371,7 +434,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "inverted-row",
   "name": "Inverted Row",
@@ -388,7 +454,10 @@ const EXERCISES = [
    "Pause briefly at the top, then lower with control.",
    "Make it harder by lowering the bar or elevating your feet."
   ]
- },
+ }
+
+
+,
  {
   "id": "chest-supported-dumbbell-row",
   "name": "Chest-Supported Dumbbell Row",
@@ -405,7 +474,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "meadows-row",
   "name": "Meadows Row",
@@ -422,7 +494,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "rack-pull",
   "name": "Rack Pull",
@@ -439,7 +514,10 @@ const EXERCISES = [
    "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-arm-cable-row",
   "name": "Single-Arm Cable Row",
@@ -456,7 +534,10 @@ const EXERCISES = [
    "Squeeze your back for a second at full contraction.",
    "Extend your arms slowly back to the start without rounding your back."
   ]
- },
+ }
+
+
+,
  {
   "id": "yates-row",
   "name": "Yates Row",
@@ -473,7 +554,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "seal-row",
   "name": "Seal Row",
@@ -490,7 +574,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "pull-up",
   "name": "Pull-Up",
@@ -507,7 +594,10 @@ const EXERCISES = [
    "Pause at the top with your chin over the bar.",
    "Lower all the way down with control. No kipping unless programmed."
   ]
- },
+ }
+
+
+,
  {
   "id": "lat-pulldown",
   "name": "Lat Pulldown",
@@ -524,7 +614,10 @@ const EXERCISES = [
    "Squeeze your lats hard at the bottom.",
    "Let the bar rise with control to a full stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "wide-grip-pulldown",
   "name": "Wide-Grip Pulldown",
@@ -541,7 +634,10 @@ const EXERCISES = [
    "Squeeze your lats hard at the bottom.",
    "Let the bar rise with control to a full stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "straight-arm-pulldown",
   "name": "Straight-Arm Pulldown",
@@ -556,7 +652,10 @@ const EXERCISES = [
    "Squeeze your lats at the bottom for a second.",
    "Raise slowly back up, resisting the pull."
   ]
- },
+ }
+
+
+,
  {
   "id": "close-grip-v-bar-pulldown",
   "name": "Close-Grip V-Bar Pulldown",
@@ -573,7 +672,10 @@ const EXERCISES = [
    "Squeeze your lats hard at the bottom.",
    "Let the bar rise with control to a full stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "commando-pull-up",
   "name": "Commando Pull-Up",
@@ -590,7 +692,10 @@ const EXERCISES = [
    "Pause at the top with your chin over the bar.",
    "Lower all the way down with control. No kipping unless programmed."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-pullover",
   "name": "Dumbbell Pullover",
@@ -607,7 +712,10 @@ const EXERCISES = [
    "Pull it back over your chest using your lats, arms nearly straight.",
    "Keep your core braced and don't overarch."
   ]
- },
+ }
+
+
+,
  {
   "id": "chin-up",
   "name": "Chin-Up",
@@ -624,7 +732,10 @@ const EXERCISES = [
    "Pause at the top with your chin over the bar.",
    "Lower all the way down with control. No kipping unless programmed."
   ]
- },
+ }
+
+
+,
  {
   "id": "overhead-barbell-press",
   "name": "Overhead Barbell Press",
@@ -641,7 +752,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-shoulder-press",
   "name": "Dumbbell Shoulder Press",
@@ -658,7 +772,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "lateral-raise",
   "name": "Lateral Raise",
@@ -673,7 +790,10 @@ const EXERCISES = [
    "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
- },
+ }
+
+
+,
  {
   "id": "front-raise",
   "name": "Front Raise",
@@ -688,7 +808,10 @@ const EXERCISES = [
    "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
- },
+ }
+
+
+,
  {
   "id": "rear-delt-fly",
   "name": "Rear Delt Fly",
@@ -703,7 +826,10 @@ const EXERCISES = [
    "Squeeze your rear delts at the top.",
    "Lower with control and keep your torso still."
   ]
- },
+ }
+
+
+,
  {
   "id": "arnold-press",
   "name": "Arnold Press",
@@ -720,7 +846,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "push-press",
   "name": "Push Press",
@@ -737,7 +866,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-lateral-raise",
   "name": "Cable Lateral Raise",
@@ -752,7 +884,10 @@ const EXERCISES = [
    "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
- },
+ }
+
+
+,
  {
   "id": "face-pull",
   "name": "Face Pull",
@@ -769,7 +904,10 @@ const EXERCISES = [
    "Rotate your shoulders outward at the end. Think 'double biceps' pose.",
    "Extend your arms slowly back to the start."
   ]
- },
+ }
+
+
+,
  {
   "id": "upright-row",
   "name": "Upright Row",
@@ -786,7 +924,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control.",
    "Stop if you feel shoulder impingement. Dumbbells are friendlier."
   ]
- },
+ }
+
+
+,
  {
   "id": "machine-shoulder-press",
   "name": "Machine Shoulder Press",
@@ -803,7 +944,10 @@ const EXERCISES = [
    "Squeeze briefly, then lower slowly back to the start.",
    "Don't let the weight stack slam between reps."
   ]
- },
+ }
+
+
+,
  {
   "id": "pike-push-up",
   "name": "Pike Push-Up",
@@ -820,7 +964,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "bradford-press",
   "name": "Bradford Press",
@@ -837,7 +984,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "cuban-press",
   "name": "Cuban Press",
@@ -852,7 +1002,10 @@ const EXERCISES = [
    "Press the dumbbells overhead, then reverse the whole sequence.",
    "Use very light weight. This is a shoulder-health move."
   ]
- },
+ }
+
+
+,
  {
   "id": "landmine-shoulder-press",
   "name": "Landmine Shoulder Press",
@@ -869,7 +1022,10 @@ const EXERCISES = [
    "Lower it back to your shoulder with control.",
    "Keep your ribs down. Don't overarch your lower back."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-front-raise",
   "name": "Cable Front Raise",
@@ -884,7 +1040,10 @@ const EXERCISES = [
    "Pause briefly, feeling the delts do the work. Don't shrug.",
    "Lower slowly; avoid swinging the weights up with momentum."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-push-press",
   "name": "Dumbbell Push Press",
@@ -901,7 +1060,10 @@ const EXERCISES = [
    "Pause briefly, then lower with control back to your shoulders.",
    "Don't lean back excessively. Keep your ribs down."
   ]
- },
+ }
+
+
+,
  {
   "id": "barbell-curl",
   "name": "Barbell Curl",
@@ -918,7 +1080,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-curl",
   "name": "Dumbbell Curl",
@@ -933,7 +1098,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "hammer-curl",
   "name": "Hammer Curl",
@@ -950,7 +1118,10 @@ const EXERCISES = [
    "Squeeze at the top, then lower with control.",
    "Keep your elbows fixed. Don't let them drift forward."
   ]
- },
+ }
+
+
+,
  {
   "id": "preacher-curl",
   "name": "Preacher Curl",
@@ -965,7 +1136,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "concentration-curl",
   "name": "Concentration Curl",
@@ -980,7 +1154,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-curl",
   "name": "Cable Curl",
@@ -995,7 +1172,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "incline-dumbbell-curl",
   "name": "Incline Dumbbell Curl",
@@ -1010,7 +1190,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "ez-bar-curl",
   "name": "EZ-Bar Curl",
@@ -1025,7 +1208,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "reverse-curl",
   "name": "Reverse Curl",
@@ -1042,7 +1228,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "spider-curl",
   "name": "Spider Curl",
@@ -1057,7 +1246,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "zottman-curl",
   "name": "Zottman Curl",
@@ -1074,7 +1266,10 @@ const EXERCISES = [
    "Lower slowly with the reverse grip to hammer your forearms.",
    "Rotate back at the bottom and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "bayesian-cable-curl",
   "name": "Bayesian Cable Curl",
@@ -1089,7 +1284,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "drag-curl",
   "name": "Drag Curl",
@@ -1104,7 +1302,10 @@ const EXERCISES = [
    "Squeeze your biceps hard at the top.",
    "Lower slowly to full extension. The negative matters."
   ]
- },
+ }
+
+
+,
  {
   "id": "tricep-rope-pushdown",
   "name": "Tricep Rope Pushdown",
@@ -1119,7 +1320,10 @@ const EXERCISES = [
    "Squeeze your triceps hard at the bottom.",
    "Let the handle rise slowly. Don't let your elbows move."
   ]
- },
+ }
+
+
+,
  {
   "id": "overhead-cable-extension",
   "name": "Overhead Cable Extension",
@@ -1134,7 +1338,10 @@ const EXERCISES = [
    "Feel the deep stretch, then extend back up to full lockout.",
    "Keep your upper arms still. Only the forearms move."
   ]
- },
+ }
+
+
+,
  {
   "id": "skull-crusher",
   "name": "Skull Crusher",
@@ -1149,7 +1356,10 @@ const EXERCISES = [
    "Extend back up to full lockout without flaring your elbows.",
    "Keep your upper arms vertical throughout."
   ]
- },
+ }
+
+
+,
  {
   "id": "tricep-dip",
   "name": "Tricep Dip",
@@ -1166,7 +1376,10 @@ const EXERCISES = [
    "Drive back up without shrugging or swinging your legs.",
    "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
- },
+ }
+
+
+,
  {
   "id": "close-grip-bench-press",
   "name": "Close-Grip Bench Press",
@@ -1183,7 +1396,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "diamond-push-up",
   "name": "Diamond Push-Up",
@@ -1198,7 +1414,10 @@ const EXERCISES = [
    "Push the floor away to return to the top without sagging at the hips.",
    "Keep your neck neutral and breathe in on the way down, out on the way up."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-kickback",
   "name": "Dumbbell Kickback",
@@ -1213,7 +1432,10 @@ const EXERCISES = [
    "Squeeze the triceps hard at full extension.",
    "Lower slowly. Your upper arm never moves."
   ]
- },
+ }
+
+
+,
  {
   "id": "jm-press",
   "name": "JM Press",
@@ -1228,7 +1450,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "bench-dip",
   "name": "Bench Dip",
@@ -1243,7 +1468,10 @@ const EXERCISES = [
    "Drive back up without shrugging or swinging your legs.",
    "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-arm-cable-pushdown",
   "name": "Single-Arm Cable Pushdown",
@@ -1258,7 +1486,10 @@ const EXERCISES = [
    "Squeeze your triceps hard at the bottom.",
    "Let the handle rise slowly. Don't let your elbows move."
   ]
- },
+ }
+
+
+,
  {
   "id": "cross-body-cable-extension",
   "name": "Cross-Body Cable Extension",
@@ -1273,7 +1504,10 @@ const EXERCISES = [
    "Feel the deep stretch, then extend back up to full lockout.",
    "Keep your upper arms still. Only the forearms move."
   ]
- },
+ }
+
+
+,
  {
   "id": "weighted-dip",
   "name": "Weighted Dip",
@@ -1290,7 +1524,10 @@ const EXERCISES = [
    "Drive back up without shrugging or swinging your legs.",
    "Keep the movement strict. Add weight only once bodyweight feels easy."
   ]
- },
+ }
+
+
+,
  {
   "id": "barbell-wrist-curl",
   "name": "Barbell Wrist Curl",
@@ -1305,7 +1542,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "reverse-wrist-curl",
   "name": "Reverse Wrist Curl",
@@ -1320,7 +1560,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "farmer-s-carry",
   "name": "Farmer's Carry",
@@ -1337,7 +1580,10 @@ const EXERCISES = [
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
   ]
- },
+ }
+
+
+,
  {
   "id": "plate-pinch-hold",
   "name": "Plate Pinch Hold",
@@ -1352,7 +1598,10 @@ const EXERCISES = [
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
- },
+ }
+
+
+,
  {
   "id": "dead-hang",
   "name": "Dead Hang",
@@ -1369,7 +1618,10 @@ const EXERCISES = [
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
- },
+ }
+
+
+,
  {
   "id": "towel-hang",
   "name": "Towel Hang",
@@ -1384,7 +1636,10 @@ const EXERCISES = [
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
- },
+ }
+
+
+,
  {
   "id": "wrist-roller",
   "name": "Wrist Roller",
@@ -1399,7 +1654,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "crunch",
   "name": "Crunch",
@@ -1414,7 +1672,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "plank",
   "name": "Plank",
@@ -1429,7 +1690,10 @@ const EXERCISES = [
    "Breathe steadily. Don't hold your breath.",
    "Stop when your hips start to sag."
   ]
- },
+ }
+
+
+,
  {
   "id": "hanging-leg-raise",
   "name": "Hanging Leg Raise",
@@ -1444,7 +1708,10 @@ const EXERCISES = [
    "Lower them slowly without swinging.",
    "Keep the movement strict. Momentum cheats your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-crunch",
   "name": "Cable Crunch",
@@ -1459,7 +1726,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "ab-wheel-rollout",
   "name": "Ab Wheel Rollout",
@@ -1476,7 +1746,10 @@ const EXERCISES = [
    "Go as far as you can without your hips sagging.",
    "Pull back to the start using your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "bicycle-crunch",
   "name": "Bicycle Crunch",
@@ -1493,7 +1766,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "dead-bug",
   "name": "Dead Bug",
@@ -1508,7 +1784,10 @@ const EXERCISES = [
    "Return with control, then switch sides.",
    "Never let your back arch off the floor."
   ]
- },
+ }
+
+
+,
  {
   "id": "hollow-body-hold",
   "name": "Hollow Body Hold",
@@ -1523,7 +1802,10 @@ const EXERCISES = [
    "Breathe steadily. Don't hold your breath.",
    "Stop when your hips start to sag."
   ]
- },
+ }
+
+
+,
  {
   "id": "lying-leg-raise",
   "name": "Lying Leg Raise",
@@ -1538,7 +1820,10 @@ const EXERCISES = [
    "Lower them slowly without swinging.",
    "Keep the movement strict. Momentum cheats your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "toe-to-bar",
   "name": "Toe-to-Bar",
@@ -1555,7 +1840,10 @@ const EXERCISES = [
    "Lower them slowly without swinging.",
    "Keep the movement strict. Momentum cheats your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "sit-up",
   "name": "Sit-Up",
@@ -1570,7 +1858,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "pallof-press",
   "name": "Pallof Press",
@@ -1587,7 +1878,10 @@ const EXERCISES = [
    "Hold for a breath, feeling your obliques fire.",
    "Bring it back in with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "hanging-knee-raise",
   "name": "Hanging Knee Raise",
@@ -1602,7 +1896,10 @@ const EXERCISES = [
    "Lower them slowly without swinging.",
    "Keep the movement strict. Momentum cheats your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "standing-cable-crunch",
   "name": "Standing Cable Crunch",
@@ -1617,7 +1914,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "russian-twist",
   "name": "Russian Twist",
@@ -1634,7 +1934,10 @@ const EXERCISES = [
    "Rotate to the other side with control.",
    "Keep your chest up and move from the core, not the arms."
   ]
- },
+ }
+
+
+,
  {
   "id": "side-plank",
   "name": "Side Plank",
@@ -1649,7 +1952,10 @@ const EXERCISES = [
    "Hold while breathing steadily, obliques engaged.",
    "Lower with control, then switch sides."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-woodchopper",
   "name": "Cable Woodchopper",
@@ -1666,7 +1972,10 @@ const EXERCISES = [
    "Control the return to the start.",
    "Keep your arms fairly straight. Power comes from the core."
   ]
- },
+ }
+
+
+,
  {
   "id": "oblique-crunch",
   "name": "Oblique Crunch",
@@ -1681,7 +1990,10 @@ const EXERCISES = [
    "Squeeze at the top for a second.",
    "Lower with control. Don't yank your neck."
   ]
- },
+ }
+
+
+,
  {
   "id": "windshield-wipers",
   "name": "Windshield Wipers",
@@ -1698,7 +2010,10 @@ const EXERCISES = [
    "Lower them slowly without swinging.",
    "Keep the movement strict. Momentum cheats your abs."
   ]
- },
+ }
+
+
+,
  {
   "id": "suitcase-carry",
   "name": "Suitcase Carry",
@@ -1715,7 +2030,10 @@ const EXERCISES = [
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
   ]
- },
+ }
+
+
+,
  {
   "id": "landmine-rotation",
   "name": "Landmine Rotation",
@@ -1730,7 +2048,10 @@ const EXERCISES = [
    "Control the return to the start.",
    "Keep your arms fairly straight. Power comes from the core."
   ]
- },
+ }
+
+
+,
  {
   "id": "copenhagen-plank",
   "name": "Copenhagen Plank",
@@ -1747,7 +2068,10 @@ const EXERCISES = [
    "Hold while breathing steadily, obliques engaged.",
    "Lower with control, then switch sides."
   ]
- },
+ }
+
+
+,
  {
   "id": "barbell-hip-thrust",
   "name": "Barbell Hip Thrust",
@@ -1764,7 +2088,10 @@ const EXERCISES = [
    "Squeeze your glutes hard for two seconds at the top.",
    "Lower with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "glute-bridge",
   "name": "Glute Bridge",
@@ -1779,7 +2106,10 @@ const EXERCISES = [
    "Squeeze your glutes hard for two seconds at the top.",
    "Lower with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "kettlebell-swing",
   "name": "Kettlebell Swing",
@@ -1797,7 +2127,10 @@ const EXERCISES = [
    "Let the bell float to chest height. Your arms are just ropes.",
    "Guide it back down and repeat in one fluid rhythm."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-kickback",
   "name": "Cable Kickback",
@@ -1812,7 +2145,10 @@ const EXERCISES = [
    "Squeeze the triceps hard at full extension.",
    "Lower slowly. Your upper arm never moves."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-step-up",
   "name": "Dumbbell Step-Up",
@@ -1829,7 +2165,10 @@ const EXERCISES = [
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
   ]
- },
+ }
+
+
+,
  {
   "id": "curtsy-lunge",
   "name": "Curtsy Lunge",
@@ -1846,7 +2185,10 @@ const EXERCISES = [
    "Drive through your front heel to return to standing.",
    "Alternate legs, keeping your balance centered."
   ]
- },
+ }
+
+
+,
  {
   "id": "fire-hydrant",
   "name": "Fire Hydrant",
@@ -1861,7 +2203,10 @@ const EXERCISES = [
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
- },
+ }
+
+
+,
  {
   "id": "donkey-kick",
   "name": "Donkey Kick",
@@ -1876,7 +2221,10 @@ const EXERCISES = [
    "Hold for time, breathing steadily.",
    "Drop down safely when your grip gives out."
   ]
- },
+ }
+
+
+,
  {
   "id": "frog-pump",
   "name": "Frog Pump",
@@ -1891,7 +2239,10 @@ const EXERCISES = [
    "Squeeze your glutes hard for two seconds at the top.",
    "Lower with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "sumo-deadlift",
   "name": "Sumo Deadlift",
@@ -1909,7 +2260,10 @@ const EXERCISES = [
    "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
- },
+ }
+
+
+,
  {
   "id": "lateral-band-walk",
   "name": "Lateral Band Walk",
@@ -1924,7 +2278,10 @@ const EXERCISES = [
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-leg-hip-thrust",
   "name": "Single-Leg Hip Thrust",
@@ -1939,7 +2296,10 @@ const EXERCISES = [
    "Squeeze your glutes hard for two seconds at the top.",
    "Lower with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "back-squat",
   "name": "Back Squat",
@@ -1956,7 +2316,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "front-squat",
   "name": "Front Squat",
@@ -1973,7 +2336,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "leg-press",
   "name": "Leg Press",
@@ -1990,7 +2356,10 @@ const EXERCISES = [
    "Press through your whole foot without locking your knees hard.",
    "Keep your lower back glued to the seat."
   ]
- },
+ }
+
+
+,
  {
   "id": "walking-lunge",
   "name": "Walking Lunge",
@@ -2007,7 +2376,10 @@ const EXERCISES = [
    "Drive through your front heel to return to standing.",
    "Alternate legs, keeping your balance centered."
   ]
- },
+ }
+
+
+,
  {
   "id": "bulgarian-split-squat",
   "name": "Bulgarian Split Squat",
@@ -2024,7 +2396,10 @@ const EXERCISES = [
    "Drive through your front heel to return to standing.",
    "Alternate legs, keeping your balance centered."
   ]
- },
+ }
+
+
+,
  {
   "id": "goblet-squat",
   "name": "Goblet Squat",
@@ -2041,7 +2416,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "hack-squat",
   "name": "Hack Squat",
@@ -2056,7 +2434,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "leg-extension",
   "name": "Leg Extension",
@@ -2071,7 +2452,10 @@ const EXERCISES = [
    "Squeeze your quads hard at the top for a second.",
    "Lower slowly back to the start."
   ]
- },
+ }
+
+
+,
  {
   "id": "sissy-squat",
   "name": "Sissy Squat",
@@ -2086,7 +2470,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "box-squat",
   "name": "Box Squat",
@@ -2103,7 +2490,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "pistol-squat",
   "name": "Pistol Squat",
@@ -2120,7 +2510,10 @@ const EXERCISES = [
    "Drive through your front heel to return to standing.",
    "Alternate legs, keeping your balance centered."
   ]
- },
+ }
+
+
+,
  {
   "id": "wall-sit",
   "name": "Wall Sit",
@@ -2135,7 +2528,10 @@ const EXERCISES = [
    "Hold the position, breathing steadily.",
    "Push through the burn. Stop if your form breaks."
   ]
- },
+ }
+
+
+,
  {
   "id": "spanish-squat",
   "name": "Spanish Squat",
@@ -2150,7 +2546,10 @@ const EXERCISES = [
    "Hold the position, breathing steadily.",
    "Push through the burn. Stop if your form breaks."
   ]
- },
+ }
+
+
+,
  {
   "id": "reverse-lunge",
   "name": "Reverse Lunge",
@@ -2167,7 +2566,10 @@ const EXERCISES = [
    "Drive through your front heel to return to standing.",
    "Alternate legs, keeping your balance centered."
   ]
- },
+ }
+
+
+,
  {
   "id": "cyclist-squat",
   "name": "Cyclist Squat",
@@ -2182,7 +2584,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "belt-squat",
   "name": "Belt Squat",
@@ -2199,7 +2604,10 @@ const EXERCISES = [
    "Descend until your hip crease is below your knees, chest up.",
    "Drive through your whole foot to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "romanian-deadlift",
   "name": "Romanian Deadlift",
@@ -2217,7 +2625,10 @@ const EXERCISES = [
    "Go until you feel a deep hamstring stretch, back flat.",
    "Drive your hips forward to stand, squeezing your glutes."
   ]
- },
+ }
+
+
+,
  {
   "id": "nordic-ham-curl",
   "name": "Nordic Ham Curl",
@@ -2232,7 +2643,10 @@ const EXERCISES = [
    "Catch yourself with your hands and push back up to start.",
    "This is brutally hard. Start with a limited range."
   ]
- },
+ }
+
+
+,
  {
   "id": "lying-leg-curl",
   "name": "Lying Leg Curl",
@@ -2247,7 +2661,10 @@ const EXERCISES = [
    "Pause briefly at full contraction.",
    "Lower slowly to full extension."
   ]
- },
+ }
+
+
+,
  {
   "id": "seated-leg-curl",
   "name": "Seated Leg Curl",
@@ -2262,7 +2679,10 @@ const EXERCISES = [
    "Pause briefly at full contraction.",
    "Lower slowly to full extension."
   ]
- },
+ }
+
+
+,
  {
   "id": "good-morning",
   "name": "Good Morning",
@@ -2279,7 +2699,10 @@ const EXERCISES = [
    "Go until your torso is near parallel or you feel a deep stretch.",
    "Drive your hips forward to stand back up."
   ]
- },
+ }
+
+
+,
  {
   "id": "stiff-leg-deadlift",
   "name": "Stiff-Leg Deadlift",
@@ -2296,7 +2719,10 @@ const EXERCISES = [
    "Go until you feel a deep hamstring stretch, back flat.",
    "Drive your hips forward to stand, squeezing your glutes."
   ]
- },
+ }
+
+
+,
  {
   "id": "glute-ham-raise",
   "name": "Glute-Ham Raise",
@@ -2313,7 +2739,10 @@ const EXERCISES = [
    "Catch yourself with your hands and push back up to start.",
    "This is brutally hard. Start with a limited range."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-leg-romanian-deadlift",
   "name": "Single-Leg Romanian Deadlift",
@@ -2330,7 +2759,10 @@ const EXERCISES = [
    "Go until you feel a deep hamstring stretch, back flat.",
    "Drive your hips forward to stand, squeezing your glutes."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-pull-through",
   "name": "Cable Pull-Through",
@@ -2347,7 +2779,10 @@ const EXERCISES = [
    "Drive your hips forward explosively, squeezing your glutes.",
    "Keep your back flat and arms straight throughout."
   ]
- },
+ }
+
+
+,
  {
   "id": "swiss-ball-leg-curl",
   "name": "Swiss Ball Leg Curl",
@@ -2364,7 +2799,10 @@ const EXERCISES = [
    "Pause briefly at full contraction.",
    "Lower slowly to full extension."
   ]
- },
+ }
+
+
+,
  {
   "id": "slider-leg-curl",
   "name": "Slider Leg Curl",
@@ -2379,7 +2817,10 @@ const EXERCISES = [
    "Pause briefly at full contraction.",
    "Lower slowly to full extension."
   ]
- },
+ }
+
+
+,
  {
   "id": "standing-calf-raise",
   "name": "Standing Calf Raise",
@@ -2394,7 +2835,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "seated-calf-raise",
   "name": "Seated Calf Raise",
@@ -2409,7 +2853,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-leg-calf-raise",
   "name": "Single-Leg Calf Raise",
@@ -2424,7 +2871,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "donkey-calf-raise",
   "name": "Donkey Calf Raise",
@@ -2439,7 +2889,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "leg-press-calf-raise",
   "name": "Leg Press Calf Raise",
@@ -2454,7 +2907,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "jump-rope",
   "name": "Jump Rope",
@@ -2469,7 +2925,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "box-jump",
   "name": "Box Jump",
@@ -2486,7 +2945,10 @@ const EXERCISES = [
    "Stand tall, then step (don't jump) back down.",
    "Pick a box height you can land on quietly every time."
   ]
- },
+ }
+
+
+,
  {
   "id": "tibialis-raise",
   "name": "Tibialis Raise",
@@ -2501,7 +2963,10 @@ const EXERCISES = [
    "Pause for a second at the very top.",
    "Lower all the way down for a deep stretch."
   ]
- },
+ }
+
+
+,
  {
   "id": "barbell-shrug",
   "name": "Barbell Shrug",
@@ -2516,7 +2981,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-shrug",
   "name": "Dumbbell Shrug",
@@ -2531,7 +2999,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "cable-shrug",
   "name": "Cable Shrug",
@@ -2546,7 +3017,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "overhead-barbell-shrug",
   "name": "Overhead Barbell Shrug",
@@ -2561,7 +3035,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "snatch-grip-high-pull",
   "name": "Snatch-Grip High Pull",
@@ -2578,7 +3055,10 @@ const EXERCISES = [
    "Lead with your elbows, keeping the bar close.",
    "Lower with control back to the hang."
   ]
- },
+ }
+
+
+,
  {
   "id": "power-shrug",
   "name": "Power Shrug",
@@ -2593,7 +3073,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "kelso-shrug",
   "name": "Kelso Shrug",
@@ -2608,7 +3091,10 @@ const EXERCISES = [
    "Hold the squeeze for a full second at the top.",
    "Lower with control. No rolling the shoulders."
   ]
- },
+ }
+
+
+,
  {
   "id": "hyperextension",
   "name": "Hyperextension",
@@ -2625,7 +3111,10 @@ const EXERCISES = [
    "Raise back up until your body is in a straight line.",
    "Don't hyperextend past neutral at the top."
   ]
- },
+ }
+
+
+,
  {
   "id": "reverse-hyperextension",
   "name": "Reverse Hyperextension",
@@ -2642,7 +3131,10 @@ const EXERCISES = [
    "Raise back up until your body is in a straight line.",
    "Don't hyperextend past neutral at the top."
   ]
- },
+ }
+
+
+,
  {
   "id": "superman-hold",
   "name": "Superman Hold",
@@ -2659,7 +3151,10 @@ const EXERCISES = [
    "Hold for 2–3 seconds, squeezing your glutes and lower back.",
    "Lower with control and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "bird-dog",
   "name": "Bird Dog",
@@ -2676,7 +3171,10 @@ const EXERCISES = [
    "Hold briefly without rotating your hips.",
    "Return with control and switch sides."
   ]
- },
+ }
+
+
+,
  {
   "id": "jefferson-curl",
   "name": "Jefferson Curl",
@@ -2693,7 +3191,10 @@ const EXERCISES = [
    "Pause at the bottom, then reverse back up with control.",
    "Start very light. This is a mobility-strength hybrid."
   ]
- },
+ }
+
+
+,
  {
   "id": "kettlebell-deadlift",
   "name": "Kettlebell Deadlift",
@@ -2711,7 +3212,10 @@ const EXERCISES = [
    "Stand tall, squeezing your glutes. Don't lean back.",
    "Reverse the motion: hips back, then knees, bar sliding down your legs."
   ]
- },
+ }
+
+
+,
  {
   "id": "burpee",
   "name": "Burpee",
@@ -2729,7 +3233,10 @@ const EXERCISES = [
    "Explode upward into a jump with hands overhead.",
    "Land soft and flow straight into the next rep."
   ]
- },
+ }
+
+
+,
  {
   "id": "thruster",
   "name": "Thruster",
@@ -2747,7 +3254,10 @@ const EXERCISES = [
    "Use the momentum to press the weight overhead.",
    "Lower to the rack position and flow into the next rep."
   ]
- },
+ }
+
+
+,
  {
   "id": "clean-and-press",
   "name": "Clean and Press",
@@ -2765,7 +3275,10 @@ const EXERCISES = [
    "Catch it solidly. Front rack for cleans, overhead for snatches.",
    "Stand tall to finish, then lower with control."
   ]
- },
+ }
+
+
+,
  {
   "id": "power-snatch",
   "name": "Power Snatch",
@@ -2783,7 +3296,10 @@ const EXERCISES = [
    "Catch it solidly. Front rack for cleans, overhead for snatches.",
    "Stand tall to finish, then lower with control."
   ]
- },
+ }
+
+
+,
  {
   "id": "turkish-get-up",
   "name": "Turkish Get-Up",
@@ -2800,7 +3316,10 @@ const EXERCISES = [
    "Bridge your hips and sweep your leg under to a kneeling lunge.",
    "Stand up, then reverse every step to return."
   ]
- },
+ }
+
+
+,
  {
   "id": "man-maker",
   "name": "Man Maker",
@@ -2818,7 +3337,10 @@ const EXERCISES = [
    "Jump your feet to your hands and clean the weights up.",
    "Press overhead, then return to the floor."
   ]
- },
+ }
+
+
+,
  {
   "id": "devil-press",
   "name": "Devil Press",
@@ -2835,7 +3357,10 @@ const EXERCISES = [
    "Stand tall with arms locked out.",
    "Lower with control and go again."
   ]
- },
+ }
+
+
+,
  {
   "id": "battle-ropes",
   "name": "Battle Ropes",
@@ -2852,7 +3377,10 @@ const EXERCISES = [
    "Keep your core braced and stay low.",
    "Work in intense intervals with full rest between."
   ]
- },
+ }
+
+
+,
  {
   "id": "sled-push",
   "name": "Sled Push",
@@ -2870,7 +3398,10 @@ const EXERCISES = [
    "Push for the programmed distance as fast as you can.",
    "Rest fully, then go again."
   ]
- },
+ }
+
+
+,
  {
   "id": "bear-crawl",
   "name": "Bear Crawl",
@@ -2888,7 +3419,10 @@ const EXERCISES = [
    "Stay low and controlled. No sagging hips.",
    "Crawl for distance or time, breathing steadily."
   ]
- },
+ }
+
+
+,
  {
   "id": "sandbag-carry",
   "name": "Sandbag Carry",
@@ -2905,7 +3439,10 @@ const EXERCISES = [
    "Breathe steadily as you go for distance or time.",
    "Set the weights down with a flat back, not a rounded one."
   ]
- },
+ }
+
+
+,
  {
   "id": "wall-ball",
   "name": "Wall Ball",
@@ -2923,7 +3460,10 @@ const EXERCISES = [
    "Catch it on the rebound and ride it into the next squat.",
    "Keep a steady rhythm. Don't pause at the top."
   ]
- },
+ }
+
+
+,
  {
   "id": "treadmill-run",
   "name": "Treadmill Run",
@@ -2938,7 +3478,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "rowing-machine",
   "name": "Rowing Machine",
@@ -2956,7 +3499,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "stationary-bike",
   "name": "Stationary Bike",
@@ -2973,7 +3519,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "stair-climber",
   "name": "Stair Climber",
@@ -2991,7 +3540,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "mountain-climbers",
   "name": "Mountain Climbers",
@@ -3008,7 +3560,10 @@ const EXERCISES = [
    "Keep your hips level. Don't bounce them up.",
    "Move fast but controlled for time or reps."
   ]
- },
+ }
+
+
+,
  {
   "id": "high-knees",
   "name": "High Knees",
@@ -3025,7 +3580,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "swimming",
   "name": "Swimming",
@@ -3042,7 +3600,10 @@ const EXERCISES = [
    "Build to your target pace or interval set.",
    "Cool down with easy swimming."
   ]
- },
+ }
+
+
+,
  {
   "id": "jumping-jacks",
   "name": "Jumping Jacks",
@@ -3057,7 +3618,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "sprint-intervals",
   "name": "Sprint Intervals",
@@ -3074,7 +3638,10 @@ const EXERCISES = [
    "Walk or jog easy between efforts for full recovery.",
    "Stop the session if your form breaks down."
   ]
- },
+ }
+
+
+,
  {
   "id": "elliptical",
   "name": "Elliptical",
@@ -3089,7 +3656,10 @@ const EXERCISES = [
    "Hold your target effort for the programmed time or distance.",
    "Cool down easy for 3–5 minutes afterward."
   ]
- },
+ }
+
+
+,
  {
   "id": "single-arm-dumbbell-row",
   "name": "Single-Arm Dumbbell Row",
@@ -3106,7 +3676,10 @@ const EXERCISES = [
    "Squeeze your shoulder blades together hard at the top.",
    "Lower with control to a full stretch and repeat."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-floor-press",
   "name": "Dumbbell Floor Press",
@@ -3123,7 +3696,10 @@ const EXERCISES = [
    "Press up explosively without bouncing, keeping your wrists stacked over your elbows.",
    "Lock out softly at the top, then repeat. Exhale on the press."
   ]
- },
+ }
+
+
+,
  {
   "id": "dumbbell-romanian-deadlift",
   "name": "Dumbbell Romanian Deadlift",
@@ -3142,7 +3718,10 @@ const EXERCISES = [
    "Drive your hips forward to stand, squeezing your glutes."
   ]
  }
+
+
 ];
+
 
 const MUSCLES = {
  "chest": "Chest",

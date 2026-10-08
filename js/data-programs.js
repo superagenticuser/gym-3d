@@ -35,7 +35,10 @@ const PROGRAMS = [
         { id: "standing-calf-raise", sets: 2, reps: "15" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "push-pull-legs",
     name: "Push / Pull / Legs",
@@ -67,7 +70,10 @@ const PROGRAMS = [
         { id: "standing-calf-raise", sets: 4, reps: "15" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "upper-lower",
     name: "Upper / Lower",
@@ -104,7 +110,10 @@ const PROGRAMS = [
         { id: "seated-calf-raise", sets: 3, reps: "15" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "strength-5x5",
     name: "5×5 Strength",
@@ -125,7 +134,10 @@ const PROGRAMS = [
         { id: "deadlift", sets: 1, reps: "5" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "dumbbell-home",
     name: "Dumbbell-Only Home",
@@ -146,7 +158,10 @@ const PROGRAMS = [
         { id: "plank", sets: 3, reps: "45s" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "hiit-conditioning",
     name: "HIIT Conditioning",
@@ -167,7 +182,10 @@ const PROGRAMS = [
         { id: "devil-press", sets: 1, reps: "30s" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "powerbuilding",
     name: "Powerbuilding",
@@ -202,7 +220,10 @@ const PROGRAMS = [
         { id: "plank", sets: 3, reps: "60s" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "calisthenics",
     name: "Calisthenics Skills",
@@ -227,7 +248,10 @@ const PROGRAMS = [
         { id: "plank", sets: 3, reps: "60s" }
       ]}
     ]
-  },
+  }
+
+
+,
   {
     id: "runner-strength",
     name: "Runner's Strength",
@@ -251,4 +275,6 @@ const PROGRAMS = [
       ]}
     ]
   }
+
+
 ];

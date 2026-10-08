@@ -1,13 +1,39 @@
 /* FORGE - program list, detail, builder extras */
 'use strict';
 
+
 // PROGRAMS
 const EXPRESS_POOL = [
-  { id: "goblet-squat", sets: 3, reps: "10" }, { id: "push-up", sets: 3, reps: "12" },
-  { id: "dumbbell-romanian-deadlift", sets: 3, reps: "10" }, { id: "chest-supported-dumbbell-row", sets: 3, reps: "10" },
-  { id: "overhead-press", sets: 2, reps: "10" }, { id: "glute-bridge", sets: 2, reps: "15" },
-  { id: "plank", sets: 2, reps: "45s" }, { id: "standing-calf-raise", sets: 2, reps: "15" }
+  { id: "goblet-squat", sets: 3, reps: "10" }
+
+
+, { id: "push-up", sets: 3, reps: "12" }
+
+
+,
+  { id: "dumbbell-romanian-deadlift", sets: 3, reps: "10" }
+
+
+, { id: "chest-supported-dumbbell-row", sets: 3, reps: "10" }
+
+
+,
+  { id: "overhead-press", sets: 2, reps: "10" }
+
+
+, { id: "glute-bridge", sets: 2, reps: "15" }
+
+
+,
+  { id: "plank", sets: 2, reps: "45s" }
+
+
+, { id: "standing-calf-raise", sets: 2, reps: "15" }
+
+
 ];
+
+
 // PYRAMID SET BUILDER
 function openPyramid(exId) {
   const ex = byId(exId);
@@ -86,6 +112,8 @@ function openPyramid(exId) {
     location.hash = "#/workout/" + prog.id + "/0";
   });
 }
+
+
 function startExpress() {
   const picks = [];
   const groups = new Set();
@@ -103,8 +131,12 @@ function startExpress() {
   const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
   location.hash = "#/workout/" + prog.id + "/0";
 }
+
+
 // Travel mode: swap exercises to minimal-equipment alternatives
 const TRAVEL_EQ = ["bodyweight", "dumbbell", "band"];
+
+
 function travelSub(exId) {
   const ex = byId(exId);
   if (!ex || TRAVEL_EQ.includes(ex.equipment)) return null;
@@ -113,7 +145,11 @@ function travelSub(exId) {
   cands.sort((a, b) => (a.level === "beginner" ? 0 : 1) - (b.level === "beginner" ? 0 : 1));
   return cands[0];
 }
+
+
 const DUNGEON_TITLES = ["Goblin ambush", "Skeleton crypt", "Dragon's lair", "Orc war camp", "Dark dungeon", "Troll bridge"];
+
+
 function startDungeon() {
   const groups = [...new Set(EXERCISES.map(e => e.primary))];
   for (let i = groups.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[groups[i], groups[j]] = [groups[j], groups[i]]; }
@@ -132,6 +168,8 @@ function startDungeon() {
   const all = getCustomPrograms(); all.push(prog); saveCustomPrograms(all);
   location.hash = "#/workout/" + prog.id + "/0";
 }
+
+
 function renderPrograms() {
   const activeId = getActiveProg();
   const active = activeId && progById(activeId);
@@ -165,10 +203,16 @@ function renderPrograms() {
     </div>`;
   }).join("");
 }
+
+
 document.addEventListener("click", e => {
   const pc = e.target.closest("[data-prog]");
   if (pc) location.hash = "#/program/" + pc.dataset.prog;
-});
+}
+
+
+);
+
 
 // PROGRAM DETAIL
 function renderProgram(id) {
@@ -238,6 +282,8 @@ function renderProgram(id) {
     </div>`;
   }).join("");
 }
+
+
 function exportProgramICS(pid) {
   const p = progById(pid);
   if (!p) return;

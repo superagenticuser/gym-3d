@@ -1,14 +1,21 @@
 /* FORGE - workout player, timer, celebrations */
 'use strict';
 
+
 let timerInt = null, timerLeft = 0, timerTotal = 0, currentWorkout = null;
+
+
 const TIMER_CIRC = 2 * Math.PI * 52;
+
+
 function paintTimer() {
   const d = $("timerDisplay");
   if (d) d.textContent = fmtT(Math.max(0, timerLeft));
   const ring = $("timerRing");
   if (ring) ring.style.strokeDashoffset = String(timerTotal > 0 ? TIMER_CIRC * (1 - Math.max(0, timerLeft) / timerTotal) : 0);
 }
+
+
 (function () {
   var timerEl = null, miniQueued = false, miniOn = false;
   function timerVisible() {
@@ -30,7 +37,12 @@ function paintTimer() {
   window.addEventListener("scroll", queueMini, { passive: true });
   window.addEventListener("resize", queueMini);
   window._refreshTimerMini = queueMini;
-})();
+}
+
+
+)();
+
+
 function currentExerciseId() {
   if (!currentWorkout || !currentWorkout.exercises) return null;
   for (let xi = 0; xi < currentWorkout.exercises.length; xi++) {
@@ -40,6 +52,8 @@ function currentExerciseId() {
   }
   return currentWorkout.exercises.length ? currentWorkout.exercises[0].id : null;
 }
+
+
 function getRestSeconds(ex) {
   const s = getSettings();
   if (!ex) return s.restShort;
@@ -47,7 +61,11 @@ function getRestSeconds(ex) {
   if (ex.equipment === "barbell" || ex.level === "advanced") return s.restLong;
   return s.restShort;
 }
+
+
 let cueInt = null;
+
+
 function showRestCue() {
   clearInterval(cueInt);
   const el = $("restCue");
@@ -69,6 +87,8 @@ function showRestCue() {
   el.textContent = "Form cue: " + cues[0];
   cueInt = setInterval(() => { i = (i + 1) % cues.length; el.textContent = "Form cue: " + cues[i]; }, 15000);
 }
+
+
 function startTimer(sec) {
   clearInterval(timerInt);
   clearInterval(cueInt);
@@ -88,7 +108,11 @@ function startTimer(sec) {
     }
   }, 1000);
 }
+
+
 function fmtT(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+
 function renderWorkout(pid, di, week) {
   clearInterval(timerInt); timerInt = null; timerLeft = 0; timerTotal = 0; paintTimer();
   const p = progById(pid);
@@ -222,6 +246,7 @@ function renderWorkout(pid, di, week) {
   refreshClipCounts();
 }
 
+
 function updateBeatdown(xi) {
   const badge = $("beat-" + xi);
   if (!badge || !currentWorkout || !currentWorkout.exercises[xi]) return;
@@ -246,6 +271,8 @@ function updateBeatdown(xi) {
     badge.classList.add("hidden");
   }
 }
+
+
 document.addEventListener("click", e => {
   const gt = e.target.closest(".guide-toggle");
   if (gt) {
@@ -405,7 +432,12 @@ document.addEventListener("click", e => {
     return;
   }
   if (e.target.closest("#timerStop")) { clearInterval(timerInt); timerInt = null; clearInterval(cueInt); const rc = $("restCue"); if (rc) rc.textContent = ""; return; }
-});
+}
+
+
+);
+
+
 function showLevelUp(lvl) {
   const veil = document.createElement("div");
   veil.className = "pr-veil";
@@ -421,6 +453,8 @@ function showLevelUp(lvl) {
   buzz([30, 50, 30, 50, 60]);
   setTimeout(() => veil.remove(), 6000);
 }
+
+
 function spawnConfetti(host, n) {
   if (getSettings().reduceMotion) return;
   const colors = ["#c8ff00", "#38e1ff", "#ff5d5d", "#ffd166", "#b388ff"];
@@ -436,6 +470,8 @@ function spawnConfetti(host, n) {
     setTimeout(() => s.remove(), 3600);
   }
 }
+
+
 function showPRCelebration(prs) {
   const veil = document.createElement("div");
   veil.className = "pr-veil";
@@ -450,6 +486,8 @@ function showPRCelebration(prs) {
   spawnConfetti(veil, 42);
   setTimeout(() => veil.remove(), 8000);
 }
+
+
 $("woFinish").addEventListener("click", () => {
   const raw = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
   const key = raw[1] + ":" + raw[2];
@@ -623,7 +661,12 @@ $("woFinish").addEventListener("click", () => {
     const el = $("woDone");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 100);
-});
+}
+
+
+);
+
+
 $("shareTextBtn").addEventListener("click", async () => {
   const entry = window._lastEntry;
   if (!entry) return;
@@ -639,7 +682,12 @@ $("shareTextBtn").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(text); appAlert("Workout summary copied to clipboard."); }
     catch (e) { appAlert("Sharing is not available on this device."); }
   }
-});
+}
+
+
+);
+
+
 $("shareCard").addEventListener("click", async () => {
   const entry = window._lastEntry;
   if (!entry) return;
@@ -669,11 +717,18 @@ $("shareCard").addEventListener("click", async () => {
     document.body.appendChild(a); a.click(); a.remove();
     appAlert("Image downloaded.");
   } catch (e) { appAlert("Could not create share image."); }
-});
+}
+
+
+);
+
+
 $("replayBtn").addEventListener("click", () => {
   if (!window._lastEntry) return;
   // store the entry for replay and go to body map
   window._replayEntry = window._lastEntry;
   location.hash = "#/body?replay=1";
-});
+}
 
+
+);

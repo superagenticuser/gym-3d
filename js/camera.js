@@ -1,8 +1,10 @@
 /* FORGE - camera: form recorder, mirror mode, photo capture */
 'use strict';
 
+
 /* ---------- CAMERA FEATURES ---------- */
 let _camStream = null, _recState = null, _mirrorInt = null, _photoPose = "front", _camFacing = "environment";
+
 
 async function camGet(facing) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -24,11 +26,15 @@ async function camGet(facing) {
     return null;
   }
 }
+
+
 function camStop() {
   if (_camStream) { _camStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); _camStream = null; }
   const v = $("camVideo");
   if (v) v.srcObject = null;
 }
+
+
 async function camFlip(mirrored) {
   const track = _camStream && _camStream.getVideoTracks()[0];
   const curId = track ? track.getSettings().deviceId : null;
@@ -63,6 +69,8 @@ async function camFlip(mirrored) {
     appAlert("Could not switch camera.");
   }
 }
+
+
 function camShell() {
   let ov = $("camOverlay");
   if (ov) return ov;
@@ -84,10 +92,14 @@ function camShell() {
   $("camClose").addEventListener("click", camHide);
   return ov;
 }
+
+
 function camShow() {
   camShell().classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
+
+
 function recCleanup() {
   const st = _recState; _recState = null;
   if (st) {
@@ -96,6 +108,8 @@ function recCleanup() {
     if (st.rec) { try { st.rec.stop(); } catch (e) {} }
   }
 }
+
+
 function camHide() {
   recCleanup();
   if (_mirrorInt) { clearInterval(_mirrorInt); _mirrorInt = null; }
@@ -109,6 +123,7 @@ function camHide() {
   const tm = $("camTimer"); if (tm) tm.classList.add("hidden");
   const v = $("camVideo"); if (v) v.style.transform = "";
 }
+
 
 function camToast(msg, imgSrc) {
   let t = $("camToast");
@@ -124,6 +139,8 @@ function camToast(msg, imgSrc) {
   clearTimeout(t._hideT);
   t._hideT = setTimeout(() => t.classList.remove("show"), 2600);
 }
+
+
 /* ----- progress photo capture ----- */
 function photoGhost() {
   const gh = $("camGhost");
@@ -132,6 +149,8 @@ function photoGhost() {
   if (last && last.src) { gh.src = last.src; gh.classList.remove("hidden"); }
   else gh.classList.add("hidden");
 }
+
+
 async function openPhotoCapture() {
   camShell(); camShow();
   $("camTitle").textContent = "Take progress photo";
@@ -160,6 +179,8 @@ async function openPhotoCapture() {
   v.srcObject = s;
   photoGhost();
 }
+
+
 function photoSnap() {
   const v = $("camVideo");
   if (!v || !v.videoWidth) return;
@@ -184,6 +205,7 @@ function photoSnap() {
   camToast(`Photo saved (${pose}).`, dataUrl);
 }
 
+
 /* ----- form clip storage (IndexedDB) ----- */
 function clipDB() {
   return new Promise((resolve, reject) => {
@@ -200,6 +222,8 @@ function clipDB() {
     req.onerror = () => reject(req.error);
   });
 }
+
+
 async function saveClip(c) {
   const db = await clipDB();
   return new Promise((resolve, reject) => {
@@ -209,6 +233,8 @@ async function saveClip(c) {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+
 async function getClips(exId) {
   const db = await clipDB();
   return new Promise((resolve, reject) => {
@@ -218,6 +244,8 @@ async function getClips(exId) {
     req.onerror = () => reject(req.error);
   });
 }
+
+
 async function deleteClip(id) {
   const db = await clipDB();
   return new Promise((resolve, reject) => {
@@ -227,6 +255,8 @@ async function deleteClip(id) {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+
 async function refreshClipCounts() {
   if (!("indexedDB" in window)) return;
   let all = [];
@@ -253,6 +283,7 @@ async function refreshClipCounts() {
     if (badge) badge.textContent = n;
   });
 }
+
 
 /* ----- form recorder ----- */
 async function openFormRecorder(xi, exId, exName) {
@@ -281,6 +312,8 @@ async function openFormRecorder(xi, exId, exName) {
   $("camRecBtn").addEventListener("click", recToggle);
   $("camRecFlip").addEventListener("click", () => camFlip(false));
 }
+
+
 function recBump(d) {
   if (!_recState) return;
   _recState.reps = Math.max(0, _recState.reps + d);
@@ -288,11 +321,15 @@ function recBump(d) {
   if (n) n.textContent = _recState.reps;
   buzz(10);
 }
+
+
 function recToggle() {
   if (!_recState) return;
   if (_recState.rec) recStopUser();
   else recStart();
 }
+
+
 function recStart() {
   const st = _recState;
   if (!st || !window.MediaRecorder) { appAlert("Video recording is not supported on this device."); return; }
@@ -317,6 +354,8 @@ function recStart() {
   const btn = $("camRecBtn");
   if (btn) { btn.classList.add("on"); btn.innerHTML = `<span class="cam-rec-dot"></span>Stop`; }
 }
+
+
 function recStopUser() {
   const st = _recState;
   if (!st || !st.rec) return;
@@ -324,6 +363,8 @@ function recStopUser() {
   if (st.tint) clearInterval(st.tint);
   try { st.rec.stop(); } catch (e) { recSaved(st); }
 }
+
+
 function recSaved(st) {
   const blob = new Blob(st.chunks, { type: (st.rec && st.rec.mimeType) || "video/webm" });
   saveClip({ exId: st.exId, exName: st.exName, date: fmtDate(new Date()), ts: Date.now(), reps: st.reps, blob, mime: blob.type })
@@ -346,6 +387,8 @@ function recSaved(st) {
     camToast("Clip saved.");
   }
 }
+
+
 async function openClipLibrary(exId, exName) {
   let clips = [];
   try { clips = await getClips(exId); } catch (e) { appAlert("Clip storage is not available on this device."); return; }
@@ -394,6 +437,7 @@ async function openClipLibrary(exId, exName) {
     openClipLibrary(exId, exName);
   }));
 }
+
 
 /* ----- mirror mode ----- */
 async function openMirror() {
@@ -452,4 +496,3 @@ async function openMirror() {
   upd();
   _mirrorInt = setInterval(upd, 1000);
 }
-

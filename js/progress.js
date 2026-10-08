@@ -1,9 +1,14 @@
 /* FORGE - progress tracking: stats, charts, check-in, measures, photos */
 'use strict';
 
+
 /* ---------- movement pattern radar ---------- */
 const PATTERNS = ["push", "pull", "squat", "hinge", "lunge", "carry"];
+
+
 const PATTERN_NAMES = { push: "Push", pull: "Pull", squat: "Squat", hinge: "Hinge", lunge: "Lunge", carry: "Carry" };
+
+
 const MUSCLE_TO_PATTERN = {
   chest: "push", shoulders: "push", triceps: "push",
   back: "pull", lats: "pull", biceps: "pull",
@@ -12,12 +17,18 @@ const MUSCLE_TO_PATTERN = {
   traps: "carry", forearms: "carry", abs: "carry", obliques: "carry",
   "full-body": "carry", cardio: "carry"
 };
+
+
 const LUNGE_WORDS = ["lunge", "bulgarian", "split squat", "step-up", "stepup", "step up"];
+
+
 function patternOfExercise(ex) {
   const nm = (ex.name || "").toLowerCase();
   if (LUNGE_WORDS.some(w => nm.includes(w))) return "lunge";
   return MUSCLE_TO_PATTERN[groupOf(ex.primary)] || "carry";
 }
+
+
 function patternVolume(days) {
   const cutoff = new Date(); cutoff.setHours(12, 0, 0, 0); cutoff.setDate(cutoff.getDate() - days);
   const vol = { push: 0, pull: 0, squat: 0, hinge: 0, lunge: 0, carry: 0 };
@@ -30,6 +41,8 @@ function patternVolume(days) {
   });
   return vol;
 }
+
+
 function radarSection() {
   const vol = patternVolume(28);
   const total = PATTERNS.reduce((a, p) => a + vol[p], 0);
@@ -64,6 +77,8 @@ function radarSection() {
   <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block;max-width:430px;margin:0 auto" role="img" aria-label="Movement pattern balance radar chart">${grid}${axes}<polygon points="${poly}" fill="color-mix(in srgb, var(--volt) 22%, transparent)" stroke="var(--volt)" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg></div>
   <div class="onerm-box"><b>Weakest pattern: ${PATTERN_NAMES[weakest]}.</b> <span class="muted">${weakestTip}</span></div>`;
 }
+
+
 function renderInsightsTab(body) {
   const bal = muscleBalance();
   const dots = dotsScore();
@@ -91,6 +106,8 @@ function renderInsightsTab(body) {
     </div>
   `;
 }
+
+
 function rpeTrendSection() {
   const log = getLog();
   const now = new Date();
@@ -132,6 +149,8 @@ function rpeTrendSection() {
   const dots = pts.map(p => p ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--volt)"/>` : "").join("");
   return `<h3 style="margin-top:20px">RPE trend</h3><p class="muted" style="font-size:13px;margin-bottom:12px">Average RPE per week, last 12 weeks.</p><div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block" role="img" aria-label="Average RPE per week">${grid}<path d="${path}" fill="none" stroke="var(--volt)" stroke-width="2.5" stroke-linecap="round"/>${dots}${xl}</svg></div>`;
 }
+
+
 function renderCoachTab(body) {
   body.innerHTML = `
     <h3>Ask your coach</h3>
@@ -225,6 +244,8 @@ function renderCoachTab(body) {
     });
   });
 }
+
+
 function answerCoach() {
   const q = $("coachQ").value.toLowerCase();
   const out = $("coachA");
@@ -246,7 +267,11 @@ function answerCoach() {
   }
   out.innerHTML = `<div class="onerm-box"><b>Coach:</b> <span>${ans}</span></div>`;
 }
+
+
 let wodInterval = null;
+
+
 function startWOD(type) {
   if (wodInterval) { clearInterval(wodInterval); wodInterval = null; }
   const out = $("wodOut");
@@ -272,12 +297,24 @@ function startWOD(type) {
   $("wodStop").addEventListener("click", () => { clearInterval(wodInterval); wodInterval = null; });
 }
 
+
 // PERSONAL CHALLENGES
 const CHALLENGES = [
-  { id: "vol-week", name: "Volume week", desc: "Hit 20,000 kg total volume in 7 days", target: 20000, metric: "volume7" },
-  { id: "freq-week", name: "5x week", desc: "Train 5 times in 7 days", target: 5, metric: "freq7" },
-  { id: "streak-14", name: "2-week streak", desc: "14-day streak", target: 14, metric: "streak" },
+  { id: "vol-week", name: "Volume week", desc: "Hit 20,000 kg total volume in 7 days", target: 20000, metric: "volume7" }
+
+
+,
+  { id: "freq-week", name: "5x week", desc: "Train 5 times in 7 days", target: 5, metric: "freq7" }
+
+
+,
+  { id: "streak-14", name: "2-week streak", desc: "14-day streak", target: 14, metric: "streak" }
+
+
+,
 ];
+
+
 function challengeProgress() {
   const log = getLog();
   const now = Date.now();
@@ -289,6 +326,8 @@ function challengeProgress() {
     streak: workoutStreak(),
   };
 }
+
+
 function renderChallengesTab(body) {
   const prog = challengeProgress();
   body.innerHTML = `<h3>Challenges</h3><p class="muted">Beat your own records.</p><div class="badge-grid">` +
@@ -307,16 +346,21 @@ function renderChallengesTab(body) {
     }).join("") + `</div>`;
 }
 
+
 function applyA11y() {
   const s = getSettings();
   document.body.classList.toggle("big-text", !!s.bigText);
   document.body.classList.toggle("high-contrast", !!s.highContrast);
   document.body.classList.toggle("rm", !!s.reduceMotion);
 }
+
+
 function buzz(p) {
   if (!getSettings().haptics) return;
   try { if (navigator.vibrate) navigator.vibrate(p || 15); } catch (e) {}
 }
+
+
 function countUp(el, final, fmt) {
   fmt = fmt || (v => Math.round(v).toLocaleString());
   if (!el) return;
@@ -328,14 +372,20 @@ function countUp(el, final, fmt) {
     if (pr < 1) requestAnimationFrame(tick);
   })(t0);
 }
+
+
 // DAILY CHECK-IN UI
 let ciEnergyVal = 3;
+
+
 function syncCiSliders() {
   const so = $("ciSleepOut"), eo = $("ciEnergyOut");
   if (so) so.textContent = parseFloat($("ciSleep").value).toFixed(1) + "h";
   ciEnergyVal = parseInt($("ciEnergy").value, 10);
   if (eo) eo.textContent = ciEnergyVal + "/5";
 }
+
+
 function openCheckin() {
   $("checkinClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
   const today = fmtDate(new Date());
@@ -350,7 +400,11 @@ function openCheckin() {
   updateTrackerLabels();
   $("checkinVeil").classList.remove("hidden");
 }
+
+
 var WATER_TARGET = 2000;
+
+
 function updateTrackerLabels() {
   const today = fmtDate(new Date());
   const w = getWater(today);
@@ -369,6 +423,8 @@ function updateTrackerLabels() {
   renderCheckinHistory();
   renderSuppList();
 }
+
+
 function renderCheckinHistory() {
   const hist = getCheckinHistory(7);
   const el = $("checkinHistory");
@@ -427,6 +483,8 @@ function renderCheckinHistory() {
     updateTrackerLabels();
   }));
 }
+
+
 function initCheckin() {
   $("checkinClose").addEventListener("click", () => $("checkinVeil").classList.add("hidden"));
   $("checkinVeil").addEventListener("click", e => { if (e.target.id === "checkinVeil") $("checkinVeil").classList.add("hidden"); });
@@ -477,6 +535,7 @@ function initCheckin() {
   });
 }
 
+
 // ============ V10: TRAINING INTELLIGENCE ============
 // Periodization planner - 4-week mesocycle with progressive overload
 function generatePeriodized(baseProgId) {
@@ -516,11 +575,15 @@ function generatePeriodized(baseProgId) {
       <a class="btn btn-primary btn-sm" href="#/program/${id}">View mesocycle</a>
     </div>`;
 }
+
+
 // RPE tracking helpers
 function getRPE(exId) {
   try { const m = JSON.parse(localStorage.getItem("forge-rpe") || "{}"); return m[exId] || null; }
   catch (e) { return null; }
 }
+
+
 function saveRPE(exId, rpe) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-rpe") || "{}");
@@ -528,6 +591,8 @@ function saveRPE(exId, rpe) {
     localStorage.setItem("forge-rpe", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 // Plateau detection - 3+ sessions without progress on a lift
 function detectPlateaus() {
   const log = getLog();
@@ -550,16 +615,22 @@ function detectPlateaus() {
   }
   return plateaus.slice(0, 5);
 }
+
+
 // %1RM helpers
 function parsePercent(repsStr) {
   const m = String(repsStr).match(/(\d+)%/);
   return m ? parseInt(m[1]) : null;
 }
+
+
 function weightFromPercent(exId, pct) {
   const orm = oneRM(exId);
   if (!orm) return null;
   return Math.round(orm * pct / 100 * 4) / 4;
 }
+
+
 // Warm-up calculator
 function warmupSets(workingWeight) {
   const w = parseFloat(workingWeight) || 0;
@@ -571,34 +642,50 @@ function warmupSets(workingWeight) {
   steps.push({ weight: Math.round(w * 0.8), reps: 3 });
   return steps;
 }
+
+
 // Per-exercise rest memory
 function getRestFor(exId) {
   try { return JSON.parse(localStorage.getItem("forge-restmem") || "{}")[exId] || null; }
   catch (e) { return null; }
 }
+
+
 function saveRestFor(exId, secs) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-restmem") || "{}");
     m[exId] = secs; localStorage.setItem("forge-restmem", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 // Exercise notes
 function getExNote(exId) {
   try { return localStorage.getItem("forge-note-" + exId) || ""; }
   catch (e) { return ""; }
 }
+
+
 function saveExNote(exId, note) {
   try { localStorage.setItem("forge-note-" + exId, note); } catch (e) {}
 }
+
+
 // Tempo coach
 function getTempo(exId) {
   try { return JSON.parse(localStorage.getItem("forge-tempo") || "{}")[exId] || [3, 1, 2]; }
   catch (e) { return [3, 1, 2]; }
 }
+
+
 function saveTempo(exId, arr) {
   try { const m = JSON.parse(localStorage.getItem("forge-tempo") || "{}"); m[exId] = arr; localStorage.setItem("forge-tempo", JSON.stringify(m)); } catch (e) {}
 }
+
+
 let tempoTimer = null;
+
+
 function startTempo(ecc, pause, con, elId) {
   stopTempo();
   const phases = [["Lower", Math.max(1, ecc) * 1000], ["Hold", Math.max(0, pause) * 1000], ["Lift", Math.max(1, con) * 1000]];
@@ -617,33 +704,48 @@ function startTempo(ecc, pause, con, elId) {
   };
   tick();
 }
+
+
 function stopTempo() { if (tempoTimer) { clearTimeout(tempoTimer); tempoTimer = null; } }
+
 
 // ============ V10: RECOVERY & HEALTH ============
 function getCheckin(dateKey) {
   try { return JSON.parse(localStorage.getItem("forge-checkin") || "{}")[dateKey] || null; }
   catch (e) { return null; }
 }
+
+
 function saveCheckin(dateKey, data) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-checkin") || "{}");
     m[dateKey] = data; localStorage.setItem("forge-checkin", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 function getSupplements() {
   try { return JSON.parse(localStorage.getItem("forge-supp") || "[]"); }
   catch (e) { return []; }
 }
+
+
 function saveSupplements(list) {
   try { localStorage.setItem("forge-supp", JSON.stringify(list)); } catch (e) {}
 }
+
+
 function getSuppLog(dateKey) {
   try { return JSON.parse(localStorage.getItem("forge-supp-log") || "{}")[dateKey] || []; }
   catch (e) { return []; }
 }
+
+
 function saveSuppLog(dateKey, ids) {
   try { const m = JSON.parse(localStorage.getItem("forge-supp-log") || "{}"); m[dateKey] = ids; localStorage.setItem("forge-supp-log", JSON.stringify(m)); } catch (e) {}
 }
+
+
 function renderSuppList() {
   const list = getSupplements();
   const el = $("suppList");
@@ -657,10 +759,14 @@ function renderSuppList() {
       <button class="icon-btn" data-suppdel="${s.id}" aria-label="Remove supplement">${window.FORGE_ICON("x")}</button>
     </div>`).join("") : `<div class="empty-note"><p><b>No supplements yet.</b></p><p>Add your daily stack below.</p></div>`;
 }
+
+
 function getWater(dateKey) {
   try { return JSON.parse(localStorage.getItem("forge-water") || "{}")[dateKey] || 0; }
   catch (e) { return 0; }
 }
+
+
 function addWater(dateKey, ml) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-water") || "{}");
@@ -668,6 +774,8 @@ function addWater(dateKey, ml) {
     localStorage.setItem("forge-water", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 function setWater(dateKey, ml) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-water") || "{}");
@@ -675,6 +783,8 @@ function setWater(dateKey, ml) {
     localStorage.setItem("forge-water", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 function getCheckinHistory(days) {
   try {
     const all = JSON.parse(localStorage.getItem("forge-checkin") || "{}");
@@ -689,6 +799,8 @@ function getCheckinHistory(days) {
     return out;
   } catch (e) { return []; }
 }
+
+
 function setProtein(dateKey, g) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-protein") || "{}");
@@ -696,13 +808,19 @@ function setProtein(dateKey, g) {
     localStorage.setItem("forge-protein", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 function getCycle() {
   try { return JSON.parse(localStorage.getItem("forge-cycle") || "null"); }
   catch (e) { return null; }
 }
+
+
 function saveCycle(data) {
   try { localStorage.setItem("forge-cycle", JSON.stringify(data)); } catch (e) {}
 }
+
+
 function cyclePhase() {
   const c = getCycle();
   if (!c || !c.lastStart) return null;
@@ -712,6 +830,8 @@ function cyclePhase() {
   if (day <= 16) return { phase: "Ovulatory", day, tip: "Peak strength window. Push hard but warm up well." };
   return { phase: "Luteal", day, tip: "Energy may dip. Moderate intensity, prioritize recovery." };
 }
+
+
 // ============ V10: NUTRITION ============
 function proteinTarget() {
   const m = getMeasures();
@@ -722,10 +842,14 @@ function proteinTarget() {
   const kg = getSettings().units === "lb" ? bw * 0.453592 : bw;
   return Math.round(kg * mult);
 }
+
+
 function getProtein(dateKey) {
   try { return JSON.parse(localStorage.getItem("forge-protein") || "{}")[dateKey] || 0; }
   catch (e) { return 0; }
 }
+
+
 function addProtein(dateKey, g) {
   try {
     const m = JSON.parse(localStorage.getItem("forge-protein") || "{}");
@@ -733,6 +857,8 @@ function addProtein(dateKey, g) {
     localStorage.setItem("forge-protein", JSON.stringify(m));
   } catch (e) {}
 }
+
+
 // ============ V10: INSIGHTS ============
 function exerciseHistory(exId, limit) {
   const hist = [];
@@ -746,6 +872,8 @@ function exerciseHistory(exId, limit) {
   });
   return limit ? hist.slice(-limit) : hist;
 }
+
+
 function oneRM(exId) {
   const log = getLog();
   let best = 0;
@@ -759,6 +887,8 @@ function oneRM(exId) {
   });
   return best;
 }
+
+
 function oneRMFromSets(sets) {
   let best = 0;
   sets.forEach(s => {
@@ -769,6 +899,8 @@ function oneRMFromSets(sets) {
   });
   return best;
 }
+
+
 function muscleBalance() {
   const vol = volumeByMuscle(28);
   const push = (vol.chest || 0) + (vol.shoulders || 0) + (vol.triceps || 0);
@@ -779,12 +911,16 @@ function muscleBalance() {
     quad, ham, legRatio: ham > 0 ? quad / ham : 0
   };
 }
+
+
 function dotsFromTotal(totalKg, bwKg) {
   if (!totalKg || !bwKg) return null;
   const x = Math.min(Math.max(bwKg, 40), 200);
   const coef = 0.000001093 * Math.pow(x, 4) - 0.0007391293 * Math.pow(x, 3) + 0.19147565 * Math.pow(x, 2) - 22.41233541 * x + 1143.86505292;
   return Math.round(totalKg * 500 / coef * 10) / 10;
 }
+
+
 function renderMeetTool() {
   const bw = latestBodyweightKg();
   const lifts = ["Squat", "Bench", "Deadlift"];
@@ -834,6 +970,8 @@ function renderMeetTool() {
       <p class="muted" style="font-size:13px">Meet logged. +75 XP earned.</p>`;
   });
 }
+
+
 function dotsScore() {
   // DOTS formula (men), simplified polynomial
   const m = getMeasures();
@@ -853,6 +991,8 @@ function dotsScore() {
   const totalKg = getSettings().units === "lb" ? total * 0.453592 : total;
   return Math.round(totalKg * 500 / coef * 10) / 10;
 }
+
+
 function correlationInsights() {
   const insights = [];
   const log = getLog();
@@ -878,24 +1018,36 @@ function correlationInsights() {
   }
   return insights;
 }
+
+
 function totalVolumeAll() {
   return getLog().reduce((a, w) => a + w.exercises.reduce((b, x) => b + x.sets.reduce((c, s) => c + s.weight * s.reps, 0), 0), 0);
 }
+
+
 // ============ V10: MOTIVATION ============
 function getXP() {
   try { return JSON.parse(localStorage.getItem("forge-xp") || '{"xp":0,"freeze":1}'); }
   catch (e) { return { xp: 0, freeze: 1 }; }
 }
+
+
 function saveXP(d) { try { localStorage.setItem("forge-xp", JSON.stringify(d)); } catch (e) {} }
+
+
 function addXP(amount) {
   const d = getXP();
   d.xp += amount;
   saveXP(d);
   return d;
 }
+
+
 function xpLevel(xp) {
   return Math.floor(Math.sqrt(xp / 100)) + 1;
 }
+
+
 // ============ V10: DATA ============
 function exportCSV() {
   const log = getLog();
@@ -912,6 +1064,8 @@ function exportCSV() {
   a.download = "forge-export.csv";
   a.click();
 }
+
+
 function backupData() {
   const data = {};
   try {
@@ -926,6 +1080,8 @@ function backupData() {
   a.download = `forge-backup-${fmtDate(new Date())}.json`;
   a.click();
 }
+
+
 function shareProgramURL(progId) {
   const prog = progById(progId);
   if (!prog) return "";
@@ -933,6 +1089,8 @@ function shareProgramURL(progId) {
   const b64 = btoa(unescape(encodeURIComponent(json)));
   return location.origin + location.pathname + "#/shared/" + b64;
 }
+
+
 function parseSharedProgram(b64) {
   try {
     const json = decodeURIComponent(escape(atob(b64)));
@@ -940,6 +1098,7 @@ function parseSharedProgram(b64) {
     return { name: d.n, days: d.d.map(x => ({ name: x.n, exercises: x.e.map(e => ({ id: e[0], sets: e[1], reps: e[2] })) })) };
   } catch (e) { return null; }
 }
+
 
 // ACHIEVEMENTS
 function streakCalendar(log) {
@@ -979,28 +1138,70 @@ function streakCalendar(log) {
   const legend = `<div class="heatmap-legend"><span>Less</span><div class="hm-day"></div><div class="hm-day l1"></div><div class="hm-day l2"></div><div class="hm-day l3"></div><div class="hm-day l4"></div><span>More</span></div>`;
   return `<div class="heatmap-scroll">${html}</div>${legend}`;
 }
+
+
 const BADGES = [
-  { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 },
-  { id: "ten", icon: "flame", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 },
-  { id: "fifty", icon: "dumbbell", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 },
-  { id: "streak7", icon: "zap", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 },
-  { id: "streak30", icon: "star", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 },
-  { id: "vol10k", icon: "dumbbell", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0) >= 10000) },
-  { id: "hundred", icon: "trophy", name: "Century", desc: "Log 100 workouts", check: log => log.length >= 100 },
-  { id: "dl100", icon: "dumbbell", name: "Triple digits", desc: "Deadlift 100 kg", check: log => log.some(w => w.exercises.some(x => { const ex = byId(x.id); return ex && /deadlift/i.test(ex.name) && x.sets.some(s => (s.weight || 0) >= 100); })) },
-  { id: "vol100k", icon: "flame", name: "100-ton club", desc: "100,000 kg lifetime volume", check: log => totalVolumeKg(log) >= 100000 },
-  { id: "xp5k", icon: "zap", name: "Rising star", desc: "Earn 5,000 XP", check: () => getXP().xp >= 5000 },
-  { id: "earlybird", icon: "star", name: "Consistent", desc: "Train 4 weeks in a row", check: log => weeklyStreak(log) >= 4 },
+  { id: "first", icon: "target", name: "First workout", desc: "Log your first workout", check: log => log.length >= 1 }
+
+
+,
+  { id: "ten", icon: "flame", name: "Getting serious", desc: "Log 10 workouts", check: log => log.length >= 10 }
+
+
+,
+  { id: "fifty", icon: "dumbbell", name: "Committed", desc: "Log 50 workouts", check: log => log.length >= 50 }
+
+
+,
+  { id: "streak7", icon: "zap", name: "Week streak", desc: "7-day streak", check: (log, streak) => streak >= 7 }
+
+
+,
+  { id: "streak30", icon: "star", name: "Month streak", desc: "30-day streak", check: (log, streak) => streak >= 30 }
+
+
+,
+  { id: "vol10k", icon: "dumbbell", name: "Volume king", desc: "10,000 kg in one workout", check: log => log.some(w => w.exercises.reduce((a, x) => a + x.sets.reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0) >= 10000) }
+
+
+,
+  { id: "hundred", icon: "trophy", name: "Century", desc: "Log 100 workouts", check: log => log.length >= 100 }
+
+
+,
+  { id: "dl100", icon: "dumbbell", name: "Triple digits", desc: "Deadlift 100 kg", check: log => log.some(w => w.exercises.some(x => { const ex = byId(x.id); return ex && /deadlift/i.test(ex.name) && x.sets.some(s => (s.weight || 0) >= 100); })) }
+
+
+,
+  { id: "vol100k", icon: "flame", name: "100-ton club", desc: "100,000 kg lifetime volume", check: log => totalVolumeKg(log) >= 100000 }
+
+
+,
+  { id: "xp5k", icon: "zap", name: "Rising star", desc: "Earn 5,000 XP", check: () => getXP().xp >= 5000 }
+
+
+,
+  { id: "earlybird", icon: "star", name: "Consistent", desc: "Train 4 weeks in a row", check: log => weeklyStreak(log) >= 4 }
+
+
+,
   { id: "allmuscles", icon: "map", name: "Full body", desc: "Train all 17 muscle groups", check: log => {
     const groups = new Set();
     log.forEach(w => w.exercises.forEach(x => { const ex = byId(x.id); if (ex) groups.add(ex.primary); }));
     return groups.size >= 17;
-  }},
+  }}
+
+
+,
 ];
+
+
 function getBadges() {
   try { return JSON.parse(localStorage.getItem("forge-badges") || "[]"); }
   catch (e) { return []; }
 }
+
+
 function checkBadges() {
   const log = getLog();
   const streak = workoutStreak();
@@ -1019,6 +1220,8 @@ function checkBadges() {
   });
   localStorage.setItem("forge-badges", JSON.stringify(earned));
 }
+
+
 function renderYearTab(body) {
   const yr = new Date().getFullYear();
   const ylog = getLog().filter(w => (w.date || "").indexOf(String(yr)) === 0);
@@ -1056,6 +1259,8 @@ function renderYearTab(body) {
     <h3 style="margin-top:20px">Top lifts this year</h3>
     ${top.length ? top.map(({ id, v }) => { const ex = byId(id); return `<div class="rec-row">${window.FORGE_ICON("trophy")}<b>${esc(ex ? ex.name : id)}</b><span>est. 1RM ${fmtW(v)}</span></div>`; }).join("") : `<p class="muted">Log weighted sets to rank your lifts.</p>`}`;
 }
+
+
 function renderBoardTab(body) {
   const months = {};
   getLog().forEach(w => {
@@ -1088,6 +1293,8 @@ function renderBoardTab(body) {
       return `<div class="rec-row"><span style="font-size:20px">${medals[i] || (i + 1) + "."}</span><b>${label}</b><span>${r.workouts} workouts · ${fmtW(r.vol)} · ${r.xp} XP</span></div>`;
     }).join("");
 }
+
+
 function renderBadgesTab(body) {
   const earned = getBadges();
   body.innerHTML = `<h3>Achievements</h3><div class="badge-grid">` +
@@ -1098,13 +1305,20 @@ function renderBadgesTab(body) {
       </div>`).join("") + `</div>`;
 }
 
+
 // BODY MEASUREMENTS
 function getMeasures() {
   try { return JSON.parse(localStorage.getItem("forge-measures") || "[]"); }
   catch (e) { return []; }
 }
+
+
 function saveMeasures(m) { localStorage.setItem("forge-measures", JSON.stringify(m)); }
+
+
 let _calYear = null, _calMonth = null;
+
+
 function renderCalendarTab(body) {
   const now = new Date();
   if (_calYear == null) { _calYear = now.getFullYear(); _calMonth = now.getMonth(); }
@@ -1152,6 +1366,8 @@ function renderCalendarTab(body) {
     renderCalDetail($("calDetail"), el.dataset.calday);
   }));
 }
+
+
 function renderCalDetail(el, key) {
   if (!el) return;
   const ws = getLog().filter(w => w.date === key);
@@ -1170,6 +1386,8 @@ function renderCalDetail(el, key) {
     }).join("") + `</div>`).join("");
   el.innerHTML = `<h3 style="margin-top:20px">${esc(dstr)}</h3><p class="muted">${ws.length} workout${ws.length > 1 ? "s" : ""} · ${sets} sets · ${fmtW(vol)} volume</p>${detail}`;
 }
+
+
 function renderBodyTab(body) {
   const measures = getMeasures();
   const units = getSettings().units;
@@ -1212,6 +1430,8 @@ function renderBodyTab(body) {
   });
   $("photoCamBtn").addEventListener("click", openPhotoCapture);
 }
+
+
 function attachChartTip(canvas, pts, fmt) {
   const par = canvas.parentElement;
   par.style.position = "relative";
@@ -1236,7 +1456,11 @@ function attachChartTip(canvas, pts, fmt) {
   canvas.addEventListener("pointermove", e => { if (e.pointerType === "mouse") showAt(e.clientX, e.clientY); });
   canvas.addEventListener("pointerleave", () => { tip.style.display = "none"; });
 }
+
+
 let mChartSpan = 0;
+
+
 function renderMeasureChart() {
   const measures = getMeasures().filter(m => m.weight);
   if (measures.length < 2) {
@@ -1315,15 +1539,26 @@ function renderMeasureChart() {
   attachChartTip(canvas, vals.map((v, i) => ({ x: X(i), y: Y(v), i })), p =>
     `${fmtD(measures[p.i].date)}: ${fromKg(vals[p.i]).toFixed(1)} ${unitLabel()}`);
 }
+
+
 document.addEventListener("click", e => {
   const zb = e.target.closest("[data-mspan]");
   if (zb) { mChartSpan = parseInt(zb.dataset.mspan, 10) || 0; renderMeasureChart(); }
-});
+}
+
+
+);
+
+
 function getPhotos() {
   try { return JSON.parse(localStorage.getItem("forge-photos") || "[]"); }
   catch (e) { return []; }
 }
+
+
 function savePhotos(p) { localStorage.setItem("forge-photos", JSON.stringify(p)); }
+
+
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1347,7 +1582,11 @@ function handlePhotoUpload(e) {
   };
   reader.readAsDataURL(file);
 }
+
+
 let compareSel = [];
+
+
 function renderPhotos() {
   const photos = getPhotos().sort((a, b) => a.ts - b.ts);
   const grid = $("photoGrid");
@@ -1375,6 +1614,8 @@ function renderPhotos() {
     });
   });
 }
+
+
 function openCompare(a, b) {
   compareSel = [];
   const veil = document.createElement("div");
@@ -1440,14 +1681,33 @@ function openCompare(a, b) {
   document.body.appendChild(veil);
 }
 
+
 const STD_LIFTS = [
-  { id: "barbell-back-squat", name: "Squat", ratios: [0.75, 1.0, 1.5, 2.0, 2.5] },
-  { id: "barbell-bench-press", name: "Bench", ratios: [0.5, 0.75, 1.0, 1.5, 1.75] },
-  { id: "barbell-deadlift", name: "Deadlift", ratios: [1.0, 1.25, 1.75, 2.25, 2.75] },
-  { id: "barbell-overhead-press", name: "Overhead press", ratios: [0.35, 0.5, 0.75, 1.0, 1.25] },
+  { id: "barbell-back-squat", name: "Squat", ratios: [0.75, 1.0, 1.5, 2.0, 2.5] }
+
+
+,
+  { id: "barbell-bench-press", name: "Bench", ratios: [0.5, 0.75, 1.0, 1.5, 1.75] }
+
+
+,
+  { id: "barbell-deadlift", name: "Deadlift", ratios: [1.0, 1.25, 1.75, 2.25, 2.75] }
+
+
+,
+  { id: "barbell-overhead-press", name: "Overhead press", ratios: [0.35, 0.5, 0.75, 1.0, 1.25] }
+
+
+,
 ];
+
+
 const STD_LEVELS = ["Beginner", "Novice", "Intermediate", "Advanced", "Elite"];
+
+
 function epley1RM(weight, reps) { return weight * (1 + Math.max(0, reps) / 30); }
+
+
 function renderStandards() {
   const measures = getMeasures();
   const bw = measures.length && measures[measures.length - 1].weight ? toKg(measures[measures.length - 1].weight) : 0;
@@ -1473,6 +1733,8 @@ function renderStandards() {
   }).join("");
   return `<p class="muted" style="margin-bottom:14px">Estimated 1RM vs bodyweight (${fmtW(bw)}). Based on Epley formula from your best logged set.</p>` + rows;
 }
+
+
 function renderProgress(tab) {
   tab = tab || localStorage.getItem("forge-progress-tab") || "overview";
   try { localStorage.setItem("forge-progress-tab", tab); } catch (e) {}
@@ -1657,4 +1919,3 @@ function renderProgress(tab) {
   }
 }
 }
-

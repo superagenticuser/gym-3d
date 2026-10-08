@@ -1,6 +1,7 @@
 /* FORGE - router, init, global wiring */
 'use strict';
 
+
 /* ---------- router ---------- */
 function router() {
   const raw = location.hash.replace(/^#\/?/, "");
@@ -37,83 +38,200 @@ function router() {
   else { show("home"); renderHome(); }
   if (window._refreshTimerMini) setTimeout(window._refreshTimerMini, 60);
 }
-$("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); });
+
+
+$("search").addEventListener("input", e => { filters.q = e.target.value; renderExercises(); }
+
+
+);
+
+
 $("muscleChips").addEventListener("click", e => {
   const c = e.target.closest("[data-m]"); if (!c) return;
   filters.muscle = c.dataset.m;
   document.querySelectorAll("#muscleChips .chip").forEach(x => x.classList.toggle("on", x === c));
   renderExercises();
-});
-$("eqFilter").addEventListener("change", e => { filters.eq = e.target.value; renderExercises(); });
-$("lvlFilter").addEventListener("change", e => { filters.lvl = e.target.value; renderExercises(); });
-$("myEqToggle").addEventListener("change", e => { filters.myEq = e.target.checked; renderExercises(); });
+}
+
+
+);
+
+
+$("eqFilter").addEventListener("change", e => { filters.eq = e.target.value; renderExercises(); }
+
+
+);
+
+
+$("lvlFilter").addEventListener("change", e => { filters.lvl = e.target.value; renderExercises(); }
+
+
+);
+
+
+$("myEqToggle").addEventListener("change", e => { filters.myEq = e.target.checked; renderExercises(); }
+
+
+);
+
+
 $("dFav").addEventListener("click", () => {
   const id = $("dFav").dataset.id;
   favs.has(id) ? favs.delete(id) : favs.add(id);
   saveFavs(); syncDetailFav(byId(id));
-});
+}
+
+
+);
+
+
 $("dPyramid").addEventListener("click", () => {
   const id = $("dPyramid").dataset.id;
   if (id) openPyramid(id);
-});
+}
+
+
+);
+
 
 window.addEventListener("hashchange", router);
+
+
 initExercises();
+
+
 saveFavs();
+
+
 // retire the old light/dark theme; dark only from here on
 localStorage.removeItem("forge-theme");
+
+
 document.documentElement.removeAttribute("data-theme");
+
+
 applyAccent(localStorage.getItem("forge-accent") || "volt", false);
+
+
 applyI18n();
+
+
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
+
+
 $("settingsBtn").addEventListener("click", openSettings);
+
+
 $("settingsClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+
+
 document.querySelectorAll("[data-icon]").forEach(el => {
   if (window.FORGE_ICON) el.innerHTML = window.FORGE_ICON(el.dataset.icon);
-});
+}
+
+
+);
+
+
 $("settingsClose").addEventListener("click", closeSettings);
-$("settingsVeil").addEventListener("click", e => { if (e.target.id === "settingsVeil") closeSettings(); });
-document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSettings(); closeQuiz(); } });
+
+
+$("settingsVeil").addEventListener("click", e => { if (e.target.id === "settingsVeil") closeSettings(); }
+
+
+);
+
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSettings(); closeQuiz(); } }
+
+
+);
+
+
 $("accentGrid").addEventListener("click", e => {
   const b = e.target.closest("[data-accent]");
   if (b) applyAccent(b.dataset.accent);
-});
+}
+
+
+);
+
+
 $("unitSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-unit]"); if (!b) return;
   const s = getSettings(); s.units = b.dataset.unit; saveSettings(s); syncSettingsUI();
-});
+}
+
+
+);
+
+
 $("speedSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-speed]"); if (!b) return;
   const s = getSettings(); s.demoSpeed = parseFloat(b.dataset.speed); saveSettings(s); syncSettingsUI();
-});
+}
+
+
+);
+
+
 $("langSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-lang]"); if (!b) return;
   const s = getSettings(); s.lang = b.dataset.lang; saveSettings(s); syncSettingsUI(); applyI18n();
-});
+}
+
+
+);
+
+
 $("eqGrid").addEventListener("click", e => {
   const b = e.target.closest("[data-eq]"); if (!b) return;
   const s = getSettings(); s.myEquipment = s.myEquipment || [];
   const q = b.dataset.eq;
   s.myEquipment = s.myEquipment.includes(q) ? s.myEquipment.filter(x => x !== q) : [...s.myEquipment, q];
   saveSettings(s); syncSettingsUI();
-});
-$("reminderTime").addEventListener("change", e => { const s = getSettings(); s.reminder = e.target.value || ""; saveSettings(s); });
-$("reminderClear").addEventListener("click", () => { const s = getSettings(); s.reminder = ""; saveSettings(s); $("reminderTime").value = ""; });
+}
+
+
+);
+
+
+$("reminderTime").addEventListener("change", e => { const s = getSettings(); s.reminder = e.target.value || ""; saveSettings(s); }
+
+
+);
+
+
+$("reminderClear").addEventListener("click", () => { const s = getSettings(); s.reminder = ""; saveSettings(s); $("reminderTime").value = ""; }
+
+
+);
+
+
 [["tglSound", "sound"], ["tglMotion", "reduceMotion"], ["tglDemoPlay", "demoAutoplay"], ["tglAutoRest", "autoRest"], ["tglVoice", "voiceCues"], ["tglBigText", "bigText"], ["tglContrast", "highContrast"], ["tglAdvanced", "advanced"], ["tglHaptic", "haptics"]].forEach(([id, key]) => {
   $(id).addEventListener("click", () => {
     const s = getSettings(); s[key] = !s[key]; saveSettings(s); syncSettingsUI(); applyA11y(); applyAdvanced();
   });
-});
+}
+
+
+);
+
+
 function applyAdvanced() {
   document.body.classList.toggle("no-adv", !getSettings().advanced);
 }
+
+
 function syncFinishUI() {
   const cur = getSettings().bodyFinish || "standard";
   document.querySelectorAll("#finishSeg [data-finish]").forEach(b =>
     b.classList.toggle("on", b.dataset.finish === cur));
 }
+
+
 // migrate legacy finish from localStorage to settings
 try {
   const legacy = localStorage.getItem("forge-body-finish");
@@ -121,11 +239,21 @@ try {
     const st = getSettings(); st.bodyFinish = legacy; saveSettings(st);
   }
   localStorage.removeItem("forge-body-finish");
-} catch (e) {}
+}
+
+
+catch (e) {}
+
+
 $("goalSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-goal]");
   if (b) { const s = getSettings(); s.goal = b.dataset.goal; saveSettings(s); syncSettingsUI(); }
-});
+}
+
+
+);
+
+
 $("finishSeg").addEventListener("click", e => {
   const b = e.target.closest("[data-finish]");
   if (b) {
@@ -133,7 +261,12 @@ $("finishSeg").addEventListener("click", e => {
     syncFinishUI(); applyBodyFinish(st.bodyFinish);
     try { if (finishPreviewViewer && finishPreviewViewer.setFinish) finishPreviewViewer.setFinish(st.bodyFinish); } catch (e2) {}
   }
-});
+}
+
+
+);
+
+
 $("exportData").addEventListener("click", () => {
   const data = {
     favs: [...favs], log: getLog(), done,
@@ -146,9 +279,18 @@ $("exportData").addEventListener("click", () => {
   a.download = "forge-backup.json";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-});
+}
+
+
+);
+
+
 $("csvExport").addEventListener("click", exportCSV);
+
+
 $("backupData").addEventListener("click", backupData);
+
+
 $("restoreData").addEventListener("change", async e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -168,24 +310,46 @@ $("restoreData").addEventListener("change", async e => {
     e.target.value = "";
   };
   reader.readAsText(file);
-});
+}
+
+
+);
+
+
 $("resetData").addEventListener("click", async () => {
   if (await appConfirm("Delete all favorites, workout history, records and settings? This cannot be undone.", { okText: "Delete everything", danger: true })) {
     localStorage.clear();
     location.reload();
   }
-});
+}
+
+
+);
+
+
 $("progTabs").addEventListener("click", e => {
   const c = e.target.closest("[data-ptab]"); if (!c) return;
   c.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   renderProgress(c.dataset.ptab);
-});
+}
+
+
+);
+
+
 // builder events
 $("bAddDay").addEventListener("click", () => {
   builder.days.push({ name: "Day " + (builder.days.length + 1), exercises: [] });
   renderBuilder();
-});
+}
+
+
+);
+
+
 $("bSave").addEventListener("click", saveBuilder);
+
+
 $("bDays").addEventListener("click", e => {
   const delD = e.target.closest("[data-bdel-day]");
   if (delD) {
@@ -231,7 +395,12 @@ $("bDays").addEventListener("click", e => {
     appAlert(filled ? `Filled ${filled} exercise${filled > 1 ? "s" : ""} at 75% of estimated 1RM.` + (missing ? ` ${missing} had no logged data.` : "") : "No logged data yet. Log workouts to estimate your 1RMs.");
     return;
   }
-});
+}
+
+
+);
+
+
 $("bDays").addEventListener("input", e => {
   const dn = e.target.closest("[data-bday]");
   if (dn) { builder.days[parseInt(dn.dataset.bday, 10)].name = dn.value; return; }
@@ -253,7 +422,12 @@ $("bDays").addEventListener("input", e => {
     const [di, xi] = rp.dataset.brep.split(":").map(Number);
     builder.days[di].exercises[xi].reps = rp.value;
   }
-});
+}
+
+
+);
+
+
 (function () {
   var wrap = $("bDays");
   if (!wrap) return;
@@ -306,10 +480,24 @@ $("bDays").addEventListener("input", e => {
   }
   wrap.addEventListener("pointerup", endDrag);
   wrap.addEventListener("pointercancel", endDrag);
-})();
+}
+
+
+)();
+
+
 $("pickerClose").addEventListener("click", closePicker);
-$("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); });
+
+
+$("pickerVeil").addEventListener("click", e => { if (e.target.id === "pickerVeil") closePicker(); }
+
+
+);
+
+
 $("pickerSearch").addEventListener("input", e => renderPicker(e.target.value));
+
+
 $("pickerList").addEventListener("click", async e => {
   const tDel = e.target.closest("[data-tpl-del]");
   if (tDel) {
@@ -335,40 +523,103 @@ $("pickerList").addEventListener("click", async e => {
     day.exercises.push({ id, sets: 3, reps: "10" });
     renderBuilder(); renderPicker($("pickerSearch").value);
   }
-});
+}
+
+
+);
+
+
 $("travelBtn").addEventListener("click", () => {
   window._travelOn = !window._travelOn;
   $("travelBtn").classList.toggle("on", !!window._travelOn);
   $("travelBtn").textContent = window._travelOn ? "Travel mode: on" : "Travel mode";
   if (window._woPid) renderWorkout(window._woPid, window._woDi, window._woWeek);
-});
+}
+
+
+);
+
+
 const _exBtn = $("expressBtn");
+
+
 if (_exBtn) _exBtn.addEventListener("click", startExpress);
+
+
 const _duBtn = $("dungeonBtn");
+
+
 if (_duBtn) _duBtn.addEventListener("click", startDungeon);
+
+
 $("gymModeBtn").addEventListener("click", () => {
   const on = document.body.classList.toggle("gym-mode");
   $("gymModeBtn").textContent = on ? "Exit gym mode" : "Gym mode";
-});
+}
+
+
+);
+
+
 $("mirrorBtn").addEventListener("click", openMirror);
+
+
 $("plateBtn").addEventListener("click", openPlates);
+
+
 $("voiceBtn").addEventListener("click", toggleVoiceLog);
+
+
 $("plateClose").addEventListener("click", () => $("plateVeil").classList.add("hidden"));
-$("plateVeil").addEventListener("click", e => { if (e.target.id === "plateVeil") $("plateVeil").classList.add("hidden"); });
+
+
+$("plateVeil").addEventListener("click", e => { if (e.target.id === "plateVeil") $("plateVeil").classList.add("hidden"); }
+
+
+);
+
+
 $("plateBar").addEventListener("input", calcPlates);
+
+
 $("plateTarget").addEventListener("input", calcPlates);
+
+
 $("coachBtn").addEventListener("click", generateCoachProgram);
+
+
 /* ---------- custom exercises: modal + delete wiring ---------- */
 $("customPrimary").innerHTML = Object.keys(MUSCLE_INFO).map(id => `<option value="${id}">${MUSCLE_INFO[id].name}</option>`).join("");
+
+
 $("customEquipment").innerHTML = Object.keys(eqName).map(q => `<option value="${q}">${eqName[q]}</option>`).join("");
+
+
 $("customSecondary").innerHTML = Object.keys(MUSCLE_INFO).map(id =>
   `<label class="check-pill"><input type="checkbox" value="${id}" /> ${MUSCLE_INFO[id].name}</label>`).join("");
+
+
 $("customClose").innerHTML = window.FORGE_ICON ? window.FORGE_ICON("x") : "×";
+
+
 $("addCustomBtn").addEventListener("click", openCustomModal);
+
+
 $("customCancel").addEventListener("click", closeCustomModal);
+
+
 $("customClose").addEventListener("click", closeCustomModal);
-$("customVeil").addEventListener("click", e => { if (e.target.id === "customVeil") closeCustomModal(); });
+
+
+$("customVeil").addEventListener("click", e => { if (e.target.id === "customVeil") closeCustomModal(); }
+
+
+);
+
+
 $("customSave").addEventListener("click", saveCustomExercise);
+
+
 $("dDelete").addEventListener("click", async () => {
   const id = $("dDelete").dataset.id;
   const ex = byId(id);
@@ -379,9 +630,16 @@ $("dDelete").addEventListener("click", async () => {
   const i = EXERCISES.findIndex(e => e.id === id);
   if (i >= 0) EXERCISES.splice(i, 1);
   location.hash = "#/exercises";
-});
+}
+
+
+);
+
+
 /* ---------- in-app dialogs (replace native alert/confirm/prompt) ---------- */
 let _dlgResolve = null, _dlgMode = null;
+
+
 function _showDlg(o) {
   return new Promise(res => {
     _dlgMode = o.mode || "msg";
@@ -404,40 +662,93 @@ function _showDlg(o) {
     $("dlgVeil").classList.remove("hidden");
   });
 }
+
+
 function _closeDlg(val) {
   $("dlgVeil").classList.add("hidden");
   $("dlgInput").classList.add("hidden");
   _dlgMode = null;
   if (_dlgResolve) { const r = _dlgResolve; _dlgResolve = null; r(val); }
 }
+
+
 function appAlert(msg, title) { return _showDlg({ msg, title: title || "FORGE", okText: "OK" }); }
+
+
 function appConfirm(msg, o) {
   o = o || {};
   return _showDlg({ msg, title: o.title || "Are you sure?", okText: o.okText || "Confirm", cancelText: "Cancel", danger: o.danger });
 }
+
+
 function appPrompt(msg, defVal, title) {
   return _showDlg({ msg, title: title || "FORGE", okText: "OK", cancelText: "Cancel", mode: "prompt", defVal });
 }
+
+
 $("dlgOk").addEventListener("click", () => {
   if (_dlgMode === "prompt") _closeDlg($("dlgInput").value);
   else _closeDlg(true);
-});
+}
+
+
+);
+
+
 $("dlgCancel").addEventListener("click", () => _closeDlg(_dlgMode === "prompt" ? null : false));
-$("dlgVeil").addEventListener("click", e => { if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false); });
+
+
+$("dlgVeil").addEventListener("click", e => { if (e.target.id === "dlgVeil") _closeDlg(_dlgMode === "prompt" ? null : false); }
+
+
+);
+
+
 $("dlgInput").addEventListener("keydown", e => {
   if (_dlgMode !== "prompt") return;
   if (e.key === "Enter") $("dlgOk").click();
-});
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false); });
+}
+
+
+);
+
+
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("dlgVeil").classList.contains("hidden")) _closeDlg(false); }
+
+
+);
+
 
 initCheckin();
+
+
 $("checkinBtn").addEventListener("click", openCheckin);
-applyA11y(); applyAdvanced();
+
+
+applyA11y();
+
+
+applyAdvanced();
+
+
 $("formCheckBtn").addEventListener("click", openFormCheck);
+
+
 $("formClose").addEventListener("click", stopFormCheck);
-$("formVeil").addEventListener("click", e => { if (e.target.id === "formVeil") stopFormCheck(); });
+
+
+$("formVeil").addEventListener("click", e => { if (e.target.id === "formVeil") stopFormCheck(); }
+
+
+);
+
+
 $("formStart").addEventListener("click", startFormCheck);
+
+
 $("formStop").addEventListener("click", stopFormCheck);
+
+
 // quiz
 document.addEventListener("click", e => {
   if (e.target.closest("#quizBtn")) { openQuiz(); return; }
@@ -454,9 +765,22 @@ document.addEventListener("click", e => {
   if (e.target.closest("#quizBack") && quizState) { quizState.step--; renderQuizStep(); return; }
   if (e.target.closest("#quizAgain")) { quizState = { step: 0, answers: {} }; renderQuizStep(); return; }
   if (e.target.closest("#quizGo")) { closeQuiz(); return; }
-});
+}
+
+
+);
+
+
 const syncOffline = () => $("offlineBar").classList.toggle("hidden", navigator.onLine);
+
+
 window.addEventListener("online", syncOffline);
+
+
 window.addEventListener("offline", syncOffline);
+
+
 syncOffline();
+
+
 router();
