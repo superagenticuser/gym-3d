@@ -918,6 +918,7 @@
     });
   }
   const CHANGELOG = [
+    ["v11.34", "Fix mirror rest timer, uniform action buttons"],
     ["v11.33", "Camera fixes: icon action bar, camera switch, mirror sets, toasts"],
     ["v11.32", "Camera features: form recorder, mirror mode, photo capture"],
     ["v11.31", "Align all card padding to documented system"],
@@ -5268,7 +5269,7 @@
       }
       if (!html) html = `<b>Workout complete</b><span>Nice work.</span>`;
       if (timerLeft > 0) {
-        const s3 = Math.ceil(timerLeft / 1000);
+        const s3 = Math.ceil(timerLeft);
         html += `<span class="cam-rest">Rest ${Math.floor(s3 / 60)}:${String(s3 % 60).padStart(2, "0")}</span>`;
       }
       hud.innerHTML = html;
