@@ -1,618 +1,1164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FORGE · 3D Gym Training</title>
-<meta name="description" content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle." />
-<meta name="theme-color" content="#0b0e13" />
-<link rel="manifest" href="manifest.json" />
-<link rel="stylesheet" href="css/base.css?v=11.37" />
-<link rel="stylesheet" href="css/components.css?v=11.37" />
-<link rel="stylesheet" href="css/views.css?v=11.37" />
-<link rel="stylesheet" href="css/workout.css?v=11.37" />
-<link rel="stylesheet" href="css/progress.css?v=11.37" />
-<link rel="stylesheet" href="css/camera.css?v=11.37" />
-</head>
-<body>
-<div id="offlineBar" class="hidden" style="background:#f59e0b;color:#0b0d12;text-align:center;font-size:13px;font-weight:700;padding:8px">Offline - workouts still save on this device</div>
-<header class="topbar">
-  <a class="brand" href="#/">
-    <span class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20 L9 12 L13 15 L20 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    FORGE
-  </a>
-  <nav class="nav">
-    <a href="#/exercises" data-nav="exercises" data-i18n="nav_exercises"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6" />
-  <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z" />
-  <path d="m21.5 21.5-1.4-1.4" />
-  <path d="M3.9 3.9 2.5 2.5" />
-  <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z" /></svg>Exercises</a>
-    <a href="#/programs" data-nav="programs" data-i18n="nav_programs"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4" />
-  <path d="M16 2v4" />
-  <rect width="18" height="18" x="3" y="4" rx="2" />
-  <path d="M3 10h18" /></svg>Programs</a>
-    <a href="#/body" data-nav="body" data-i18n="nav_body"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1" />
-  <path d="m9 20 3-6 3 6" />
-  <path d="m6 8 6 2 6-2" />
-  <path d="M12 10v4" /></svg>3D Body Map</a>
-    <a href="#/favorites" data-nav="favorites" data-i18n="nav_favorites"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>Favorites <span class="fav-count" id="favCount">0</span></a>
-    <a href="#/progress" data-nav="progress" data-i18n="nav_progress"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16" />
-  <path d="M18 17V9" />
-  <path d="M13 17V5" />
-  <path d="M8 17v-3" /></svg>Progress</a>
-    <span class="nav-pill" id="navPill"></span>
-  </nav>
-  <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9" />
-  <path d="M14 17H5" />
-  <circle cx="17" cy="17" r="3" />
-  <circle cx="7" cy="7" r="3" /></svg></button>
-</header>
-
-<main>
-  <!-- HOME -->
-  <section id="view-home" class="view">
-    <div class="onerm-box hidden" id="reminderBanner" style="margin-bottom:16px;border-color:var(--volt)"></div>
-    <div class="hero">
-      <div class="hero-copy">
-        <p class="kicker"><span id="homeGreet"></span> · <span data-i18n="home_kicker">3D GYM TRAINING</span></p>
-        <h1>Every muscle.<br /><span class="volt">Every exercise.</span><br />In 3D.</h1>
-        <p class="lede" data-i18n="home_lede">193 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#/body" data-i18n="home_cta_body">Explore the 3D body</a>
-          <a class="btn btn-ghost" href="#/exercises" data-i18n="home_cta_ex">Browse exercises</a>
-          <button class="btn btn-ghost" id="checkinBtn">Daily check-in</button>
-        </div>
-        <div class="hero-stats">
-          <div><b id="statEx">190</b><span>exercises</span></div>
-          <div><b id="statMus">17</b><span>muscle groups</span></div>
-          <div><b>3D</b><span>interactive body</span></div>
-        </div>
-        <div class="hero-progress" id="heroProgress"></div>
-        <div id="recoveryDash" style="margin-top:16px"></div>
-        <div id="goalsDash" style="margin-top:16px"></div>
-      </div>
-      <div class="hero-3d" id="hero3d"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FORGE · 3D Gym Training</title>
+    <meta
+      name="description"
+      content="FORGE: 190+ exercises visualized on an interactive 3D body. Train every muscle."
+    />
+    <meta name="theme-color" content="#0b0e13" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/base.css?v=11.38" />
+    <link rel="stylesheet" href="css/components.css?v=11.38" />
+    <link rel="stylesheet" href="css/views.css?v=11.38" />
+    <link rel="stylesheet" href="css/workout.css?v=11.38" />
+    <link rel="stylesheet" href="css/progress.css?v=11.38" />
+    <link rel="stylesheet" href="css/camera.css?v=11.38" />
+  </head>
+  <body>
+    <div
+      id="offlineBar"
+      class="hidden"
+      style="background: #f59e0b; color: #0b0d12; text-align: center; font-size: 13px; font-weight: 700; padding: 8px"
+    >
+      Offline - workouts still save on this device
     </div>
-    <h2 class="section-title">Train by muscle</h2>
-    <div class="muscle-grid" id="muscleGrid"></div>
-  </section>
-
-  <!-- EXERCISES -->
-  <section id="view-exercises" class="view hidden">
-    <h2 class="section-title" data-i18n="ex_title">All exercises<span class="count" id="exCount"></span></h2>
-    <div class="toolbar">
-      <div class="search-wrap"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" />
-  <path d="m21 21-4.3-4.3" /></svg><input id="search" type="search" data-i18n-ph="ex_search_ph" placeholder="Search exercises… (e.g. squat, cable, beginner)" autocomplete="off" /></div>
-      <label class="my-eq-toggle hidden" id="myEqWrap"><input type="checkbox" id="myEqToggle" /> <span data-i18n="myeq_only">My equipment only</span></label>
-      <div class="chip-row" id="muscleChips"></div>
-      <div class="selects">
-        <select id="eqFilter"><option value="">All equipment</option></select>
-        <select id="lvlFilter">
-          <option value="">All levels</option>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-ghost btn-sm" id="addCustomBtn" style="margin-bottom:14px">Add custom exercise</button>
-    <div class="cards" id="exerciseGrid"></div>
-  </section>
-
-  <!-- DETAIL -->
-  <section id="view-detail" class="view hidden">
-    <a class="back" href="#/exercises"><span class="back-icon" data-icon="arrow-left"></span> All exercises</a>
-    <div class="detail-head">
-      <div>
-        <div class="badges" id="dBadges"></div>
-        <h2 id="dName"></h2>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-ghost btn-sm" id="dPyramid">Pyramid</button>
-        <button class="fav-btn btn btn-ghost btn-sm" id="dFav">Save to favorites</button>
-        <button class="btn btn-danger btn-sm hidden" id="dDelete">Delete exercise</button>
-      </div>
-    </div>
-    <div class="detail-3d">
-      <div id="detail3d" class="stage"></div>
-      <div class="view-toggle">
-        <button id="dFront" class="on">Front</button>
-        <button id="dBack">Back</button>
-      </div>
-      <p class="hint">Drag to rotate · scroll to zoom · red = primary, orange = secondary</p>
-    </div>
-    <div class="detail-cols">
-      <div class="detail-main">
-        <h3>See it in motion</h3>
-        <div id="demoBox" class="demo-box"></div>
-        <h3>How to do it</h3>
-        <ol class="steps" id="dSteps"></ol>
-      </div>
-      <aside class="detail-side">
-        <h3>Muscles worked</h3>
-        <div class="muscle-tags" id="dMuscles"></div>
-        <h3>Try also</h3>
-        <div class="mini-cards" id="dSimilar"></div>
-        <h3><span data-i18n="swap_title">Swap it</span> <span class="muted" style="font-weight:400;font-size:13px" data-i18n="swap_sub">same muscle, different gear</span></h3>
-        <div id="dSwaps"></div>
-        <div id="dOnerm"></div>
-        <div id="dProg"></div>
-        <button class="btn btn-ghost btn-sm" id="formCheckBtn" style="margin-top:12px">AI form check</button>
-      </aside>
-    </div>
-  </section>
-
-  <!-- BODY MAP -->
-  <section id="view-body" class="view hidden">
-    <h2 class="section-title" data-i18n="body_title">3D Body Map</h2>
-    <p class="lede" data-i18n="body_lede">Click any muscle on the body to see every exercise that trains it.</p>
-    <div class="body-layout">
-      <div class="body-3d">
-        <div id="body3d" class="stage tall"></div>
-        <div class="view-toggle">
-          <button id="bFront" class="on" data-i18n="body_front">Front</button>
-          <button id="bBack" data-i18n="body_back">Back</button>
-        </div>
-        <div class="view-toggle" style="margin-top:8px">
-          <button id="bMuscles" class="on" data-i18n="body_muscles">Muscles</button>
-          <button id="bRecovery" data-i18n="body_recovery">Recovery</button>
-          <button id="bFatigue">Fatigue</button>
-          <button id="bPain" data-i18n="body_pain">Pain</button>
-        </div>
-        <p class="hint" data-i18n="body_hint">Drag to rotate · scroll to zoom · click a muscle</p>
-        <p class="hint hidden" id="painHint" style="margin-top:8px"><span id="painCount">Tap a muscle to mark pain</span> · tap again to unmark</p>
-        <div class="heat-legend hidden" id="heatLegend">
-          <span><i style="background:#ff2d1a"></i>Trained recently</span>
-          <span><i style="background:#2a3040;border:1px solid var(--line)"></i>Ready to train</span>
-        </div>
-      </div>
-      <aside class="body-panel">
-        <div id="muscleInfo"><p class="muted">Select a muscle…</p></div>
-        <div class="mini-cards" id="bodyExercises"></div>
-      </aside>
-    </div>
-    <div id="bodyRecoveryDash" style="margin-top:24px"></div>
-  </section>
-
-  <!-- PROGRAMS -->
-  <section id="view-programs" class="view hidden">
-    <h2 class="section-title" data-i18n="prog_title">Training programs</h2>
-    <p class="lede" data-i18n="prog_lede">Pick a plan and just train. Every workout is laid out set by set.</p>
-    <div class="prog-actions">
-      <button class="btn btn-primary btn-sm" id="quizBtn" data-i18n="prog_quiz">Find my program</button>
-      <a class="btn btn-ghost btn-sm" href="#/builder" data-i18n="prog_create">Create program</a>
-      <button class="btn btn-ghost btn-sm" id="coachBtn">AI coach plan</button>
-      <button class="btn btn-ghost btn-sm" id="expressBtn" title="A condensed full-body session, about 20 minutes">20-min express</button>
-      <button class="btn btn-ghost btn-sm" id="dungeonBtn" title="A random gamified workout for bonus XP">Dungeon crawl</button>
-    </div>
-    <div class="active-banner hidden" id="activeBanner"></div>
-    <div class="prog-grid" id="programGrid"></div>
-  </section>
-
-  <!-- PROGRAM DETAIL -->
-  <section id="view-program" class="view hidden">
-    <a class="back" href="#/programs"><span class="back-icon" data-icon="arrow-left"></span> All programs</a>
-    <h2 class="section-title" id="pgName"></h2>
-    <p class="lede" id="pgTag"></p>
-    <div class="badges" id="pgBadges" style="margin-bottom:20px"></div>
-    <div class="prog-actions" id="pgActions" style="margin-bottom:24px"></div>
-    <div id="pgDays"></div>
-  </section>
-
-  <!-- WORKOUT MODE -->
-  <section id="view-workout" class="view hidden">
-    <a class="back" id="woBack" href="#/programs"><span class="back-icon" data-icon="arrow-left"></span> Back</a>
-    <p class="kicker" id="woSub"></p>
-    <h2 class="section-title" id="woTitle"></h2>
-    <p class="muted hidden" id="woPace" style="font-size:13px;margin:-8px 0 12px"></p>
-    <div class="timer">
-      <div class="timer-ring-wrap">
-        <svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="tr-bg" cx="60" cy="60" r="52"/>
-          <circle class="tr-fg" id="timerRing" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="0"/>
+    <header class="topbar">
+      <a class="brand" href="#/">
+        <span class="brand-mark"
+          ><svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M4 20 L9 12 L13 15 L20 4"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            /></svg
+        ></span>
+        FORGE
+      </a>
+      <nav class="nav">
+        <a href="#/exercises" data-nav="exercises" data-i18n="nav_exercises"
+          ><svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M14.4 14.4 9.6 9.6" />
+            <path
+              d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+            />
+            <path d="m21.5 21.5-1.4-1.4" />
+            <path d="M3.9 3.9 2.5 2.5" />
+            <path
+              d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+            /></svg
+          >Exercises</a
+        >
+        <a href="#/programs" data-nav="programs" data-i18n="nav_programs"
+          ><svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M8 2v4" />
+            <path d="M16 2v4" />
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <path d="M3 10h18" /></svg
+          >Programs</a
+        >
+        <a href="#/body" data-nav="body" data-i18n="nav_body"
+          ><svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="5" r="1" />
+            <path d="m9 20 3-6 3 6" />
+            <path d="m6 8 6 2 6-2" />
+            <path d="M12 10v4" /></svg
+          >3D Body Map</a
+        >
+        <a href="#/favorites" data-nav="favorites" data-i18n="nav_favorites"
+          ><svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+            /></svg
+          >Favorites <span class="fav-count" id="favCount">0</span></a
+        >
+        <a href="#/progress" data-nav="progress" data-i18n="nav_progress"
+          ><svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+            <path d="M18 17V9" />
+            <path d="M13 17V5" />
+            <path d="M8 17v-3" /></svg
+          >Progress</a
+        >
+        <span class="nav-pill" id="navPill"></span>
+      </nav>
+      <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings">
+        <svg
+          class="ic"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 7h-9" />
+          <path d="M14 17H5" />
+          <circle cx="17" cy="17" r="3" />
+          <circle cx="7" cy="7" r="3" />
         </svg>
-        <div class="timer-display" id="timerDisplay">0:00</div>
-      </div>
-      <div class="timer-btns">
-        <button data-timer="30">0:30</button>
-        <button data-timer="60">1:00</button>
-        <button data-timer="90">1:30</button>
-        <button data-timer="120">2:00</button>
-        <button id="timerStop">Stop</button>
-      </div>
-      <p class="hint" id="restCue" style="min-height:20px;font-size:13.5px;color:var(--volt);font-weight:600"></p>
-      <p class="hint timer-hint"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2" />
-  <line x1="12" x2="15" y1="14" y2="11" />
-  <circle cx="12" cy="14" r="8" /></svg>Rest timer. Tap a duration to start</p>
-      <button class="btn btn-ghost btn-sm" id="plateBtn" style="margin-top:8px">Plate calculator</button>
-      <button class="btn btn-ghost btn-sm" id="voiceBtn" style="margin-top:8px"><span class="btn-ic" data-icon="mic"></span> Voice log</button>
-      <button class="btn btn-ghost btn-sm" id="travelBtn" style="margin-top:8px" title="Swap to bodyweight / dumbbell / band alternatives">Travel mode</button>
-      <p class="muted" id="voiceStatus" style="font-size:13px;margin-top:6px"></p>
-    </div>
-    <button class="btn btn-ghost btn-sm" id="gymModeBtn" style="margin:8px 0">Gym mode</button>
-    <button class="btn btn-ghost btn-sm" id="mirrorBtn" style="margin:8px 0 8px 8px">Mirror mode</button>
-    <div id="woList"></div>
-    <div class="field-group" style="margin:14px 0">
-      <label class="field-label" for="woNotes">Session notes</label>
-      <textarea id="woNotes" class="text-input" rows="3" placeholder="How did it feel? Anything to change next time?" style="resize:vertical"></textarea>
-    </div>
-    <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
-    <div class="done-banner hidden" id="woDone">
-      <h3>Workout complete. <span data-icon="dumbbell" style="display:inline-flex;vertical-align:-3px"></span></h3>
-      <p class="muted">Logged. Keep the streak going.</p>
-      <p class="muted" id="woDurationLine" style="margin-top:4px;font-weight:600"></p>
-      <div id="woRating" style="margin:12px 0">
-        <p class="muted" style="font-size:13px;margin-bottom:8px">How was this workout?</p>
-        <div id="woStars" style="display:flex;gap:6px;justify-content:center;font-size:28px;cursor:pointer"></div>
-        <input id="woRatingNote" class="text-input" placeholder="Optional note..." style="margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto">
-      </div>
-      <p class="muted" id="woXpLine" style="margin-top:6px"></p>
-      <div class="xpbar" id="woXpBar" style="max-width:320px;margin-left:auto;margin-right:auto"><div id="woXpFill"></div></div>
-      <p class="muted" id="woXpNext" style="font-size:12px;margin-top:4px"></p>
-      <div class="wo-done-actions">
-        <button class="btn btn-ghost btn-sm wo-icon-btn" id="shareCard" title="Share workout card" aria-label="Share workout card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg></button>
-        <button class="btn btn-ghost btn-sm wo-icon-btn" id="shareTextBtn" title="Share as text" aria-label="Share as text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></button>
-        <button class="btn btn-ghost btn-sm wo-icon-btn" id="replayBtn" title="3D replay" aria-label="3D replay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="6 3 20 12 6 21 6 3"/></svg></button>
-        <a class="btn btn-primary btn-sm" id="woDoneBack" href="#/programs" style="white-space:nowrap">Back to programs</a>
-      </div>
-    </div>
-    </div>
-  </section>
+      </button>
+    </header>
 
-  <!-- FAVORITES -->
-  <section id="view-favorites" class="view hidden">
-    <h2 class="section-title" data-i18n="fav_title">Your favorites</h2>
-    <div class="cards" id="favGrid"></div>
-    <div class="hidden" id="favEmpty"></div>
-  </section>
+    <main>
+      <!-- HOME -->
+      <section id="view-home" class="view">
+        <div class="onerm-box hidden" id="reminderBanner" style="margin-bottom: 16px; border-color: var(--volt)"></div>
+        <div class="hero">
+          <div class="hero-copy">
+            <p class="kicker"><span id="homeGreet"></span> · <span data-i18n="home_kicker">3D GYM TRAINING</span></p>
+            <h1>Every muscle.<br /><span class="volt">Every exercise.</span><br />In 3D.</h1>
+            <p class="lede" data-i18n="home_lede">
+              193 exercises mapped onto an interactive 3D body. Tap a muscle, see it light up, learn the move.
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#/body" data-i18n="home_cta_body">Explore the 3D body</a>
+              <a class="btn btn-ghost" href="#/exercises" data-i18n="home_cta_ex">Browse exercises</a>
+              <button class="btn btn-ghost" id="checkinBtn">Daily check-in</button>
+            </div>
+            <div class="hero-stats">
+              <div><b id="statEx">190</b><span>exercises</span></div>
+              <div><b id="statMus">17</b><span>muscle groups</span></div>
+              <div><b>3D</b><span>interactive body</span></div>
+            </div>
+            <div class="hero-progress" id="heroProgress"></div>
+            <div id="recoveryDash" style="margin-top: 16px"></div>
+            <div id="goalsDash" style="margin-top: 16px"></div>
+          </div>
+          <div class="hero-3d" id="hero3d"></div>
+        </div>
+        <h2 class="section-title">Train by muscle</h2>
+        <div class="muscle-grid" id="muscleGrid"></div>
+      </section>
 
-  <!-- PROGRESS -->
-  <section id="view-progress" class="view hidden">
-    <h2 class="section-title" data-i18n="progress_title">Progress</h2>
-    <div class="tab-row" id="progTabs">
-      <button class="chip on" data-ptab="overview" data-i18n="tab_overview">Overview</button>
-      <button class="chip" data-ptab="history" data-i18n="tab_history">History</button>
-      <button class="chip" data-ptab="records" data-i18n="tab_records">Records</button>
-      <button class="chip" data-ptab="standards">Standards</button>
-      <button class="chip" data-ptab="volume" data-i18n="tab_volume">Volume</button>
-      <button class="chip" data-ptab="body">Body</button>
-      <button class="chip" data-ptab="badges">Badges</button>
-      <button class="chip" data-ptab="year" data-i18n="tab_year">Year</button>
-      <button class="chip" data-ptab="board" data-i18n="tab_board">Leaderboard</button>
-      <button class="chip" data-ptab="challenges">Challenges</button>
-      <button class="chip" data-ptab="insights">Insights</button>
-      <button class="chip" data-ptab="coach">Coach</button>
-      <button class="chip" data-ptab="calendar">Calendar</button>
-    </div>
-    <div id="progressBody"></div>
-  </section>
-  <!-- PROGRAM BUILDER -->
-  <section id="view-builder" class="view hidden">
-    <h2 class="section-title" data-i18n="builder_title">Create program</h2>
-    <p class="lede" data-i18n="builder_lede">Build your own training plan from the exercise library.</p>
-    <div class="builder-field">
-      <label for="bName" data-i18n="b_name">Program name</label>
-      <input type="text" id="bName" class="text-input" data-i18n-ph="b_name_ph" placeholder="e.g. My Push Day Split" maxlength="60" />
-    </div>
-    <div class="builder-field">
-      <label for="bTagline" data-i18n="b_tagline">Tagline (optional)</label>
-      <input type="text" id="bTagline" class="text-input" data-i18n-ph="b_tagline_ph" placeholder="e.g. 3 days, dumbbells only" maxlength="80" />
-    </div>
-    <div id="bDays"></div>
-    <button class="btn btn-ghost btn-sm" id="bAddDay" data-i18n="b_add_day">Add day</button>
-    <div style="display:flex;gap:10px;margin:20px 0;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" id="bSave" data-i18n="b_save">Save program</button>
-      <a class="btn btn-ghost btn-sm" href="#/programs" data-i18n="b_cancel">Cancel</a>
-    </div>
-  </section>
+      <!-- EXERCISES -->
+      <section id="view-exercises" class="view hidden">
+        <h2 class="section-title" data-i18n="ex_title">All exercises<span class="count" id="exCount"></span></h2>
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg
+              class="ic"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" /></svg
+            ><input
+              id="search"
+              type="search"
+              data-i18n-ph="ex_search_ph"
+              placeholder="Search exercises… (e.g. squat, cable, beginner)"
+              autocomplete="off"
+            />
+          </div>
+          <label class="my-eq-toggle hidden" id="myEqWrap"
+            ><input type="checkbox" id="myEqToggle" /> <span data-i18n="myeq_only">My equipment only</span></label
+          >
+          <div class="chip-row" id="muscleChips"></div>
+          <div class="selects">
+            <select id="eqFilter">
+              <option value="">All equipment</option>
+            </select>
+            <select id="lvlFilter">
+              <option value="">All levels</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="addCustomBtn" style="margin-bottom: 14px">Add custom exercise</button>
+        <div class="cards" id="exerciseGrid"></div>
+      </section>
 
-  <!-- EXERCISE PICKER -->
-  <div class="modal-veil hidden" id="pickerVeil">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
-      <div class="modal-head">
-        <h3 id="pickerTitle">Add exercises</h3>
-        <button class="modal-x" id="pickerClose" aria-label="Close picker"></button>
-      </div>
-      <div class="modal-body">
-        <div class="search-wrap" style="margin-bottom:12px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" />
-  <path d="m21 21-4.3-4.3" /></svg><input id="pickerSearch" type="search" placeholder="Search exercises…" autocomplete="off" /></div>
-        <div id="pickerList"></div>
-      </div>
-    </div>
-  </div>
-<!-- PLATE CALC -->
-<div class="modal-veil hidden" id="plateVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plateTitle">
-    <div class="modal-head">
-      <h3 id="plateTitle">Plate calculator</h3>
-      <button class="modal-x" id="plateClose" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      <div class="builder-field">
-        <label for="plateBar">Bar weight</label>
-        <input type="number" id="plateBar" class="text-input" value="20" step="any" min="0" />
-      </div>
-      <div class="builder-field">
-        <label for="plateTarget">Target weight</label>
-        <input type="number" id="plateTarget" class="text-input" value="100" step="any" min="0" />
-      </div>
-      <div id="plateResult"></div>
-    </div>
-  </div>
-</div>
-<!-- FORM CHECK -->
-<div class="modal-veil hidden" id="formVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle" style="max-width:640px">
-    <div class="modal-head">
-      <h3 id="formTitle">AI form check</h3>
-      <button class="modal-x" id="formClose" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      <p class="muted" style="margin-bottom:12px">Position your phone so your full body is visible from the side. Works best for squats.</p>
-      <div style="position:relative;background:#000;border-radius:12px;overflow:hidden">
-        <video id="formVideo" playsinline muted style="width:100%;display:block;transform:scaleX(-1)"></video>
-        <canvas id="formCanvas" style="position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)"></canvas>
-      </div>
-      <div id="formFeedback" style="margin-top:12px;font-size:16px;font-weight:600;min-height:48px"></div>
-      <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="btn btn-primary btn-sm" id="formStart">Start camera</button>
-        <button class="btn btn-ghost btn-sm hidden" id="formStop">Stop</button>
-      </div>
-      <p class="muted" style="font-size:12px;margin-top:8px">Runs on-device. No video leaves your phone.</p>
-    </div>
-  </div>
-</div>
-<!-- DAILY CHECK-IN -->
-<div class="modal-veil hidden" id="checkinVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="checkinTitle">
-    <div class="modal-head">
-      <h3 id="checkinTitle">Daily check-in</h3>
-      <button class="modal-x" id="checkinClose" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      <p class="setting-label">Sleep (hours) <b id="ciSleepOut" style="color:var(--volt)"></b></p>
-      <input type="range" class="slider" id="ciSleep" min="0" max="14" step="0.5" value="7" aria-label="Sleep hours" />
-      <p class="setting-label" style="margin-top:12px">Energy (1-5) <b id="ciEnergyOut" style="color:var(--volt)"></b></p>
-      <input type="range" class="slider" id="ciEnergy" min="1" max="5" step="1" value="3" aria-label="Energy level" />
-      <p class="setting-label" style="margin-top:12px">HRV (ms, morning reading)</p>
-      <input type="number" id="ciHrv" min="0" max="300" class="field-input" style="width:120px" />
-      <p class="muted" style="font-size:12px;margin-top:6px">Heart rate variability. Higher usually means better recovery. Typical range: 20-120 ms.</p>
-      <p class="setting-label" style="margin-top:12px">Water (ml)</p>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="water-glass" aria-hidden="true"><div class="water-fill" id="waterFill" style="height:0%"></div></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
-          <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
-          <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
+      <!-- DETAIL -->
+      <section id="view-detail" class="view hidden">
+        <a class="back" href="#/exercises"><span class="back-icon" data-icon="arrow-left"></span> All exercises</a>
+        <div class="detail-head">
+          <div>
+            <div class="badges" id="dBadges"></div>
+            <h2 id="dName"></h2>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+            <button class="btn btn-ghost btn-sm" id="dPyramid">Pyramid</button>
+            <button class="fav-btn btn btn-ghost btn-sm" id="dFav">Save to favorites</button>
+            <button class="btn btn-danger btn-sm hidden" id="dDelete">Delete exercise</button>
+          </div>
+        </div>
+        <div class="detail-3d">
+          <div id="detail3d" class="stage"></div>
+          <div class="view-toggle">
+            <button id="dFront" class="on">Front</button>
+            <button id="dBack">Back</button>
+          </div>
+          <p class="hint">Drag to rotate · scroll to zoom · red = primary, orange = secondary</p>
+        </div>
+        <div class="detail-cols">
+          <div class="detail-main">
+            <h3>See it in motion</h3>
+            <div id="demoBox" class="demo-box"></div>
+            <h3>How to do it</h3>
+            <ol class="steps" id="dSteps"></ol>
+          </div>
+          <aside class="detail-side">
+            <h3>Muscles worked</h3>
+            <div class="muscle-tags" id="dMuscles"></div>
+            <h3>Try also</h3>
+            <div class="mini-cards" id="dSimilar"></div>
+            <h3>
+              <span data-i18n="swap_title">Swap it</span>
+              <span class="muted" style="font-weight: 400; font-size: 13px" data-i18n="swap_sub"
+                >same muscle, different gear</span
+              >
+            </h3>
+            <div id="dSwaps"></div>
+            <div id="dOnerm"></div>
+            <div id="dProg"></div>
+            <button class="btn btn-ghost btn-sm" id="formCheckBtn" style="margin-top: 12px">AI form check</button>
+          </aside>
+        </div>
+      </section>
+
+      <!-- BODY MAP -->
+      <section id="view-body" class="view hidden">
+        <h2 class="section-title" data-i18n="body_title">3D Body Map</h2>
+        <p class="lede" data-i18n="body_lede">Click any muscle on the body to see every exercise that trains it.</p>
+        <div class="body-layout">
+          <div class="body-3d">
+            <div id="body3d" class="stage tall"></div>
+            <div class="view-toggle">
+              <button id="bFront" class="on" data-i18n="body_front">Front</button>
+              <button id="bBack" data-i18n="body_back">Back</button>
+            </div>
+            <div class="view-toggle" style="margin-top: 8px">
+              <button id="bMuscles" class="on" data-i18n="body_muscles">Muscles</button>
+              <button id="bRecovery" data-i18n="body_recovery">Recovery</button>
+              <button id="bFatigue">Fatigue</button>
+              <button id="bPain" data-i18n="body_pain">Pain</button>
+            </div>
+            <p class="hint" data-i18n="body_hint">Drag to rotate · scroll to zoom · click a muscle</p>
+            <p class="hint hidden" id="painHint" style="margin-top: 8px">
+              <span id="painCount">Tap a muscle to mark pain</span> · tap again to unmark
+            </p>
+            <div class="heat-legend hidden" id="heatLegend">
+              <span><i style="background: #ff2d1a"></i>Trained recently</span>
+              <span><i style="background: #2a3040; border: 1px solid var(--line)"></i>Ready to train</span>
+            </div>
+          </div>
+          <aside class="body-panel">
+            <div id="muscleInfo"><p class="muted">Select a muscle…</p></div>
+            <div class="mini-cards" id="bodyExercises"></div>
+          </aside>
+        </div>
+        <div id="bodyRecoveryDash" style="margin-top: 24px"></div>
+      </section>
+
+      <!-- PROGRAMS -->
+      <section id="view-programs" class="view hidden">
+        <h2 class="section-title" data-i18n="prog_title">Training programs</h2>
+        <p class="lede" data-i18n="prog_lede">Pick a plan and just train. Every workout is laid out set by set.</p>
+        <div class="prog-actions">
+          <button class="btn btn-primary btn-sm" id="quizBtn" data-i18n="prog_quiz">Find my program</button>
+          <a class="btn btn-ghost btn-sm" href="#/builder" data-i18n="prog_create">Create program</a>
+          <button class="btn btn-ghost btn-sm" id="coachBtn">AI coach plan</button>
+          <button class="btn btn-ghost btn-sm" id="expressBtn" title="A condensed full-body session, about 20 minutes">
+            20-min express
+          </button>
+          <button class="btn btn-ghost btn-sm" id="dungeonBtn" title="A random gamified workout for bonus XP">
+            Dungeon crawl
+          </button>
+        </div>
+        <div class="active-banner hidden" id="activeBanner"></div>
+        <div class="prog-grid" id="programGrid"></div>
+      </section>
+
+      <!-- PROGRAM DETAIL -->
+      <section id="view-program" class="view hidden">
+        <a class="back" href="#/programs"><span class="back-icon" data-icon="arrow-left"></span> All programs</a>
+        <h2 class="section-title" id="pgName"></h2>
+        <p class="lede" id="pgTag"></p>
+        <div class="badges" id="pgBadges" style="margin-bottom: 20px"></div>
+        <div class="prog-actions" id="pgActions" style="margin-bottom: 24px"></div>
+        <div id="pgDays"></div>
+      </section>
+
+      <!-- WORKOUT MODE -->
+      <section id="view-workout" class="view hidden">
+        <a class="back" id="woBack" href="#/programs"><span class="back-icon" data-icon="arrow-left"></span> Back</a>
+        <p class="kicker" id="woSub"></p>
+        <h2 class="section-title" id="woTitle"></h2>
+        <p class="muted hidden" id="woPace" style="font-size: 13px; margin: -8px 0 12px"></p>
+        <div class="timer">
+          <div class="timer-ring-wrap">
+            <svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="tr-bg" cx="60" cy="60" r="52" />
+              <circle
+                class="tr-fg"
+                id="timerRing"
+                cx="60"
+                cy="60"
+                r="52"
+                stroke-dasharray="326.7"
+                stroke-dashoffset="0"
+              />
+            </svg>
+            <div class="timer-display" id="timerDisplay">0:00</div>
+          </div>
+          <div class="timer-btns">
+            <button data-timer="30">0:30</button>
+            <button data-timer="60">1:00</button>
+            <button data-timer="90">1:30</button>
+            <button data-timer="120">2:00</button>
+            <button id="timerStop">Stop</button>
+          </div>
+          <p
+            class="hint"
+            id="restCue"
+            style="min-height: 20px; font-size: 13.5px; color: var(--volt); font-weight: 600"
+          ></p>
+          <p class="hint timer-hint">
+            <svg
+              class="ic"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="10" x2="14" y1="2" y2="2" />
+              <line x1="12" x2="15" y1="14" y2="11" />
+              <circle cx="12" cy="14" r="8" /></svg
+            >Rest timer. Tap a duration to start
+          </p>
+          <button class="btn btn-ghost btn-sm" id="plateBtn" style="margin-top: 8px">Plate calculator</button>
+          <button class="btn btn-ghost btn-sm" id="voiceBtn" style="margin-top: 8px">
+            <span class="btn-ic" data-icon="mic"></span> Voice log
+          </button>
+          <button
+            class="btn btn-ghost btn-sm"
+            id="travelBtn"
+            style="margin-top: 8px"
+            title="Swap to bodyweight / dumbbell / band alternatives"
+          >
+            Travel mode
+          </button>
+          <p class="muted" id="voiceStatus" style="font-size: 13px; margin-top: 6px"></p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="gymModeBtn" style="margin: 8px 0">Gym mode</button>
+        <button class="btn btn-ghost btn-sm" id="mirrorBtn" style="margin: 8px 0 8px 8px">Mirror mode</button>
+        <div id="woList"></div>
+        <div class="field-group" style="margin: 14px 0">
+          <label class="field-label" for="woNotes">Session notes</label>
+          <textarea
+            id="woNotes"
+            class="text-input"
+            rows="3"
+            placeholder="How did it feel? Anything to change next time?"
+            style="resize: vertical"
+          ></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" id="woFinish">Finish workout</button>
+        <div class="done-banner hidden" id="woDone">
+          <h3>
+            Workout complete. <span data-icon="dumbbell" style="display: inline-flex; vertical-align: -3px"></span>
+          </h3>
+          <p class="muted">Logged. Keep the streak going.</p>
+          <p class="muted" id="woDurationLine" style="margin-top: 4px; font-weight: 600"></p>
+          <div id="woRating" style="margin: 12px 0">
+            <p class="muted" style="font-size: 13px; margin-bottom: 8px">How was this workout?</p>
+            <div
+              id="woStars"
+              style="display: flex; gap: 6px; justify-content: center; font-size: 28px; cursor: pointer"
+            ></div>
+            <input
+              id="woRatingNote"
+              class="text-input"
+              placeholder="Optional note..."
+              style="margin-top: 8px; max-width: 320px; margin-left: auto; margin-right: auto"
+            />
+          </div>
+          <p class="muted" id="woXpLine" style="margin-top: 6px"></p>
+          <div class="xpbar" id="woXpBar" style="max-width: 320px; margin-left: auto; margin-right: auto">
+            <div id="woXpFill"></div>
+          </div>
+          <p class="muted" id="woXpNext" style="font-size: 12px; margin-top: 4px"></p>
+          <div class="wo-done-actions">
+            <button
+              class="btn btn-ghost btn-sm wo-icon-btn"
+              id="shareCard"
+              title="Share workout card"
+              aria-label="Share workout card"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="16"
+                height="16"
+              >
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <path d="m16 6-4-4-4 4" />
+                <path d="M12 2v13" />
+              </svg>
+            </button>
+            <button
+              class="btn btn-ghost btn-sm wo-icon-btn"
+              id="shareTextBtn"
+              title="Share as text"
+              aria-label="Share as text"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="16"
+                height="16"
+              >
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                <path d="M10 9H8" />
+                <path d="M16 13H8" />
+                <path d="M16 17H8" />
+              </svg>
+            </button>
+            <button class="btn btn-ghost btn-sm wo-icon-btn" id="replayBtn" title="3D replay" aria-label="3D replay">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="16"
+                height="16"
+              >
+                <polygon points="6 3 20 12 6 21 6 3" />
+              </svg>
+            </button>
+            <a class="btn btn-primary btn-sm" id="woDoneBack" href="#/programs" style="white-space: nowrap"
+              >Back to programs</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- FAVORITES -->
+      <section id="view-favorites" class="view hidden">
+        <h2 class="section-title" data-i18n="fav_title">Your favorites</h2>
+        <div class="cards" id="favGrid"></div>
+        <div class="hidden" id="favEmpty"></div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section id="view-progress" class="view hidden">
+        <h2 class="section-title" data-i18n="progress_title">Progress</h2>
+        <div class="tab-row" id="progTabs">
+          <button class="chip on" data-ptab="overview" data-i18n="tab_overview">Overview</button>
+          <button class="chip" data-ptab="history" data-i18n="tab_history">History</button>
+          <button class="chip" data-ptab="records" data-i18n="tab_records">Records</button>
+          <button class="chip" data-ptab="standards">Standards</button>
+          <button class="chip" data-ptab="volume" data-i18n="tab_volume">Volume</button>
+          <button class="chip" data-ptab="body">Body</button>
+          <button class="chip" data-ptab="badges">Badges</button>
+          <button class="chip" data-ptab="year" data-i18n="tab_year">Year</button>
+          <button class="chip" data-ptab="board" data-i18n="tab_board">Leaderboard</button>
+          <button class="chip" data-ptab="challenges">Challenges</button>
+          <button class="chip" data-ptab="insights">Insights</button>
+          <button class="chip" data-ptab="coach">Coach</button>
+          <button class="chip" data-ptab="calendar">Calendar</button>
+        </div>
+        <div id="progressBody"></div>
+      </section>
+      <!-- PROGRAM BUILDER -->
+      <section id="view-builder" class="view hidden">
+        <h2 class="section-title" data-i18n="builder_title">Create program</h2>
+        <p class="lede" data-i18n="builder_lede">Build your own training plan from the exercise library.</p>
+        <div class="builder-field">
+          <label for="bName" data-i18n="b_name">Program name</label>
+          <input
+            type="text"
+            id="bName"
+            class="text-input"
+            data-i18n-ph="b_name_ph"
+            placeholder="e.g. My Push Day Split"
+            maxlength="60"
+          />
+        </div>
+        <div class="builder-field">
+          <label for="bTagline" data-i18n="b_tagline">Tagline (optional)</label>
+          <input
+            type="text"
+            id="bTagline"
+            class="text-input"
+            data-i18n-ph="b_tagline_ph"
+            placeholder="e.g. 3 days, dumbbells only"
+            maxlength="80"
+          />
+        </div>
+        <div id="bDays"></div>
+        <button class="btn btn-ghost btn-sm" id="bAddDay" data-i18n="b_add_day">Add day</button>
+        <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap">
+          <button class="btn btn-primary btn-sm" id="bSave" data-i18n="b_save">Save program</button>
+          <a class="btn btn-ghost btn-sm" href="#/programs" data-i18n="b_cancel">Cancel</a>
+        </div>
+      </section>
+
+      <!-- EXERCISE PICKER -->
+      <div class="modal-veil hidden" id="pickerVeil">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+          <div class="modal-head">
+            <h3 id="pickerTitle">Add exercises</h3>
+            <button class="modal-x" id="pickerClose" aria-label="Close picker"></button>
+          </div>
+          <div class="modal-body">
+            <div class="search-wrap" style="margin-bottom: 12px">
+              <svg
+                class="ic"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" /></svg
+              ><input id="pickerSearch" type="search" placeholder="Search exercises…" autocomplete="off" />
+            </div>
+            <div id="pickerList"></div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
-        <input type="number" id="ciWaterSet" min="0" placeholder="Set total" class="field-input" style="width:110px" />
-        <button class="btn btn-ghost btn-sm" id="waterSet">Set</button>
-        <span class="ring-wrap" aria-hidden="true">
-          <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="waterRing" cx="23" cy="23" r="19" stroke="#38e1ff" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
-          <span class="ring-label" id="waterRingLabel"></span>
-        </span>
-        <span class="muted" id="waterToday"></span>
+      <!-- PLATE CALC -->
+      <div class="modal-veil hidden" id="plateVeil">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plateTitle">
+          <div class="modal-head">
+            <h3 id="plateTitle">Plate calculator</h3>
+            <button class="modal-x" id="plateClose" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="builder-field">
+              <label for="plateBar">Bar weight</label>
+              <input type="number" id="plateBar" class="text-input" value="20" step="any" min="0" />
+            </div>
+            <div class="builder-field">
+              <label for="plateTarget">Target weight</label>
+              <input type="number" id="plateTarget" class="text-input" value="100" step="any" min="0" />
+            </div>
+            <div id="plateResult"></div>
+          </div>
+        </div>
       </div>
-      <p class="setting-label" style="margin-top:12px">Protein (g)</p>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input type="number" id="ciProtein" min="0" class="field-input" style="width:120px" />
-        <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
-        <button class="btn btn-ghost btn-sm" id="proteinClear">Clear</button>
+      <!-- FORM CHECK -->
+      <div class="modal-veil hidden" id="formVeil">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle" style="max-width: 640px">
+          <div class="modal-head">
+            <h3 id="formTitle">AI form check</h3>
+            <button class="modal-x" id="formClose" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="muted" style="margin-bottom: 12px">
+              Position your phone so your full body is visible from the side. Works best for squats.
+            </p>
+            <div style="position: relative; background: #000; border-radius: 12px; overflow: hidden">
+              <video
+                id="formVideo"
+                playsinline
+                muted
+                style="width: 100%; display: block; transform: scaleX(-1)"
+              ></video>
+              <canvas
+                id="formCanvas"
+                style="position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1)"
+              ></canvas>
+            </div>
+            <div id="formFeedback" style="margin-top: 12px; font-size: 16px; font-weight: 600; min-height: 48px"></div>
+            <div style="display: flex; gap: 10px; margin-top: 8px">
+              <button class="btn btn-primary btn-sm" id="formStart">Start camera</button>
+              <button class="btn btn-ghost btn-sm hidden" id="formStop">Stop</button>
+            </div>
+            <p class="muted" style="font-size: 12px; margin-top: 8px">Runs on-device. No video leaves your phone.</p>
+          </div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
-        <span class="ring-wrap" aria-hidden="true">
-          <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/><circle class="ring-fg" id="proteinRing" cx="23" cy="23" r="19" stroke="#c8ff00" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/></svg>
-          <span class="ring-label" id="proteinRingLabel"></span>
-        </span>
-        <span class="muted" id="proteinToday"></span>
+      <!-- DAILY CHECK-IN -->
+      <div class="modal-veil hidden" id="checkinVeil">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="checkinTitle">
+          <div class="modal-head">
+            <h3 id="checkinTitle">Daily check-in</h3>
+            <button class="modal-x" id="checkinClose" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="setting-label">Sleep (hours) <b id="ciSleepOut" style="color: var(--volt)"></b></p>
+            <input
+              type="range"
+              class="slider"
+              id="ciSleep"
+              min="0"
+              max="14"
+              step="0.5"
+              value="7"
+              aria-label="Sleep hours"
+            />
+            <p class="setting-label" style="margin-top: 12px">
+              Energy (1-5) <b id="ciEnergyOut" style="color: var(--volt)"></b>
+            </p>
+            <input
+              type="range"
+              class="slider"
+              id="ciEnergy"
+              min="1"
+              max="5"
+              step="1"
+              value="3"
+              aria-label="Energy level"
+            />
+            <p class="setting-label" style="margin-top: 12px">HRV (ms, morning reading)</p>
+            <input type="number" id="ciHrv" min="0" max="300" class="field-input" style="width: 120px" />
+            <p class="muted" style="font-size: 12px; margin-top: 6px">
+              Heart rate variability. Higher usually means better recovery. Typical range: 20-120 ms.
+            </p>
+            <p class="setting-label" style="margin-top: 12px">Water (ml)</p>
+            <div style="display: flex; gap: 12px; align-items: center">
+              <div class="water-glass" aria-hidden="true">
+                <div class="water-fill" id="waterFill" style="height: 0%"></div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button class="btn btn-ghost btn-sm" data-water="250">+250</button>
+                <button class="btn btn-ghost btn-sm" data-water="500">+500</button>
+                <button class="btn btn-ghost btn-sm" data-water="-250">−250</button>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px">
+              <input
+                type="number"
+                id="ciWaterSet"
+                min="0"
+                placeholder="Set total"
+                class="field-input"
+                style="width: 110px"
+              />
+              <button class="btn btn-ghost btn-sm" id="waterSet">Set</button>
+              <span class="ring-wrap" aria-hidden="true">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none" />
+                  <circle
+                    class="ring-fg"
+                    id="waterRing"
+                    cx="23"
+                    cy="23"
+                    r="19"
+                    stroke="#38e1ff"
+                    stroke-width="5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-dasharray="119.4"
+                    stroke-dashoffset="119.4"
+                    transform="rotate(-90 23 23)"
+                  />
+                </svg>
+                <span class="ring-label" id="waterRingLabel"></span>
+              </span>
+              <span class="muted" id="waterToday"></span>
+            </div>
+            <p class="setting-label" style="margin-top: 12px">Protein (g)</p>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+              <input type="number" id="ciProtein" min="0" class="field-input" style="width: 120px" />
+              <button class="btn btn-ghost btn-sm" id="proteinAdd">Add</button>
+              <button class="btn btn-ghost btn-sm" id="proteinClear">Clear</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px">
+              <span class="ring-wrap" aria-hidden="true">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="19" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none" />
+                  <circle
+                    class="ring-fg"
+                    id="proteinRing"
+                    cx="23"
+                    cy="23"
+                    r="19"
+                    stroke="#c8ff00"
+                    stroke-width="5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-dasharray="119.4"
+                    stroke-dashoffset="119.4"
+                    transform="rotate(-90 23 23)"
+                  />
+                </svg>
+                <span class="ring-label" id="proteinRingLabel"></span>
+              </span>
+              <span class="muted" id="proteinToday"></span>
+            </div>
+            <p class="setting-label" style="margin-top: 12px">Supplements</p>
+            <div id="suppList"></div>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <input
+                type="text"
+                id="suppName"
+                placeholder="Add supplement…"
+                maxlength="40"
+                class="field-input"
+                style="flex: 1"
+              />
+              <button class="btn btn-ghost btn-sm" id="suppAdd">Add</button>
+            </div>
+            <button class="btn btn-primary btn-sm" id="checkinSave" style="margin-top: 16px">Save check-in</button>
+            <h3 style="margin-top: 24px">Last 7 days</h3>
+            <div id="checkinHistory"></div>
+          </div>
+        </div>
       </div>
-      <p class="setting-label" style="margin-top:12px">Supplements</p>
-      <div id="suppList"></div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input type="text" id="suppName" placeholder="Add supplement…" maxlength="40" class="field-input" style="flex:1" />
-        <button class="btn btn-ghost btn-sm" id="suppAdd">Add</button>
-      </div>
-      <button class="btn btn-primary btn-sm" id="checkinSave" style="margin-top:16px">Save check-in</button>
-      <h3 style="margin-top:24px">Last 7 days</h3>
-      <div id="checkinHistory"></div>
-    </div>
-  </div>
-</div>
-<section class="view hidden" id="view-privacy">
-  <div class="priv-hero">
-    <span class="priv-badge"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
-    <h2>Privacy</h2>
-    <p class="muted">Your data stays on your device. Period.</p>
-  </div>
-  <div class="priv-list">
-    <div class="priv-row">
-      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span>
-      <div><b>Stored locally</b><p class="muted">Workouts, measurements, photos, check-ins, and settings live in your browser. Nothing is sent to any server.</p></div>
-    </div>
-    <div class="priv-row">
-      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-      <div><b>No account needed</b><p class="muted">No sign-up, no login, no email. Open the app and train.</p></div>
-    </div>
-    <div class="priv-row">
-      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
-      <div><b>No tracking</b><p class="muted">No analytics, no ads, no third-party scripts watching you.</p></div>
-    </div>
-    <div class="priv-row">
-      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 20 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg></span>
-      <div><b>Works offline</b><p class="muted">The 3D body, exercise library, and every feature work fully offline after the first load.</p></div>
-    </div>
-    <div class="priv-row">
-      <span class="priv-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
-      <div><b>You own your data</b><p class="muted">Clearing browser data erases it, so use the Backup page to export a copy anytime.</p></div>
-    </div>
-  </div>
-</section>
-</main>
-<footer>
-  <div class="foot-inner">
-    <a class="brand foot-brand" href="#/">
-      <span class="brand-mark"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 20 L9 12 L13 15 L20 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      FORGE
-    </a>
-    <p class="foot-tagline"><span class="foot-num" id="footEx">193</span> exercises · <span class="foot-num">9</span> programs · Interactive 3D body</p>
+      <section class="view hidden" id="view-privacy">
+        <div class="priv-hero">
+          <span class="priv-badge"
+            ><svg
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+              />
+              <path d="m9 12 2 2 4-4" /></svg
+          ></span>
+          <h2>Privacy</h2>
+          <p class="muted">Your data stays on your device. Period.</p>
+        </div>
+        <div class="priv-list">
+          <div class="priv-row">
+            <span class="priv-ico"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                <path d="M12 18h.01" /></svg
+            ></span>
+            <div>
+              <b>Stored locally</b>
+              <p class="muted">
+                Workouts, measurements, photos, check-ins, and settings live in your browser. Nothing is sent to any
+                server.
+              </p>
+            </div>
+          </div>
+          <div class="priv-row">
+            <span class="priv-ico"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" /></svg
+            ></span>
+            <div>
+              <b>No account needed</b>
+              <p class="muted">No sign-up, no login, no email. Open the app and train.</p>
+            </div>
+          </div>
+          <div class="priv-row">
+            <span class="priv-ico"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" /></svg
+            ></span>
+            <div>
+              <b>No tracking</b>
+              <p class="muted">No analytics, no ads, no third-party scripts watching you.</p>
+            </div>
+          </div>
+          <div class="priv-row">
+            <span class="priv-ico"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 13a10 10 0 0 1 14 0" />
+                <path d="M8.5 16.5a5 5 0 0 1 7 0" />
+                <path d="M2 8.82a15 15 0 0 1 20 0" />
+                <line x1="12" x2="12.01" y1="20" y2="20" /></svg
+            ></span>
+            <div>
+              <b>Works offline</b>
+              <p class="muted">
+                The 3D body, exercise library, and every feature work fully offline after the first load.
+              </p>
+            </div>
+          </div>
+          <div class="priv-row">
+            <span class="priv-ico"
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" /></svg
+            ></span>
+            <div>
+              <b>You own your data</b>
+              <p class="muted">Clearing browser data erases it, so use the Backup page to export a copy anytime.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="foot-inner">
+        <a class="brand foot-brand" href="#/">
+          <span class="brand-mark"
+            ><svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 20 L9 12 L13 15 L20 4"
+                stroke="currentColor"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg
+          ></span>
+          FORGE
+        </a>
+        <p class="foot-tagline">
+          <span class="foot-num" id="footEx">193</span> exercises · <span class="foot-num">9</span> programs ·
+          Interactive 3D body
+        </p>
 
-    <p class="foot-quote" id="footQuote"></p>
-    <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
-    <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
-    <p class="muted foot-copy">© 2026 FORGE · <button class="foot-ver" id="footVer">v11.37</button> · <a href="#/privacy" class="foot-privacy">Privacy</a></p>
-    <div class="foot-changelog hidden" id="footChangelog"></div>
-  </div>
-</footer>
-<button id="toTop" class="to-top" aria-label="Back to top">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</button>
+        <p class="foot-quote" id="footQuote"></p>
+        <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
+        <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
+        <p class="muted foot-copy">
+          © 2026 FORGE · <button class="foot-ver" id="footVer">v11.38</button> ·
+          <a href="#/privacy" class="foot-privacy">Privacy</a>
+        </p>
+        <div class="foot-changelog hidden" id="footChangelog"></div>
+      </div>
+    </footer>
+    <button id="toTop" class="to-top" aria-label="Back to top">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 19V5M5 12l7-7 7 7"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
 
-<!-- SETTINGS -->
-<div class="modal-veil hidden" id="dlgVeil">
-  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle">
-    <div class="modal-head"><h3 id="dlgTitle">FORGE</h3></div>
-    <p class="dlg-msg" id="dlgMsg"></p>
-    <input type="text" id="dlgInput" class="text-input hidden" />
-    <div class="dlg-btns">
-      <button class="btn btn-ghost btn-sm" id="dlgCancel">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="dlgOk">OK</button>
-    </div>
-  </div>
-</div>
-<div class="modal-veil hidden" id="customVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
-    <div class="modal-head"><h3 id="customTitle">Add custom exercise</h3><button class="modal-x" id="customClose" aria-label="Close"></button></div>
-    <div class="modal-body">
-      <div class="field-group">
-        <label class="field-label" for="customName">Name</label>
-        <input type="text" id="customName" class="text-input" placeholder="e.g. Cable woodchopper" maxlength="60" autocomplete="off" />
-      </div>
-      <div class="field-group">
-        <label class="field-label" for="customPrimary">Primary muscle</label>
-        <select id="customPrimary" style="width:100%"></select>
-      </div>
-      <div class="field-group">
-        <span class="field-label">Secondary muscles (optional)</span>
-        <div class="check-grid" id="customSecondary"></div>
-      </div>
-      <div class="field-group">
-        <label class="field-label" for="customEquipment">Equipment</label>
-        <select id="customEquipment" style="width:100%"></select>
-      </div>
-      <div class="field-group">
-        <label class="field-label" for="customLevel">Level</label>
-        <select id="customLevel" style="width:100%">
-          <option value="beginner">Beginner</option>
-          <option value="intermediate" selected>Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
+    <!-- SETTINGS -->
+    <div class="modal-veil hidden" id="dlgVeil">
+      <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle">
+        <div class="modal-head"><h3 id="dlgTitle">FORGE</h3></div>
+        <p class="dlg-msg" id="dlgMsg"></p>
+        <input type="text" id="dlgInput" class="text-input hidden" />
+        <div class="dlg-btns">
+          <button class="btn btn-ghost btn-sm" id="dlgCancel">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="dlgOk">OK</button>
+        </div>
       </div>
     </div>
-    <div class="dlg-btns">
-      <button class="btn btn-ghost btn-sm" id="customCancel">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="customSave">Save exercise</button>
+    <div class="modal-veil hidden" id="customVeil">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
+        <div class="modal-head">
+          <h3 id="customTitle">Add custom exercise</h3>
+          <button class="modal-x" id="customClose" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="field-group">
+            <label class="field-label" for="customName">Name</label>
+            <input
+              type="text"
+              id="customName"
+              class="text-input"
+              placeholder="e.g. Cable woodchopper"
+              maxlength="60"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="customPrimary">Primary muscle</label>
+            <select id="customPrimary" style="width: 100%"></select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">Secondary muscles (optional)</span>
+            <div class="check-grid" id="customSecondary"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="customEquipment">Equipment</label>
+            <select id="customEquipment" style="width: 100%"></select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="customLevel">Level</label>
+            <select id="customLevel" style="width: 100%">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+        <div class="dlg-btns">
+          <button class="btn btn-ghost btn-sm" id="customCancel">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="customSave">Save exercise</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-<div class="modal-veil hidden" id="settingsVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal-head">
-      <h3 id="settingsTitle" data-i18n="set_title">Settings</h3>
-      <button class="modal-x" id="settingsClose" aria-label="Close settings"></button>
+    <div class="modal-veil hidden" id="settingsVeil">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="modal-head">
+          <h3 id="settingsTitle" data-i18n="set_title">Settings</h3>
+          <button class="modal-x" id="settingsClose" aria-label="Close settings"></button>
+        </div>
+        <div class="modal-body">
+          <p class="setting-label" data-i18n="set_accent">Accent color</p>
+          <div class="accent-grid" id="accentGrid"></div>
+          <p class="muted setting-note" data-i18n="set_accent_note">
+            Applies across the app, including the 3D body ring.
+          </p>
+          <p class="setting-label" data-i18n="set_units">Units</p>
+          <div class="seg-row" id="unitSeg">
+            <button class="seg" data-unit="kg">kg</button>
+            <button class="seg" data-unit="lb">lb</button>
+          </div>
+          <p class="setting-label">Goal</p>
+          <div class="seg-row" id="goalSeg">
+            <button class="seg" data-goal="cut">Cut</button>
+            <button class="seg" data-goal="maintain">Maintain</button>
+            <button class="seg" data-goal="bulk">Bulk</button>
+          </div>
+          <p class="setting-label">Accessibility</p>
+          <div class="toggle-row">
+            <span>Big text mode</span
+            ><button class="toggle" id="tglBigText" role="switch" aria-checked="false">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <div class="toggle-row">
+            <span>High contrast</span
+            ><button class="toggle" id="tglContrast" role="switch" aria-checked="false">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <p class="setting-label" data-i18n="set_myeq">My equipment</p>
+          <div class="eq-grid" id="eqGrid"></div>
+          <p class="muted setting-note" data-i18n="set_myeq_note">
+            Used by the program quiz and exercise swaps. Empty means everything.
+          </p>
+          <p class="setting-label" data-i18n="set_lang">Language</p>
+          <div class="seg-row" id="langSeg">
+            <button class="seg" data-lang="en">English</button>
+            <button class="seg" data-lang="fr">Français</button>
+          </div>
+          <p class="setting-label" data-i18n="set_workout">Workout</p>
+          <div class="toggle-row">
+            <span data-i18n="set_sound">Rest timer sound</span
+            ><button class="toggle" id="tglSound" role="switch" aria-checked="true"><span class="knob"></span></button>
+          </div>
+          <div class="toggle-row">
+            <span>Auto-start rest timer</span
+            ><button class="toggle" id="tglAutoRest" role="switch" aria-checked="true">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <div class="toggle-row">
+            <span>Voice cues</span
+            ><button class="toggle" id="tglVoice" role="switch" aria-checked="false"><span class="knob"></span></button>
+          </div>
+          <div class="toggle-row">
+            <span data-i18n="set_haptic">Haptic feedback</span
+            ><button class="toggle" id="tglHaptic" role="switch" aria-checked="true"><span class="knob"></span></button>
+          </div>
+          <div class="toggle-row">
+            <span>Advanced training tools</span
+            ><button class="toggle" id="tglAdvanced" role="switch" aria-checked="false">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <p class="muted setting-note">Shows travel mode and tempo coach in workouts.</p>
+          <div class="toggle-row">
+            <span data-i18n="set_motion">Reduce motion</span
+            ><button class="toggle" id="tglMotion" role="switch" aria-checked="false">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <p class="setting-label">3D body finish</p>
+          <div
+            id="finishPreview"
+            style="
+              width: 110px;
+              height: 150px;
+              border-radius: 14px;
+              overflow: hidden;
+              border: 1px solid var(--line);
+              background: var(--panel);
+              margin: 0 auto 12px;
+            "
+          ></div>
+          <div class="seg-row seg-grid" id="finishSeg">
+            <button class="seg" data-finish="standard">Standard</button>
+            <button class="seg" data-finish="chrome">Chrome</button>
+            <button class="seg" data-finish="xray">X-ray</button>
+            <button class="seg" data-finish="matte">Matte</button>
+          </div>
+          <p class="setting-label">Daily workout reminder</p>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <input type="time" id="reminderTime" class="text-input" />
+            <button class="btn btn-ghost btn-sm" id="reminderClear">Clear</button>
+          </div>
+          <p class="muted setting-note">Shows a reminder banner on the home screen when it is time to train.</p>
+          <p class="setting-label" data-i18n="set_demos">Exercise demos</p>
+          <div class="toggle-row">
+            <span data-i18n="set_autoplay">Autoplay</span
+            ><button class="toggle" id="tglDemoPlay" role="switch" aria-checked="true">
+              <span class="knob"></span>
+            </button>
+          </div>
+          <p class="setting-label" data-i18n="set_speed">Demo speed</p>
+          <div class="seg-row" id="speedSeg">
+            <button class="seg" data-speed="0.5">0.5×</button>
+            <button class="seg" data-speed="1">1×</button>
+            <button class="seg" data-speed="1.5">1.5×</button>
+          </div>
+          <p class="setting-label" data-i18n="set_data">Data</p>
+          <div class="setting-btns">
+            <button class="btn btn-ghost btn-sm" id="exportData" data-i18n="set_export">Export data</button>
+            <button class="btn btn-ghost btn-sm" id="csvExport">CSV export</button>
+            <button class="btn btn-ghost btn-sm" id="backupData">Backup</button>
+            <label class="btn btn-ghost btn-sm" style="cursor: pointer; margin: 0"
+              >Restore<input type="file" id="restoreData" accept="application/json" style="display: none"
+            /></label>
+            <button class="btn btn-ghost btn-sm danger" id="resetData" data-i18n="set_reset">Reset all data</button>
+          </div>
+          <p class="muted setting-note">Your data never leaves this device. Export anytime.</p>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <p class="setting-label" data-i18n="set_accent">Accent color</p>
-      <div class="accent-grid" id="accentGrid"></div>
-      <p class="muted setting-note" data-i18n="set_accent_note">Applies across the app, including the 3D body ring.</p>
-      <p class="setting-label" data-i18n="set_units">Units</p>
-      <div class="seg-row" id="unitSeg">
-        <button class="seg" data-unit="kg">kg</button>
-        <button class="seg" data-unit="lb">lb</button>
-      </div>
-      <p class="setting-label">Goal</p>
-      <div class="seg-row" id="goalSeg">
-        <button class="seg" data-goal="cut">Cut</button>
-        <button class="seg" data-goal="maintain">Maintain</button>
-        <button class="seg" data-goal="bulk">Bulk</button>
-      </div>
-      <p class="setting-label">Accessibility</p>
-      <div class="toggle-row"><span>Big text mode</span><button class="toggle" id="tglBigText" role="switch" aria-checked="false"><span class="knob"></span></button></div>
-      <div class="toggle-row"><span>High contrast</span><button class="toggle" id="tglContrast" role="switch" aria-checked="false"><span class="knob"></span></button></div>
-      <p class="setting-label" data-i18n="set_myeq">My equipment</p>
-      <div class="eq-grid" id="eqGrid"></div>
-      <p class="muted setting-note" data-i18n="set_myeq_note">Used by the program quiz and exercise swaps. Empty means everything.</p>
-      <p class="setting-label" data-i18n="set_lang">Language</p>
-      <div class="seg-row" id="langSeg">
-        <button class="seg" data-lang="en">English</button>
-        <button class="seg" data-lang="fr">Français</button>
-      </div>
-      <p class="setting-label" data-i18n="set_workout">Workout</p>
-      <div class="toggle-row"><span data-i18n="set_sound">Rest timer sound</span><button class="toggle" id="tglSound" role="switch" aria-checked="true"><span class="knob"></span></button></div>
-      <div class="toggle-row"><span>Auto-start rest timer</span><button class="toggle" id="tglAutoRest" role="switch" aria-checked="true"><span class="knob"></span></button></div>
-      <div class="toggle-row"><span>Voice cues</span><button class="toggle" id="tglVoice" role="switch" aria-checked="false"><span class="knob"></span></button></div>
-      <div class="toggle-row"><span data-i18n="set_haptic">Haptic feedback</span><button class="toggle" id="tglHaptic" role="switch" aria-checked="true"><span class="knob"></span></button></div>
-      <div class="toggle-row"><span>Advanced training tools</span><button class="toggle" id="tglAdvanced" role="switch" aria-checked="false"><span class="knob"></span></button></div>
-      <p class="muted setting-note">Shows travel mode and tempo coach in workouts.</p>
-      <div class="toggle-row"><span data-i18n="set_motion">Reduce motion</span><button class="toggle" id="tglMotion" role="switch" aria-checked="false"><span class="knob"></span></button></div>
-      <p class="setting-label">3D body finish</p>
-      <div id="finishPreview" style="width:110px;height:150px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--panel);margin:0 auto 12px"></div>
-      <div class="seg-row seg-grid" id="finishSeg">
-        <button class="seg" data-finish="standard">Standard</button>
-        <button class="seg" data-finish="chrome">Chrome</button>
-        <button class="seg" data-finish="xray">X-ray</button>
-        <button class="seg" data-finish="matte">Matte</button>
-      </div>
-      <p class="setting-label">Daily workout reminder</p>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="time" id="reminderTime" class="text-input" />
-        <button class="btn btn-ghost btn-sm" id="reminderClear">Clear</button>
-      </div>
-      <p class="muted setting-note">Shows a reminder banner on the home screen when it is time to train.</p>
-      <p class="setting-label" data-i18n="set_demos">Exercise demos</p>
-      <div class="toggle-row"><span data-i18n="set_autoplay">Autoplay</span><button class="toggle" id="tglDemoPlay" role="switch" aria-checked="true"><span class="knob"></span></button></div>
-      <p class="setting-label" data-i18n="set_speed">Demo speed</p>
-      <div class="seg-row" id="speedSeg">
-        <button class="seg" data-speed="0.5">0.5×</button>
-        <button class="seg" data-speed="1">1×</button>
-        <button class="seg" data-speed="1.5">1.5×</button>
-      </div>
-      <p class="setting-label" data-i18n="set_data">Data</p>
-      <div class="setting-btns">
-        <button class="btn btn-ghost btn-sm" id="exportData" data-i18n="set_export">Export data</button>
-        <button class="btn btn-ghost btn-sm" id="csvExport">CSV export</button>
-        <button class="btn btn-ghost btn-sm" id="backupData">Backup</button>
-        <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">Restore<input type="file" id="restoreData" accept="application/json" style="display:none" /></label>
-        <button class="btn btn-ghost btn-sm danger" id="resetData" data-i18n="set_reset">Reset all data</button>
-      </div>
-      <p class="muted setting-note">Your data never leaves this device. Export anytime.</p>
-    </div>
-  </div>
-</div>
 
-<!-- QUIZ -->
-<div class="modal-veil hidden" id="quizVeil">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
-    <div class="modal-head">
-      <h3 id="quizTitle" data-i18n="prog_quiz">Find my program</h3>
-      <button class="modal-x" id="quizClose" aria-label="Close quiz"></button>
+    <!-- QUIZ -->
+    <div class="modal-veil hidden" id="quizVeil">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+        <div class="modal-head">
+          <h3 id="quizTitle" data-i18n="prog_quiz">Find my program</h3>
+          <button class="modal-x" id="quizClose" aria-label="Close quiz"></button>
+        </div>
+        <div class="modal-body" id="quizBody"></div>
+      </div>
     </div>
-    <div class="modal-body" id="quizBody"></div>
-  </div>
-</div>
 
-<script src="js/vendor/three.min.js"></script>
-<script src="js/data-exercises.js"></script>
-<script src="js/data-programs.js"></script>
-<script src="js/demo.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/core.js"></script>
-<script src="js/views.js"></script>
-<script src="js/progress.js"></script>
-<script src="js/programs.js"></script>
-<script src="js/workout.js"></script>
-<script src="js/camera.js"></script>
-<script src="js/app.js"></script>
-</body>
+    <!-- JS modules: load order matters (shared globals, no bundler) -->
+    <script src="js/vendor/three.min.js"></script>
+    <script src="js/data-exercises.js"></script>
+    <script src="js/data-programs.js"></script>
+    <script src="js/demo.js"></script>
+    <script src="js/icons.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/views.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/programs.js"></script>
+    <script src="js/workout.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/app.js"></script>
+  </body>
 </html>
