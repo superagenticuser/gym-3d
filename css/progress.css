@@ -610,7 +610,8 @@ body.high-contrast {
 
 .challenge-bar {
   margin-top: 8px;
-  background: var(--surface2);
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   height: 8px;
   overflow: hidden;
@@ -621,6 +622,7 @@ body.high-contrast {
   background: var(--volt);
   border-radius: 999px;
   transition: width 0.3s ease;
+  min-width: 0;
 }
 
 .badge-card .badge-icon .ic {
