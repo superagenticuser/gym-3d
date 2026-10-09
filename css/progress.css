@@ -608,6 +608,21 @@ body.high-contrast {
   justify-content: center;
 }
 
+.challenge-bar {
+  margin-top: 8px;
+  background: var(--surface2);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.challenge-fill {
+  height: 100%;
+  background: var(--volt);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
 .badge-card .badge-icon .ic {
   width: 32px;
   height: 32px;
