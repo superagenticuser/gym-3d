@@ -889,6 +889,16 @@ function syncSettingsUI() {
         `<button class="eq-chip ${(s.myEquipment || []).includes(q) ? "on" : ""}" data-eq="${q}">${eqName[q] || q}</button>`
     )
     .join("");
+  // Update storage usage display
+  try {
+    const su = $("storageUsage");
+    if (su && typeof ForgeDB !== "undefined") {
+      ForgeDB.usage().then(u => {
+        const engine = ForgeDB.isIndexedDB() ? "IndexedDB" : "localStorage";
+        su.textContent = `Storage: ${ForgeDB.formatBytes(u.used)} of ${ForgeDB.formatBytes(u.quota)} (${u.percent}%) via ${engine}`;
+      });
+    }
+  } catch (e) {}
 }
 
 /* ---------- i18n ---------- */
@@ -1112,8 +1122,9 @@ function fmtDate(d) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
 
-/* ---------- workout log ---------- */
+/* ---------- workout log (IndexedDB via ForgeDB) ---------- */
 function getLog() {
+  if (typeof ForgeDB !== "undefined") return ForgeDB.getLogs();
   try {
     const l = JSON.parse(localStorage.getItem("forge-log") || "[]");
     return Array.isArray(l) ? l : [];
@@ -1123,6 +1134,10 @@ function getLog() {
 }
 
 function saveLog(l) {
+  if (typeof ForgeDB !== "undefined") {
+    ForgeDB.saveLogs(l);
+    return;
+  }
   localStorage.setItem("forge-log", JSON.stringify(l));
 }
 
@@ -1482,6 +1497,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.66", "IndexedDB migration for photos and workout logs"],
   ["v11.65", "cycle 4 audit fixes"],
   ["v11.64", "cycle 3 audit fixes"],
   ["v11.63", "fix remaining hardcoded kg units"],

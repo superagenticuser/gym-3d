@@ -2051,6 +2051,8 @@ document.addEventListener("click", e => {
 });
 
 function getPhotos() {
+  // Use IndexedDB via ForgeDB, fallback to localStorage
+  if (typeof ForgeDB !== "undefined") return ForgeDB.getPhotos();
   try {
     return JSON.parse(localStorage.getItem("forge-photos") || "[]");
   } catch (e) {
@@ -2059,6 +2061,10 @@ function getPhotos() {
 }
 
 function savePhotos(p) {
+  if (typeof ForgeDB !== "undefined") {
+    ForgeDB.savePhotos(p);
+    return;
+  }
   localStorage.setItem("forge-photos", JSON.stringify(p));
 }
 
