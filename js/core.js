@@ -1497,6 +1497,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.70", "make challenge bars more visible"],
   ["v11.69", "fix challenge progress bars"],
   ["v11.68", "fix chart overflow"],
   ["v11.67", "fix history tap and storage race condition"],
