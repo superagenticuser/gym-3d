@@ -453,3 +453,8 @@ select:focus {
   outline: none;
   border-color: var(--volt);
 }
+
+:focus-visible {
+  outline: 2px solid var(--volt);
+  outline-offset: 2px;
+}
