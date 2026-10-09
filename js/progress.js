@@ -415,9 +415,7 @@ function renderChallengesTab(body) {
       return `<div class="badge-card ${done ? "earned" : ""}">
         <div class="badge-icon">${window.FORGE_ICON ? window.FORGE_ICON(done ? "trophy" : "target") : ""}</div>
         <b>${c.name}</b><span>${c.desc}</span>
-        <div style="margin-top:8px;background:var(--surface2);border-radius:999px;height:8px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:var(--volt)"></div>
-        </div>
+        <div class="challenge-bar"><div class="challenge-fill" style="width:${pct}%"></div></div>
         <span style="font-size:12px">${Math.round(cur).toLocaleString()} / ${c.target.toLocaleString()}</span>
       </div>`;
     }).join("") +
