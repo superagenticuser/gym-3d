@@ -193,7 +193,7 @@ function renderHome() {
         </svg>
         <span class="ring-pct-html">${pct}%</span>
       </div>
-      <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} kg vs ${Math.round(lastW).toLocaleString()} kg last week</span>
+      <div><b>Week volume</b><span class="muted">${Math.round(thisW).toLocaleString()} ${getSettings().units || "kg"} vs ${Math.round(lastW).toLocaleString()} ${getSettings().units || "kg"} last week</span>
       ${streak >= 3 ? `<span class="streak-flame">${window.FORGE_ICON ? window.FORGE_ICON("flame") : ""} ${streak}-day streak</span>` : ""}</div>
     </div>`;
     })();
