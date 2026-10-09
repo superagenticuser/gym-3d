@@ -1833,13 +1833,15 @@ function renderSessionVolumeChart() {
     (w.exercises || []).reduce((a, x) => a + (x.sets || []).reduce((b, s) => b + setVolumeKg(x.id, s), 0), 0)
   );
   const canvas = document.createElement("canvas");
+  el.innerHTML = "";
   el.appendChild(canvas);
   const dpr = window.devicePixelRatio || 1;
-  const cw = Math.max(280, el.clientWidth || 320),
+  const cw = Math.max(200, el.clientWidth || el.parentElement?.clientWidth || 320),
     ch = 210;
   canvas.width = cw * dpr;
   canvas.height = ch * dpr;
-  canvas.style.width = cw + "px";
+  canvas.style.width = "100%";
+  canvas.style.maxWidth = cw + "px";
   canvas.style.height = ch + "px";
   const ctx = canvas.getContext("2d");
   ctx.scale(dpr, dpr);
@@ -1955,13 +1957,15 @@ function renderMeasureChart() {
   </div>`;
   const wrap = $("mChart").querySelector(".chart-wrap");
   const canvas = document.createElement("canvas");
+  wrap.innerHTML = "";
   wrap.appendChild(canvas);
   const dpr = window.devicePixelRatio || 1;
-  const cw = wrap.clientWidth - 32,
+  const cw = Math.max(200, wrap.clientWidth - 32 || 320),
     ch = 210;
   canvas.width = cw * dpr;
   canvas.height = ch * dpr;
-  canvas.style.width = cw + "px";
+  canvas.style.width = "100%";
+  canvas.style.maxWidth = cw + "px";
   canvas.style.height = ch + "px";
   const ctx = canvas.getContext("2d");
   ctx.scale(dpr, dpr);
