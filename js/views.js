@@ -431,6 +431,12 @@ function filtered() {
 function renderExercises() {
   const list = filtered();
   $("exCount").textContent = list.length;
+  // Update heading to reflect active muscle filter
+  const titleEl = document.querySelector('[data-i18n="ex_title"]');
+  if (titleEl) {
+    const m = filters.muscle;
+    titleEl.childNodes[0].textContent = m && MUSCLE_INFO[m] ? MUSCLE_INFO[m].name + " exercises" : "All exercises";
+  }
   $("exerciseGrid").innerHTML =
     list.map(cardHTML).join("") || `<p class="muted">No exercises match. Try clearing filters.</p>`;
 }
@@ -953,7 +959,7 @@ const QUIZ_QUESTIONS = [
     title: "What's your main goal?",
     title_fr: "Quel est votre objectif principal ?",
     options: [
-      { v: "muscle", label: "Build muscle", label_fr: "Prendre du muscle" },
+      { v: "muscle", label: "Building muscle", label_fr: "Prendre du muscle" },
       { v: "strength", label: "Get stronger", label_fr: "Devenir plus fort" },
       { v: "fitness", label: "General fitness", label_fr: "Forme générale" }
     ]

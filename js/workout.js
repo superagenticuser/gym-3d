@@ -649,7 +649,7 @@ function handleVoiceCommand(text) {
   } else if (tryVoiceLog(text)) {
     // tryVoiceLog returns true and updates status if it parsed reps/weight
   } else {
-    say(`Heard: "${text}". Try "next set", "start timer", or "10 reps 60 kilos"`);
+    say(`Heard: "${text}". Try "next set", "start timer", or "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"`);
   }
 }
 
@@ -758,7 +758,7 @@ function toggleVoiceCmd() {
   voiceCmdRec.start();
   setVoiceCmdBtn(true);
   const status = $("voiceStatus");
-  if (status) status.textContent = 'Listening… say "next set", "start timer", or "10 reps 60 kilos"';
+  if (status) status.textContent = `Listening… say "next set", "start timer", or "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"`;
 }
 
 function ensureVoiceCmdButton() {
@@ -768,7 +768,7 @@ function ensureVoiceCmdButton() {
   b.addEventListener("click", toggleVoiceCmd);
   setVoiceCmdBtn(false);
   const status = $("voiceStatus");
-  if (status) status.textContent = 'Tap Voice, then say "next set", "start timer", or "10 reps 60 kilos"';
+  if (status) status.textContent = `Tap Voice, then say "next set", "start timer", or "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"`;
 }
 
 ensureVoiceCmdButton();

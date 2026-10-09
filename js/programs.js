@@ -244,8 +244,8 @@ function renderPrograms() {
       <p class="muted">${esc(p.tagline)}</p>
       <div class="meta">
         <span class="tag volt-tag">${cap1(p.level)}</span>
-        <span class="tag">${p.daysPerWeek} days/wk</span>
-        <span class="tag">${p.weeks} weeks</span>
+        <span class="tag">${p.daysPerWeek} day${p.daysPerWeek === 1 ? "" : "s"}/wk</span>
+        <span class="tag">${p.weeks} week${p.weeks === 1 ? "" : "s"}</span>
       </div>
       <p class="muted" style="margin-top:10px;font-size:13px">${p.days.length} workout${p.days.length === 1 ? "" : "s"} · ${n} exercises · ${esc(p.equipment)}</p>
     </div>`;
@@ -268,8 +268,8 @@ function renderProgram(id) {
   $("pgName").textContent = p.name;
   $("pgTag").textContent = p.tagline;
   $("pgBadges").innerHTML = `<span class="tag volt-tag">${cap1(p.level)}</span>
-     <span class="tag">${p.daysPerWeek} days/week</span>
-     <span class="tag">${p.weeks} weeks</span>
+     <span class="tag">${p.daysPerWeek} day${p.daysPerWeek === 1 ? "" : "s"}/week</span>
+     <span class="tag">${p.weeks} week${p.weeks === 1 ? "" : "s"}</span>
      <span class="tag">${esc(p.equipment)}</span>`;
   const isActive = getActiveProg() === p.id;
   const ni = nextDayIdx(p);
@@ -290,7 +290,7 @@ function renderProgram(id) {
       renderProgram(p.id);
     };
   $("pgActions").innerHTML +=
-    ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a 4-week calendar file">Export to calendar</button>`;
+    ` <button class="btn btn-ghost btn-sm" id="pgICS" title="Download a calendar file">Export to calendar</button>`;
   $("pgICS").onclick = () => exportProgramICS(p.id);
   if (p.custom) {
     $("pgActions").innerHTML += ` <button class="btn btn-ghost btn-sm danger" id="pgDelete">${t("b_delete")}</button>`;
