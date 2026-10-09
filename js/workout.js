@@ -726,7 +726,7 @@ function tryVoiceLog(text) {
   }
   const status = $("voiceStatus");
   if (status)
-    status.textContent = `Logged: ${reps ? reps + " reps" : ""}${reps && weight ? " " : ""}${weight ? weight + " kg" : ""}`;
+    status.textContent = `Logged: ${reps ? reps + " reps" : ""}${reps && weight ? " " : ""}${weight ? weight + " " + (getSettings().units || "kg") : ""}`;
   return true;
 }
 
@@ -1036,7 +1036,7 @@ $("woFinish").addEventListener("click", () => {
     veil.innerHTML = `<div class="pr-card">
       <div class="pr-trophy">${window.FORGE_ICON ? window.FORGE_ICON("trophy") : ""}</div>
       <h2>Volume record${newVolPRs.length > 1 ? "s" : ""}!</h2>
-      ${newVolPRs.map(v => `<p><b>${esc(v.name)}</b><br><span>${Math.round(v.vol).toLocaleString()} kg in one day</span></p>`).join("")}
+      ${newVolPRs.map(v => `<p><b>${esc(v.name)}</b><br><span>${Math.round(v.vol).toLocaleString()} ${getSettings().units || "kg"} in one day</span></p>`).join("")}
       <button class="btn btn-primary" id="prClose">Keep going</button>
     </div>`;
     veil.addEventListener("click", e => {

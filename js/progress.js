@@ -126,7 +126,7 @@ function renderInsightsTab(body) {
     ${plats.length ? `<h3 style="margin-top:20px">Plateaus detected</h3>` + plats.map(p => `<div class="onerm-box"><b>${p.name}</b> <span class="muted">stuck for ${p.sessions} sessions. Try: +1 set, swap variation, or deload.</span></div>`).join("") : ""}
     ${corr.length ? `<h3 style="margin-top:20px">Correlations</h3>` + corr.map(c => `<p>💡 ${c}</p>`).join("") : ""}
     <h3 style="margin-top:20px">Total volume lifted</h3>
-    <p style="font-size:28px;font-weight:800;color:var(--volt)">${Math.round(totalVolumeAll()).toLocaleString()} kg</p>
+    <p style="font-size:28px;font-weight:800;color:var(--volt)">${Math.round(totalVolumeAll()).toLocaleString()} ${getSettings().units || "kg"}</p>
     ${rpeTrendSection()}
     </div>
   `;
@@ -318,7 +318,7 @@ function answerCoach() {
     const corr = correlationInsights();
     ans = corr.length ? corr[0] : "Log sleep in daily check-ins to unlock recovery insights.";
   } else if (/volume|how much/.test(q)) {
-    ans = `You've lifted ${Math.round(totalVolumeAll()).toLocaleString()} kg total across ${getLog().length} workouts.`;
+    ans = `You've lifted ${Math.round(totalVolumeAll()).toLocaleString()} ${getSettings().units || "kg"} total across ${getLog().length} workouts.`;
   } else if (/balance|imbalance/.test(q)) {
     const bal = muscleBalance();
     ans = `Push/pull ratio is ${bal.ratio ? bal.ratio.toFixed(2) : "unknown"}. Aim for 1.0 or slightly pull-dominant.`;
