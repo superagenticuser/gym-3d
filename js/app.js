@@ -299,7 +299,7 @@ safeOn("exportData", "click", () => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "forge-backup.json";
+  a.download = "forge-export.json";
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -329,6 +329,8 @@ safeOn("restoreData", "change", async e => {
       let restored = 0;
       let idbPhotos = null;
       let idbLogs = null;
+
+      // Format 1: Backup format (forge- prefixed string keys, plus forge-idb-* for IndexedDB)
       Object.keys(data).forEach(k => {
         if (k === "forge-idb-photos" && typeof data[k] === "string") {
           try {
@@ -347,6 +349,34 @@ safeOn("restoreData", "change", async e => {
           restored++;
         }
       });
+
+      // Format 2: Export format (plain keys: favs, log, done, settings, accent)
+      // Produced by "Export data" button. Map to localStorage + IndexedDB.
+      const isExportFormat = data && typeof data === "object" && ("log" in data || "favs" in data || "settings" in data);
+      if (isExportFormat) {
+        try {
+          if (Array.isArray(data.favs)) {
+            localStorage.setItem("forge-favs", JSON.stringify(data.favs));
+            restored++;
+          }
+          if (data.settings && typeof data.settings === "object") {
+            localStorage.setItem("forge-settings", JSON.stringify(data.settings));
+            restored++;
+          }
+          if (typeof data.accent === "string") {
+            localStorage.setItem("forge-accent", data.accent);
+            restored++;
+          }
+          if (data.done && typeof data.done === "object") {
+            localStorage.setItem("forge-done", JSON.stringify(data.done));
+            restored++;
+          }
+          if (Array.isArray(data.log)) {
+            idbLogs = data.log;
+          }
+        } catch (e) {}
+      }
+
       // Restore IndexedDB data (photos and workout logs)
       if (typeof ForgeDB !== "undefined") {
         try {
@@ -361,7 +391,6 @@ safeOn("restoreData", "change", async e => {
           }
         } catch (err) {}
       }
-      // Fallback: if backup has old-style forge-log/forge-photos keys, ensure IDB cache picks them up
       if (!restored) {
         appAlert("No FORGE data found in this file.");
         return;
