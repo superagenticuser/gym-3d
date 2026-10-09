@@ -816,5 +816,19 @@ window.addEventListener("offline", syncOffline);
 
 syncOffline();
 
-// router() always runs; safeOn already isolated each wiring step.
-router();
+// Wait for ForgeDB (IndexedDB) to initialize before routing, so workout logs
+// and photos are loaded from IndexedDB before the first render.
+if (typeof ForgeDB !== "undefined" && ForgeDB.init) {
+  let routed = false;
+  const doRoute = () => {
+    if (!routed) {
+      routed = true;
+      router();
+    }
+  };
+  ForgeDB.init().then(doRoute).catch(doRoute);
+  // Fallback: if init takes too long, route anyway after 2s
+  setTimeout(doRoute, 2000);
+} else {
+  router();
+}

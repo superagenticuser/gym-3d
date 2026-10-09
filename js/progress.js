@@ -2404,9 +2404,17 @@ function renderProgress(tab) {
                 (w.notes ? `<p class="muted" style="font-style:italic;margin:8px 0">Note: ${esc(w.notes)}</p>` : "")
             )
             .join("");
-          return `<div class="hist-day" data-wdate="${dt}"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer" onclick="document.getElementById('hist-${di}').classList.toggle('hidden')"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
+          return `<div class="hist-day" data-wdate="${dt}"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
         })
         .join("");
+      // Use event delegation for reliability
+      body.onclick = e => {
+        const tg = e.target.closest(".hist-toggle");
+        if (tg) {
+          const el = document.getElementById("hist-" + tg.dataset.hd);
+          if (el) el.classList.toggle("hidden");
+        }
+      };
     } else if (tab === "standards") {
       body.innerHTML = renderStandards();
     } else if (tab === "records") {
