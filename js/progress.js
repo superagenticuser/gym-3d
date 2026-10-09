@@ -1253,7 +1253,7 @@ function exportCSV() {
   a.click();
 }
 
-function backupData() {
+async function backupData() {
   const data = {};
   try {
     for (let i = 0; i < localStorage.length; i++) {
@@ -1261,11 +1261,22 @@ function backupData() {
       if (k && k.startsWith("forge-")) data[k] = localStorage.getItem(k);
     }
   } catch (e) {}
+  // Include IndexedDB data (photos and workout logs live here since v11.66)
+  try {
+    if (window.ForgeDB) {
+      const photos = ForgeDB.getPhotos();
+      const logs = ForgeDB.getLogs();
+      // getPhotos/getLogs return cached arrays synchronously when initialized
+      if (Array.isArray(photos) && photos.length) data["forge-idb-photos"] = JSON.stringify(photos);
+      if (Array.isArray(logs) && logs.length) data["forge-idb-logs"] = JSON.stringify(logs);
+    }
+  } catch (e) {}
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `forge-backup-${fmtDate(new Date())}.json`;
   a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
 function shareProgramURL(progId) {

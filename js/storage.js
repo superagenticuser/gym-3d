@@ -94,6 +94,20 @@ const ForgeDB = (() => {
     });
   }
 
+  async function clearAll() {
+    photoCache = [];
+    logCache = [];
+    if (!idbAvailable) {
+      try {
+        localStorage.removeItem("forge-photos");
+        localStorage.removeItem("forge-log");
+      } catch (e) {}
+      return;
+    }
+    await clearStore(PHOTO_STORE);
+    await clearStore(LOG_STORE);
+  }
+
   function deleteFromStore(store, id) {
     return open().then(d => {
       if (!d) return Promise.resolve();
@@ -284,6 +298,7 @@ const ForgeDB = (() => {
     addPhoto,
     addLog,
     deletePhoto,
+    clearAll,
     usage,
     formatBytes,
     isIndexedDB: () => idbAvailable

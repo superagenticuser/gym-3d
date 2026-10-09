@@ -1497,6 +1497,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.72", "fix backup/restore/reset to handle IndexedDB"],
   ["v11.71", "fix challenge bar width and add JS cache-busting"],
   ["v11.70", "make challenge bars more visible"],
   ["v11.69", "fix challenge progress bars"],

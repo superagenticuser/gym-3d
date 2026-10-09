@@ -323,22 +323,51 @@ safeOn("restoreData", "change", async e => {
     return;
   }
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = async ev => {
     try {
       const data = JSON.parse(ev.target.result);
       let restored = 0;
+      let idbPhotos = null;
+      let idbLogs = null;
       Object.keys(data).forEach(k => {
+        if (k === "forge-idb-photos" && typeof data[k] === "string") {
+          try {
+            idbPhotos = JSON.parse(data[k]);
+          } catch (e) {}
+          return;
+        }
+        if (k === "forge-idb-logs" && typeof data[k] === "string") {
+          try {
+            idbLogs = JSON.parse(data[k]);
+          } catch (e) {}
+          return;
+        }
         if (k.startsWith("forge-") && typeof data[k] === "string") {
           localStorage.setItem(k, data[k]);
           restored++;
         }
       });
+      // Restore IndexedDB data (photos and workout logs)
+      if (window.ForgeDB) {
+        try {
+          await ForgeDB.init();
+          if (Array.isArray(idbPhotos)) {
+            ForgeDB.savePhotos(idbPhotos);
+            restored++;
+          }
+          if (Array.isArray(idbLogs)) {
+            ForgeDB.saveLogs(idbLogs);
+            restored++;
+          }
+        } catch (err) {}
+      }
+      // Fallback: if backup has old-style forge-log/forge-photos keys, ensure IDB cache picks them up
       if (!restored) {
         appAlert("No FORGE data found in this file.");
         return;
       }
       appAlert("Backup restored. Reloading.");
-      location.reload();
+      setTimeout(() => location.reload(), 800);
     } catch (err) {
       appAlert("Could not read this backup file.");
     }
@@ -354,7 +383,12 @@ safeOn("resetData", "click", async () => {
       danger: true
     })
   ) {
-    localStorage.clear();
+    try {
+      if (window.ForgeDB) await ForgeDB.clearAll();
+    } catch (e) {}
+    try {
+      localStorage.clear();
+    } catch (e) {}
     location.reload();
   }
 });
