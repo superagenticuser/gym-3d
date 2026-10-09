@@ -2502,7 +2502,8 @@ function renderProgress(tab) {
                 const d = volRecs.daily[g],
                   wk = volRecs.weekly[g];
                 const nm = MUSCLE_INFO[g] ? MUSCLE_INFO[g].name : g;
-                return `<div class="vol-rec-row"><b>${esc(nm)}</b><span>${d ? `Day: ${Math.round(d.vol).toLocaleString()} kg (${d.date})` : ""}${d && wk ? " · " : ""}${wk ? `Week: ${Math.round(wk.vol).toLocaleString()} kg (w/c ${wk.date})` : ""}</span></div>`;
+                const unit = getSettings().units || "kg";
+                return `<div class="vol-rec-row"><b>${esc(nm)}</b><span>${d ? `Day: ${Math.round(d.vol).toLocaleString()} ${unit} (${d.date})` : ""}${d && wk ? " · " : ""}${wk ? `Week: ${Math.round(wk.vol).toLocaleString()} ${unit} (w/c ${wk.date})` : ""}</span></div>`;
               })
               .join("")
           : "") +

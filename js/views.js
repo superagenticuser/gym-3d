@@ -210,7 +210,7 @@ function renderHome() {
         el.innerHTML = "";
         return;
       }
-      el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good <b>${r.best.name.toLowerCase()} day</b> (${r.best.freshness}% fresh).</p></div>`;
+      el.innerHTML = `<div class="rec-suggest-card"><span class="rec-suggest-icon">💪</span><p class="rec-suggest">Today is a good&nbsp;<b>${r.best.name.toLowerCase()} day</b>&nbsp;(${r.best.freshness}% fresh).</p></div>`;
     })();
   } catch (e) {
     console.error("recoveryDash failed:", e);
@@ -904,7 +904,7 @@ function selectMuscle(groupId) {
     <p style="margin-top:8px;font-size:14px">${recHTML}</p>
     ${soreLabel ? `<p style="font-size:14px;margin-top:4px">${soreLabel}</p>` : ""}
     ${soreState ? `<div style="display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-sore="clear" data-g="${groupId}">Clear</button></div>` : ""}`;
-  const list = EXERCISES.filter(e => e.primary === groupId || e.secondary.map(groupOf).includes(groupId));
+  const list = EXERCISES.filter(e => e.primary === groupId);
   $("bodyExercises").innerHTML = list.length
     ? `<p class="muted" style="margin-bottom:10px">${list.length} exercise${list.length > 1 ? "s" : ""}</p>` +
       list

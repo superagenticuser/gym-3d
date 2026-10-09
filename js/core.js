@@ -1482,6 +1482,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.62", "cycle 1 audit fixes"],
   ["v11.61", "fix auto-rotate fighting front/back"],
   ["v11.60", "fix front/back viewer disposal"],
   ["v11.59", "body map soreness fixes"],
