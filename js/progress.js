@@ -1263,7 +1263,7 @@ async function backupData() {
   } catch (e) {}
   // Include IndexedDB data (photos and workout logs live here since v11.66)
   try {
-    if (window.ForgeDB) {
+    if (typeof ForgeDB !== "undefined") {
       const photos = ForgeDB.getPhotos();
       const logs = ForgeDB.getLogs();
       // getPhotos/getLogs return cached arrays synchronously when initialized

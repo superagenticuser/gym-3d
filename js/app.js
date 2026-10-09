@@ -348,7 +348,7 @@ safeOn("restoreData", "change", async e => {
         }
       });
       // Restore IndexedDB data (photos and workout logs)
-      if (window.ForgeDB) {
+      if (typeof ForgeDB !== "undefined") {
         try {
           await ForgeDB.init();
           if (Array.isArray(idbPhotos)) {
@@ -384,7 +384,7 @@ safeOn("resetData", "click", async () => {
     })
   ) {
     try {
-      if (window.ForgeDB) await ForgeDB.clearAll();
+      if (typeof ForgeDB !== "undefined") await ForgeDB.clearAll();
     } catch (e) {}
     try {
       localStorage.clear();

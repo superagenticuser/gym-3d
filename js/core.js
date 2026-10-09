@@ -1497,6 +1497,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.74", "fix ForgeDB reference in backup/restore"],
   ["v11.73", "fix session volume popup positioning and instant-close"],
   ["v11.72", "fix backup/restore/reset to handle IndexedDB"],
   ["v11.71", "fix challenge bar width and add JS cache-busting"],
