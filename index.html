@@ -10,12 +10,12 @@
     />
     <meta name="theme-color" content="#0b0e13" />
     <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="css/base.css?v=11.65" />
-    <link rel="stylesheet" href="css/components.css?v=11.65" />
-    <link rel="stylesheet" href="css/views.css?v=11.65" />
-    <link rel="stylesheet" href="css/workout.css?v=11.65" />
-    <link rel="stylesheet" href="css/progress.css?v=11.65" />
-    <link rel="stylesheet" href="css/camera.css?v=11.65" />
+    <link rel="stylesheet" href="css/base.css?v=11.66" />
+    <link rel="stylesheet" href="css/components.css?v=11.66" />
+    <link rel="stylesheet" href="css/views.css?v=11.66" />
+    <link rel="stylesheet" href="css/workout.css?v=11.66" />
+    <link rel="stylesheet" href="css/progress.css?v=11.66" />
+    <link rel="stylesheet" href="css/camera.css?v=11.66" />
   </head>
   <body>
     <div
@@ -940,7 +940,7 @@
         <div class="foot-accents" id="footAccents" aria-label="Theme accent"></div>
         <p class="muted foot-disclaimer">Sample training content. Not medical advice. Train smart.</p>
         <p class="muted foot-copy">
-          © 2026 FORGE · <button class="foot-ver" id="footVer">v11.65</button> ·
+          © 2026 FORGE · <button class="foot-ver" id="footVer">v11.66</button> ·
           <a href="#/privacy" class="foot-privacy">Privacy</a>
         </p>
         <div class="foot-changelog hidden" id="footChangelog"></div>
@@ -1142,6 +1142,7 @@
             <button class="btn btn-ghost btn-sm danger" id="resetData" data-i18n="set_reset">Reset all data</button>
           </div>
           <p class="muted setting-note">Your data never leaves this device. Export anytime.</p>
+          <p class="muted setting-note" id="storageUsage" style="margin-top: 8px">Storage: calculating...</p>
         </div>
       </div>
     </div>
@@ -1164,6 +1165,7 @@
     <script src="js/demo.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/core.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/badges.js"></script>
     <script src="js/views.js"></script>
     <script src="js/progress.js"></script>
