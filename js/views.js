@@ -290,7 +290,7 @@ function renderHome() {
             f.innerHTML = `<div class="goal-form">
           <select id="ngType"><option value="weight">Strength goal</option><option value="frequency">Frequency goal</option></select>
           <span id="ngExWrap"><select id="ngEx">${exOpts}</select></span>
-          <input id="ngTarget" type="number" min="1" placeholder="Target kg" style="width:100px">
+          <input id="ngTarget" type="number" min="1" placeholder="Target ${getSettings().units || "kg"}" style="width:100px">
           <span id="ngDateWrap"><input id="ngDate" type="date"></span>
           <span id="ngWeeksWrap" class="hidden"><input id="ngWeeks" type="number" min="1" max="52" value="8" style="width:70px" placeholder="Weeks"></span>
           <button class="btn btn-primary btn-sm" id="ngSave">Save</button>
@@ -300,7 +300,7 @@ function renderHome() {
               $("ngExWrap").classList.toggle("hidden", !isW);
               $("ngDateWrap").classList.toggle("hidden", !isW);
               $("ngWeeksWrap").classList.toggle("hidden", isW);
-              $("ngTarget").placeholder = isW ? "Target kg" : "Times/week";
+              $("ngTarget").placeholder = isW ? `Target ${getSettings().units || "kg"}` : "Times/week";
             };
             $("ngSave").onclick = () => {
               const type = $("ngType").value;
@@ -1680,7 +1680,7 @@ function toggleVoiceLog() {
         $("voiceStatus").textContent = `Logged: ${text}`;
       }
     } else {
-      $("voiceStatus").textContent = `Heard: "${text}". Try "10 reps 60 kilos"`;
+      $("voiceStatus").textContent = `Heard: "${text}". Try "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"`;
     }
   };
   voiceRec.onend = () => {
@@ -1689,7 +1689,7 @@ function toggleVoiceLog() {
   };
   voiceRec.start();
   setVoiceBtn(true);
-  $("voiceStatus").textContent = 'Listening… say "10 reps 60 kilos"';
+  $("voiceStatus").textContent = `Listening… say "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"`;
 }
 
 // AI COACH - generates a program from your history

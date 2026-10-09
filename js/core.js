@@ -1482,6 +1482,7 @@ if (fa) {
 }
 
 const CHANGELOG = [
+  ["v11.64", "cycle 3 audit fixes"],
   ["v11.63", "fix remaining hardcoded kg units"],
   ["v11.62", "cycle 1 audit fixes"],
   ["v11.61", "fix auto-rotate fighting front/back"],

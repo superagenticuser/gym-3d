@@ -571,7 +571,7 @@ function setVoiceCmdBtn(listening) {
     (listening ? " Stop" : " Voice");
   b.classList.toggle("listening", !!listening);
   b.setAttribute("aria-label", listening ? "Stop voice control" : "Voice control");
-  b.title = listening ? 'Listening… say "next set", "start timer", or "10 reps 60 kilos"' : "Voice control";
+  b.title = listening ? `Listening… say "next set", "start timer", or "10 reps 60 ${getSettings().units === "lb" ? "pounds" : "kilos"}"` : "Voice control";
 }
 
 // first exercise that still has incomplete sets

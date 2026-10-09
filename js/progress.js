@@ -2401,12 +2401,13 @@ function renderProgress(tab) {
           return `<div class="hist-day" data-wdate="${dt}"><div class="hd hist-toggle" data-hd="${di}" style="cursor:pointer"><b>${dstr}</b><span class="muted">${sets} sets · Tap for detail</span></div><div class="hist-detail hidden" id="hist-${di}">${detail}</div></div>`;
         })
         .join("");
-      body.querySelectorAll(".hist-toggle").forEach(tg =>
-        tg.addEventListener("click", () => {
-          const el = $("hist-" + tg.dataset.hd);
+      body.querySelectorAll(".hist-toggle").forEach(tg => {
+        tg.addEventListener("click", e => {
+          e.stopPropagation();
+          const el = document.getElementById("hist-" + tg.dataset.hd);
           if (el) el.classList.toggle("hidden");
-        })
-      );
+        });
+      });
     } else if (tab === "standards") {
       body.innerHTML = renderStandards();
     } else if (tab === "records") {

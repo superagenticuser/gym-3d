@@ -171,6 +171,10 @@ safeOn("unitSeg", "click", e => {
   s.units = b.dataset.unit;
   saveSettings(s);
   syncSettingsUI();
+  // Re-render current view so unit changes take effect immediately
+  try {
+    if (typeof router === "function") router();
+  } catch (err) {}
 });
 
 safeOn("speedSeg", "click", e => {
